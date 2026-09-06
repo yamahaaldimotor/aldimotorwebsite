@@ -15,7 +15,7 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
 
 ## Core Requirements
 1. Reservasi window H+1 s/d H+7, tutup Minggu + hari libur khusus
-2. Jam operasional Senin–Sabtu 08:00–16:00 (bisa diubah admin)
+2. Jam operasional Senin–Sabtu 08:30–16:30, Jumat istirahat 11:00–14:00 (bisa diubah admin, termasuk jam istirahat per hari)
 3. Servis: Ringan 1j, Berat 2j, Overhaul 4j, Request 1j (custom)
 4. 5 mekanik (bisa CRUD), otomatis alokasi
 5. Slot: max 5 customer/jam (= 5 mekanik). Sistem mencegah double booking
@@ -51,6 +51,10 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
 - Frontend: halaman /sparepart (hero, search debounce, chip kelompok, sidebar quick-jump, tabel per jenis dengan kolom dinamis: tipe/kapasitas/ukuran/keterangan/harga, CTA reservasi + WA). Link "Sparepart" di header, tombol "Info Sparepart" di hero beranda, banner sparepart di bawah Layanan.
 - Harga sparepart DITAMPILKAN (sesuai Sheet4 spreadsheet: "Harga sparepart dan oli ditampilkan") — berbeda dengan harga jasa servis yang sudah dihapus.
 - Sheet lain di spreadsheet belum dipakai: Yamalube (oli), Jadwal Operasional (08.30-16.30, Jumat istirahat 11.00-14.00), Data Mekanik (trained at / date of issue), Data Service (biaya jasa overhaul per tipe motor), Visi&Misi.
+
+## Update 2026-09-06 (v1.5) - Jadwal Baru & Kelola Sparepart
+- Jadwal: settings.business_hours {opening_time 08:30, closing_time 16:30, closed_days [6], breaks:[{weekday,start,end,label}], schedule_version 2}. Helper day_windows/slot_starts/fits_windows di server.py: slot per jam dari awal tiap sesi; slot yang melewati akhir sesi status "closed". Jumat (ringan): 08:30, 09:30, 14:00, 15:00. Kalender admin harian punya kolom "Istirahat". Admin Pengaturan: editor jam istirahat (hari, mulai, selesai, keterangan). Beranda & Reservasi menampilkan jadwal baru.
+- Sparepart admin: tab "Sparepart" di dashboard (frontend/src/pages/admin/SparepartsPanel.jsx) — cari/filter, tambah (dialog dengan detail opsional), edit harga inline (blur/Enter), edit lengkap, hapus, tambah varian per jenis. API /api/admin/spareparts (GET/POST), /api/admin/spareparts/{id} (PATCH/DELETE).
 
 ## Backlog (P1/P2)
 - P1: Kalender view mingguan/bulanan untuk admin

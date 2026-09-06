@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { toast } from "sonner";
 import {
   Wrench, Cog, Settings2, MessageSquareText, ChevronLeft, ChevronRight,
-  Check, CalendarIcon, Loader2, MessageCircle, ArrowRight, Download,
+  Check, CalendarIcon, Loader2, MessageCircle, ArrowRight, Download, Clock,
 } from "lucide-react";
 import api, { formatApiError } from "@/lib/apiClient";
 import { format, addDays } from "date-fns";
@@ -70,6 +70,7 @@ export default function Reservasi() {
   const [chosenService, setChosenService] = useState(null);
   const [date, setDate] = useState(null);
   const [slots, setSlots] = useState([]);
+  const [dayInfo, setDayInfo] = useState(null); // { windows, breaks }
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [time, setTime] = useState(null);
   const [dateRange, setDateRange] = useState(null); // { today, min, max } from server
@@ -113,8 +114,8 @@ export default function Reservasi() {
     setLoadingSlots(true);
     const dateStr = format(date, "yyyy-MM-dd");
     api.get(`/availability?date=${dateStr}&service_id=${chosenService.id}`)
-      .then((r) => setSlots(r.data.slots))
-      .catch((e) => { setSlots([]); toast.error(formatApiError(e)); })
+      .then((r) => { setSlots(r.data.slots); setDayInfo({ windows: r.data.windows || [], breaks: r.data.breaks || [] }); })
+      .catch((e) => { setSlots([]); setDayInfo(null); toast.error(formatApiError(e)); })
       .finally(() => setLoadingSlots(false));
   }, [date, chosenService]);
 
@@ -271,7 +272,7 @@ export default function Reservasi() {
                   </PopoverContent>
                 </Popover>
                 <p className="mt-4 text-xs text-slate-500">
-                  Reservasi tersedia H+1 hingga 7 hari ke depan. Bengkel tutup setiap hari Minggu.
+                  Reservasi tersedia H+1 hingga 7 hari ke depan. Buka Senin–Sabtu 08.30–16.30, Jumat istirahat 11.00–14.00. Tutup hari Minggu.
                 </p>
               </Card>
 
@@ -280,6 +281,15 @@ export default function Reservasi() {
                 {!date && <p className="mt-3 text-sm text-slate-500">Pilih tanggal terlebih dahulu.</p>}
                 {date && loadingSlots && (
                   <div className="mt-4 flex items-center gap-2 text-slate-500"><Loader2 className="h-4 w-4 animate-spin" /> Memuat jadwal...</div>
+                )}
+                {date && !loadingSlots && dayInfo && dayInfo.breaks.length > 0 && (
+                  <div className="mt-3 flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800" data-testid="break-notice">
+                    <Clock className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                    <span>
+                      {dayInfo.breaks.map((b) => `${b.label || "Istirahat"} ${b.start}–${b.end}`).join(", ")}. Jam buka:{" "}
+                      {dayInfo.windows.map((w) => `${w.start}–${w.end}`).join(" & ")}.
+                    </span>
+                  </div>
                 )}
                 {date && !loadingSlots && (
                   <div className="mt-3 grid grid-cols-3 gap-2">
@@ -300,7 +310,7 @@ export default function Reservasi() {
                         >
                           <div className="font-display text-base font-bold leading-tight">{s.time}</div>
                           <div className="mt-1.5 text-[10px] font-medium uppercase tracking-wider leading-tight">
-                            {s.status === "closed" ? "Lewat tutup" : s.status === "full" ? "Penuh" : `${s.available} slot`}
+                            {s.status === "closed" ? "Tidak cukup waktu" : s.status === "full" ? "Penuh" : `${s.available} slot`}
                           </div>
                         </button>
                       );

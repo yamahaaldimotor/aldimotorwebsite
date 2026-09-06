@@ -12,8 +12,9 @@ import {
   Wrench, LayoutDashboard, CalendarDays, Users2, Settings, LogOut,
   Loader2, Plus, Trash2, MessageCircle, CheckCircle2, PlayCircle, XCircle, Clock,
   FileText, Download, CalendarRange, History, ChevronLeft, ChevronRight, X,
-  Camera, ImageOff,
+  Camera, ImageOff, Package,
 } from "lucide-react";
+import SparepartsPanel from "@/pages/admin/SparepartsPanel";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format, addDays, startOfWeek } from "date-fns";
@@ -59,6 +60,7 @@ export default function Admin() {
               { id: "bookings", icon: CalendarDays, label: "Reservasi" },
               { id: "calendar", icon: CalendarRange, label: "Kalender" },
               { id: "mechanics", icon: Users2, label: "Mekanik" },
+              { id: "spareparts", icon: Package, label: "Sparepart" },
               { id: "reports", icon: FileText, label: "Laporan" },
               { id: "settings", icon: Settings, label: "Pengaturan" },
             ].map((it) => (
@@ -91,11 +93,12 @@ export default function Admin() {
           {/* Mobile tab bar */}
           <div className="md:hidden border-b border-slate-200 bg-white px-4 py-2">
             <Tabs value={tab} onValueChange={setTab}>
-              <TabsList className="grid w-full grid-cols-6">
+              <TabsList className="grid w-full grid-cols-7">
                 <TabsTrigger value="overview">Home</TabsTrigger>
                 <TabsTrigger value="bookings">Reservasi</TabsTrigger>
                 <TabsTrigger value="calendar">Kalender</TabsTrigger>
                 <TabsTrigger value="mechanics">Mekanik</TabsTrigger>
+                <TabsTrigger value="spareparts">Part</TabsTrigger>
                 <TabsTrigger value="reports">Laporan</TabsTrigger>
                 <TabsTrigger value="settings">Setting</TabsTrigger>
               </TabsList>
@@ -107,6 +110,7 @@ export default function Admin() {
             {tab === "bookings" && <Bookings />}
             {tab === "calendar" && <CalendarView />}
             {tab === "mechanics" && <Mechanics />}
+            {tab === "spareparts" && <SparepartsPanel />}
             {tab === "reports" && <Reports />}
             {tab === "settings" && <SettingsPanel />}
           </div>
@@ -519,10 +523,20 @@ function SettingsPanel() {
 
   const saveHours = async () => {
     try {
-      await api.put("/admin/business-hours", { opening_time: bh.opening_time, closing_time: bh.closing_time });
+      const breaks = (bh.breaks || []).map((b) => ({ weekday: Number(b.weekday), start: b.start, end: b.end, label: b.label || "Istirahat" }));
+      const r = await api.put("/admin/business-hours", { opening_time: bh.opening_time, closing_time: bh.closing_time, breaks });
+      setBh({ ...bh, ...r.data });
       toast.success("Jam operasional disimpan");
     } catch (e) { toast.error(formatApiError(e)); }
   };
+  const DAY_NAMES = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"];
+  const updateBreak = (i, patch) => {
+    const next = [...(bh.breaks || [])];
+    next[i] = { ...next[i], ...patch };
+    setBh({ ...bh, breaks: next });
+  };
+  const addBreak = () => setBh({ ...bh, breaks: [...(bh.breaks || []), { weekday: 4, start: "11:00", end: "14:00", label: "Istirahat" }] });
+  const removeBreak = (i) => setBh({ ...bh, breaks: (bh.breaks || []).filter((_, idx) => idx !== i) });
   const saveService = async (s, patch) => {
     try {
       await api.patch(`/admin/services/${s.id}`, patch);
@@ -552,6 +566,48 @@ function SettingsPanel() {
           <div>
             <Label>Jam Tutup</Label>
             <Input type="time" value={bh.closing_time} onChange={(e) => setBh({ ...bh, closing_time: e.target.value })} className="mt-2" data-testid="closing-time" />
+          </div>
+        </div>
+        <div className="mt-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Jam Istirahat</div>
+              <p className="mt-1 text-xs text-slate-500">Slot reservasi yang bertabrakan dengan jam istirahat tidak akan ditawarkan ke customer.</p>
+            </div>
+            <Button variant="outline" size="sm" onClick={addBreak} className="rounded-full" data-testid="add-break-btn">
+              <Plus className="mr-1.5 h-4 w-4" /> Tambah
+            </Button>
+          </div>
+          <div className="mt-3 space-y-2">
+            {(bh.breaks || []).length === 0 && <div className="text-sm text-slate-500">Belum ada jam istirahat.</div>}
+            {(bh.breaks || []).map((b, i) => (
+              <div key={i} className="grid grid-cols-2 items-end gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 md:grid-cols-[150px_120px_120px_1fr_40px]" data-testid={`break-row-${i}`}>
+                <div>
+                  <Label className="text-xs">Hari</Label>
+                  <Select value={String(b.weekday)} onValueChange={(v) => updateBreak(i, { weekday: Number(v) })}>
+                    <SelectTrigger className="mt-1 bg-white" data-testid={`break-day-${i}`}><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {DAY_NAMES.map((d, idx) => <SelectItem key={idx} value={String(idx)}>{d}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label className="text-xs">Mulai</Label>
+                  <Input type="time" value={b.start} onChange={(e) => updateBreak(i, { start: e.target.value })} className="mt-1 bg-white" data-testid={`break-start-${i}`} />
+                </div>
+                <div>
+                  <Label className="text-xs">Selesai</Label>
+                  <Input type="time" value={b.end} onChange={(e) => updateBreak(i, { end: e.target.value })} className="mt-1 bg-white" data-testid={`break-end-${i}`} />
+                </div>
+                <div>
+                  <Label className="text-xs">Keterangan</Label>
+                  <Input value={b.label || ""} onChange={(e) => updateBreak(i, { label: e.target.value })} placeholder="Istirahat" className="mt-1 bg-white" data-testid={`break-label-${i}`} />
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => removeBreak(i)} title="Hapus" data-testid={`break-remove-${i}`}>
+                  <Trash2 className="h-4 w-4 text-red-500" />
+                </Button>
+              </div>
+            ))}
           </div>
         </div>
         <Button onClick={saveHours} data-testid="save-hours-btn" className="mt-4 rounded-full bg-blue-600 hover:bg-blue-700">Simpan</Button>
@@ -688,9 +744,12 @@ function CalendarView() {
                 <th className="w-24 border-b border-slate-200 p-2 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
                   Mekanik
                 </th>
-                {dayData.hours.map((h) => (
-                  <th key={h} className="border-b border-slate-200 p-2 text-center text-xs font-bold uppercase tracking-wider text-slate-500">
-                    {h}
+                {(dayData.columns || dayData.hours.map((h) => ({ type: "slot", time: h, label: h }))).map((c) => (
+                  <th
+                    key={`${c.type}-${c.time}`}
+                    className={`border-b border-slate-200 p-2 text-center text-xs font-bold uppercase tracking-wider ${c.type === "break" ? "w-16 bg-amber-50 text-amber-700" : "text-slate-500"}`}
+                  >
+                    {c.type === "break" ? <span title={c.label}>Istirahat</span> : c.label}
                   </th>
                 ))}
               </tr>
@@ -704,6 +763,13 @@ function CalendarView() {
                   </td>
                   {m.cells.map((cell, i) => {
                     if (cell.type === "covered") return null;
+                    if (cell.type === "break") {
+                      return (
+                        <td key={i} className="border-b border-slate-100 bg-amber-50/60 p-1" title={cell.label}>
+                          <div className="h-14 rounded-md bg-[repeating-linear-gradient(45deg,transparent,transparent_6px,rgba(217,119,6,0.12)_6px,rgba(217,119,6,0.12)_12px)]" />
+                        </td>
+                      );
+                    }
                     if (cell.type === "empty") {
                       return (
                         <td key={i} className="border-b border-slate-100 p-1">

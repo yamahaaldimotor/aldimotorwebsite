@@ -124,9 +124,40 @@ class HolidayIn(BaseModel):
     date: str  # YYYY-MM-DD
     description: str
 
+class BreakIn(BaseModel):
+    weekday: int  # 0=Senin ... 6=Minggu
+    start: str  # "11:00"
+    end: str  # "14:00"
+    label: Optional[str] = "Istirahat"
+
 class BusinessHoursUpdate(BaseModel):
-    opening_time: str  # "08:00"
-    closing_time: str  # "16:00"
+    opening_time: str  # "08:30"
+    closing_time: str  # "16:30"
+    breaks: Optional[List[BreakIn]] = None
+
+class SparepartIn(BaseModel):
+    category: str = Field(min_length=2)
+    group: str = Field(min_length=2)
+    motor: str = Field(min_length=1)
+    price: Optional[float] = None
+    price_label: Optional[str] = None  # jika kosong, dibuat dari price
+    price_prefix: Optional[str] = None
+    description: Optional[str] = None
+    size: Optional[str] = None
+    variant: Optional[str] = None
+    capacity: Optional[str] = None
+
+class SparepartUpdate(BaseModel):
+    category: Optional[str] = None
+    group: Optional[str] = None
+    motor: Optional[str] = None
+    price: Optional[float] = None
+    price_label: Optional[str] = None
+    price_prefix: Optional[str] = None
+    description: Optional[str] = None
+    size: Optional[str] = None
+    variant: Optional[str] = None
+    capacity: Optional[str] = None
 
 class BookingCreate(BaseModel):
     customer_name: str = Field(min_length=3)
@@ -231,14 +262,24 @@ async def seed_data():
                 await db.spareparts.insert_many(parts)
                 logger.info("Seeded %d spareparts", len(parts))
 
-    # Business hours
-    if not await db.settings.find_one({"key": "business_hours"}):
+    # Business hours (Senin-Sabtu 08:30-16:30, Jumat istirahat 11:00-14:00)
+    default_breaks = [{"weekday": 4, "start": "11:00", "end": "14:00", "label": "Istirahat Sholat Jumat"}]
+    bh_doc = await db.settings.find_one({"key": "business_hours"})
+    if not bh_doc:
         await db.settings.insert_one({
             "key": "business_hours",
-            "opening_time": "08:00",
-            "closing_time": "16:00",
+            "opening_time": "08:30",
+            "closing_time": "16:30",
             "closed_days": [6],  # Sunday (Python: Mon=0, Sun=6)
+            "breaks": default_breaks,
+            "schedule_version": 2,
         })
+    elif bh_doc.get("schedule_version", 1) < 2:
+        # Migrate jadwal lama (08:00-16:00 tanpa istirahat) ke jadwal baru
+        await db.settings.update_one(
+            {"key": "business_hours"},
+            {"$set": {"opening_time": "08:30", "closing_time": "16:30", "breaks": default_breaks, "schedule_version": 2}},
+        )
 
 
 @app.on_event("startup")
@@ -390,6 +431,78 @@ async def spareparts_meta():
     return {"total_items": len(docs), "groups": groups}
 
 
+def _fmt_rp(n: float) -> str:
+    return "Rp " + f"{int(round(n)):,}".replace(",", ".")
+
+
+def _sparepart_doc_from(body: dict, existing: Optional[dict] = None) -> dict:
+    doc = dict(existing or {})
+    for k, v in body.items():
+        if v is None:
+            continue
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "" and k in ("description", "size", "variant", "capacity", "price_prefix", "price_label"):
+                doc.pop(k, None)
+                continue
+        doc[k] = v
+    if "price" in body and body["price"] is not None:
+        doc["price"] = float(body["price"])
+        if not body.get("price_label"):
+            doc["price_label"] = _fmt_rp(doc["price"])
+    if not doc.get("price_label"):
+        doc["price_label"] = _fmt_rp(doc.get("price") or 0)
+    return doc
+
+
+@api.get("/admin/spareparts")
+async def admin_list_spareparts(user: dict = Depends(get_current_user), q: Optional[str] = None, group: Optional[str] = None):
+    query = {}
+    if group:
+        query["group"] = group
+    docs = await db.spareparts.find(query, {"_id": 0}).to_list(3000)
+    if q:
+        ql = q.lower().strip()
+        docs = [d for d in docs if ql in d.get("category", "").lower() or ql in d.get("motor", "").lower() or ql in d.get("variant", "").lower()]
+    docs.sort(key=lambda d: d.get("order", 0))
+    return docs
+
+
+@api.post("/admin/spareparts")
+async def admin_create_sparepart(body: SparepartIn, user: dict = Depends(get_current_user)):
+    last = await db.spareparts.find({}, {"_id": 0, "order": 1}).sort("order", -1).to_list(1)
+    next_order = (last[0].get("order", 0) + 1) if last else 0
+    doc = _sparepart_doc_from(body.model_dump())
+    doc["id"] = str(uuid.uuid4())
+    doc["order"] = next_order
+    doc["created_at"] = datetime.now(timezone.utc).isoformat()
+    await db.spareparts.insert_one(doc.copy())
+    doc.pop("_id", None)
+    return doc
+
+
+@api.patch("/admin/spareparts/{sid}")
+async def admin_update_sparepart(sid: str, body: SparepartUpdate, user: dict = Depends(get_current_user)):
+    existing = await db.spareparts.find_one({"id": sid}, {"_id": 0})
+    if not existing:
+        raise HTTPException(404, "Sparepart tidak ditemukan")
+    payload = body.model_dump()
+    if all(v is None for v in payload.values()):
+        raise HTTPException(400, "Tidak ada perubahan")
+    doc = _sparepart_doc_from(payload, existing)
+    doc["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.spareparts.replace_one({"id": sid}, doc)
+    return await db.spareparts.find_one({"id": sid}, {"_id": 0})
+
+
+@api.delete("/admin/spareparts/{sid}")
+async def admin_delete_sparepart(sid: str, user: dict = Depends(get_current_user)):
+    r = await db.spareparts.delete_one({"id": sid})
+    if r.deleted_count == 0:
+        raise HTTPException(404, "Sparepart tidak ditemukan")
+    return {"ok": True}
+
+
 # ----------------- Customer plate history (public, minimal fields) -----------------
 @api.get("/customer/history")
 async def customer_history(plate: str = Query(..., min_length=3)):
@@ -431,10 +544,56 @@ async def get_bookings_for_date(booking_date: str) -> List[dict]:
     ).to_list(500)
 
 
+def to_min(hhmm: str) -> int:
+    h, m = map(int, hhmm.split(":"))
+    return h * 60 + m
+
+
+def from_min(total: int) -> str:
+    return f"{total // 60:02d}:{total % 60:02d}"
+
+
+def day_windows(bh: dict, weekday: int) -> List[tuple]:
+    """Sesi buka pada hari tertentu setelah dikurangi jam istirahat. Return list of (start_min, end_min)."""
+    open_m, close_m = to_min(bh["opening_time"]), to_min(bh["closing_time"])
+    windows = [(open_m, close_m)]
+    for br in bh.get("breaks", []) or []:
+        if int(br.get("weekday", -1)) != weekday:
+            continue
+        bs, be = to_min(br["start"]), to_min(br["end"])
+        new = []
+        for ws, we in windows:
+            if be <= ws or bs >= we:
+                new.append((ws, we))
+                continue
+            if bs > ws:
+                new.append((ws, bs))
+            if be < we:
+                new.append((be, we))
+        windows = new
+    return [(a, b) for a, b in windows if b > a]
+
+
+def slot_starts(bh: dict, weekday: int) -> List[dict]:
+    """Kandidat jam mulai (tiap 1 jam dari awal sesi). Tiap item: {time, window_end}."""
+    out = []
+    for ws, we in day_windows(bh, weekday):
+        t = ws
+        while t < we:
+            out.append({"time": from_min(t), "window_end": from_min(we)})
+            t += 60
+    return out
+
+
+def fits_windows(bh: dict, weekday: int, start: str, end: str) -> bool:
+    sm, em = to_min(start), to_min(end)
+    return any(ws <= sm and em <= we for ws, we in day_windows(bh, weekday))
+
+
 def hour_range(open_t: str, close_t: str) -> List[str]:
-    oh = int(open_t.split(":")[0])
-    ch = int(close_t.split(":")[0])
-    return [f"{h:02d}:00" for h in range(oh, ch)]
+    # Kompatibilitas: daftar jam mulai per 1 jam dari jam buka sampai sebelum jam tutup
+    o, c = to_min(open_t), to_min(close_t)
+    return [from_min(t) for t in range(o, c, 60)]
 
 
 def slot_overlaps(slot_start: str, slot_end: str, existing_start: str, existing_end: str) -> bool:
@@ -463,7 +622,6 @@ async def availability(date_str: str = Query(..., alias="date"), service_id: str
         raise HTTPException(status_code=400, detail="Reservasi maksimal 7 hari ke depan")
 
     bh = await db.settings.find_one({"key": "business_hours"}, {"_id": 0})
-    open_t, close_t = bh["opening_time"], bh["closing_time"]
     closed_days = bh.get("closed_days", [6])
     if d.weekday() in closed_days:
         raise HTTPException(status_code=400, detail="Bengkel tutup pada hari tersebut")
@@ -483,13 +641,13 @@ async def availability(date_str: str = Query(..., alias="date"), service_id: str
     bookings = await get_bookings_for_date(date_str)
 
     slots = []
-    close_hour = int(close_t.split(":")[0])
-    for hhmm in hour_range(open_t, close_t):
+    weekday = d.weekday()
+    for cand in slot_starts(bh, weekday):
+        hhmm = cand["time"]
         slot_start = hhmm
         slot_end = add_hours_str(hhmm, duration)
-        end_hour = int(slot_end.split(":")[0])
-        # if servis melebihi jam tutup, tandai penuh (tidak bisa dipilih)
-        if end_hour > close_hour or slot_end > close_t:
+        # jika servis melebihi akhir sesi (jam tutup / jam istirahat), tandai closed (tidak bisa dipilih)
+        if slot_end > cand["window_end"]:
             slots.append({"time": hhmm, "available": 0, "total": total_mechanics, "status": "closed"})
             continue
 
@@ -507,7 +665,12 @@ async def availability(date_str: str = Query(..., alias="date"), service_id: str
             status = "available"
         slots.append({"time": hhmm, "available": available, "total": total_mechanics, "status": status})
 
-    return {"date": date_str, "service_id": service_id, "duration_hours": duration, "slots": slots}
+    breaks_today = [br for br in (bh.get("breaks", []) or []) if int(br.get("weekday", -1)) == weekday]
+    return {
+        "date": date_str, "service_id": service_id, "duration_hours": duration, "slots": slots,
+        "windows": [{"start": from_min(a), "end": from_min(b)} for a, b in day_windows(bh, weekday)],
+        "breaks": breaks_today,
+    }
 
 
 # ----------------- Bookings -----------------
@@ -546,10 +709,8 @@ async def create_booking(body: BookingCreate):
     duration = float(service["duration_hours"])
     start = body.start_time
     end = add_hours_str(start, duration)
-    if end > bh["closing_time"]:
-        raise HTTPException(status_code=400, detail="Servis melewati jam tutup")
-    if start < bh["opening_time"]:
-        raise HTTPException(status_code=400, detail="Servis dimulai sebelum jam buka")
+    if not fits_windows(bh, d.weekday(), start, end):
+        raise HTTPException(status_code=400, detail="Jam tersebut di luar jam operasional atau bertabrakan dengan jam istirahat")
 
     mechanics = await get_active_mechanics()
     if not mechanics:
@@ -643,32 +804,74 @@ async def calendar_day(date_str: str = Query(..., alias="date"), user: dict = De
         d = datetime.strptime(date_str, "%Y-%m-%d").date()
     except Exception:
         raise HTTPException(400, "Format tanggal tidak valid")
-    bh = await db.settings.find_one({"key": "business_hours"}, {"_id": 0}) or {"opening_time": "08:00", "closing_time": "16:00"}
+    bh = await db.settings.find_one({"key": "business_hours"}, {"_id": 0}) or {"opening_time": "08:30", "closing_time": "16:30", "breaks": []}
     mechanics = await db.mechanics.find({}, {"_id": 0}).to_list(100)
     mechanics.sort(key=lambda m: m.get("created_at", ""))
     bookings = await db.bookings.find(
         {"booking_date": date_str, "status": {"$ne": "Dibatalkan"}}, {"_id": 0}
     ).to_list(500)
 
-    hours = hour_range(bh["opening_time"], bh["closing_time"])
-    # For each mechanic, produce a row: for each hour, either a booking-start cell (with span), a continuation cell, or empty
+    weekday = d.weekday()
+    # Kolom kalender: slot per jam di tiap sesi + kolom istirahat di antara sesi
+    windows = day_windows(bh, weekday)
+    columns = []
+    for wi, (ws, we) in enumerate(windows):
+        if wi > 0:
+            prev_end = windows[wi - 1][1]
+            columns.append({"type": "break", "time": from_min(prev_end), "label": f"Istirahat {from_min(prev_end)}–{from_min(ws)}"})
+        t = ws
+        while t < we:
+            columns.append({"type": "slot", "time": from_min(t), "label": from_min(t)})
+            t += 60
+    hours = [c["time"] for c in columns if c["type"] == "slot"]
+    slot_times = hours
+
+    def col_index_for(start_time: str) -> int:
+        # kolom slot yang tepat; jika tidak ada (booking lama/jam tidak standar), pakai slot terakhir <= start
+        best = None
+        for idx, c in enumerate(columns):
+            if c["type"] != "slot":
+                continue
+            if c["time"] == start_time:
+                return idx
+            if c["time"] <= start_time:
+                best = idx
+        if best is None:
+            best = next((idx for idx, c in enumerate(columns) if c["type"] == "slot"), 0)
+        return best
+
     result_mechs = []
     for m in mechanics:
-        my_bookings = [b for b in bookings if b["mechanic_id"] == m["id"]]
+        my_bookings = sorted([b for b in bookings if b["mechanic_id"] == m["id"]], key=lambda b: b["start_time"])
+        # map kolom -> booking yang mulai di sana
+        start_map = {}
+        for b in my_bookings:
+            idx = col_index_for(b["start_time"])
+            while idx in start_map and idx + 1 < len(columns):
+                idx += 1
+            start_map[idx] = b
         cells = []
         i = 0
-        while i < len(hours):
-            hh = hours[i]
-            # find booking that starts here
-            b_here = next((b for b in my_bookings if b["start_time"] == hh), None)
+        while i < len(columns):
+            col = columns[i]
+            if col["type"] == "break":
+                cells.append({"type": "break", "time": col["time"], "span": 1, "label": col["label"]})
+                i += 1
+                continue
+            b_here = start_map.get(i)
             if b_here:
-                span = max(1, int(round(float(b_here.get("duration_hours", 1)))))
-                cells.append({"type": "booking", "time": hh, "span": span, "booking": b_here})
+                # span = jumlah kolom slot berurutan yang tercakup durasi (berhenti di kolom istirahat)
+                span = 1
+                end_m = to_min(b_here["end_time"])
+                j = i + 1
+                while j < len(columns) and columns[j]["type"] == "slot" and to_min(columns[j]["time"]) < end_m and j not in start_map:
+                    span += 1
+                    j += 1
+                cells.append({"type": "booking", "time": col["time"], "span": span, "booking": b_here})
                 i += span
                 continue
-            # check if this hour is covered by a running booking
-            covered = any(b["start_time"] < hh < b["end_time"] for b in my_bookings)
-            cells.append({"type": "covered" if covered else "empty", "time": hh, "span": 1})
+            covered = any(b["start_time"] < col["time"] < b["end_time"] for b in my_bookings)
+            cells.append({"type": "covered" if covered else "empty", "time": col["time"], "span": 1})
             i += 1
         result_mechs.append({
             "id": m["id"],
@@ -676,7 +879,10 @@ async def calendar_day(date_str: str = Query(..., alias="date"), user: dict = De
             "status": m.get("status", "active"),
             "cells": cells,
         })
-    return {"date": date_str, "hours": hours, "mechanics": result_mechs}
+    return {
+        "date": date_str, "hours": slot_times, "columns": columns, "mechanics": result_mechs,
+        "windows": [{"start": from_min(a), "end": from_min(b)} for a, b in windows],
+    }
 
 
 @api.get("/admin/calendar/week")
@@ -686,15 +892,14 @@ async def calendar_week(start: str = Query(...), user: dict = Depends(get_curren
     except Exception:
         raise HTTPException(400, "Format tanggal tidak valid")
     days = []
-    bh = await db.settings.find_one({"key": "business_hours"}, {"_id": 0}) or {"opening_time": "08:00", "closing_time": "16:00"}
+    bh = await db.settings.find_one({"key": "business_hours"}, {"_id": 0}) or {"opening_time": "08:30", "closing_time": "16:30", "breaks": []}
     mechanics_count = await db.mechanics.count_documents({"status": "active"})
-    hours = hour_range(bh["opening_time"], bh["closing_time"])
-    total_cap_per_day = mechanics_count * len(hours)
 
     for i in range(7):
         di = d + timedelta(days=i)
         ds = di.isoformat()
         weekday = di.weekday()  # 0=Mon
+        total_cap_per_day = mechanics_count * len(slot_starts(bh, weekday))
         is_closed_day = weekday in (bh.get("closed_days", [6]) or [6])
         is_holiday = bool(await db.holidays.find_one({"date": ds}))
         bookings = await db.bookings.find(
@@ -884,11 +1089,25 @@ async def update_service(sid: str, body: ServiceUpdate, user: dict = Depends(get
 
 @api.put("/admin/business-hours")
 async def update_business_hours(body: BusinessHoursUpdate, user: dict = Depends(get_current_user)):
-    await db.settings.update_one(
-        {"key": "business_hours"},
-        {"$set": {"opening_time": body.opening_time, "closing_time": body.closing_time}},
-        upsert=True,
-    )
+    try:
+        if to_min(body.opening_time) >= to_min(body.closing_time):
+            raise HTTPException(400, "Jam buka harus lebih awal dari jam tutup")
+    except ValueError:
+        raise HTTPException(400, "Format jam tidak valid")
+    updates = {"opening_time": body.opening_time, "closing_time": body.closing_time}
+    if body.breaks is not None:
+        cleaned = []
+        for br in body.breaks:
+            if not (0 <= br.weekday <= 6):
+                raise HTTPException(400, "Hari istirahat tidak valid")
+            try:
+                if to_min(br.start) >= to_min(br.end):
+                    raise HTTPException(400, "Jam istirahat: mulai harus lebih awal dari selesai")
+            except ValueError:
+                raise HTTPException(400, "Format jam istirahat tidak valid")
+            cleaned.append({"weekday": br.weekday, "start": br.start, "end": br.end, "label": (br.label or "Istirahat").strip()})
+        updates["breaks"] = cleaned
+    await db.settings.update_one({"key": "business_hours"}, {"$set": updates}, upsert=True)
     return await db.settings.find_one({"key": "business_hours"}, {"_id": 0})
 
 

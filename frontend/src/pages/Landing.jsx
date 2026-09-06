@@ -238,7 +238,7 @@ export default function Landing() {
                 4 langkah mudah, <br />motor cepat siap.
               </h2>
               <p className="mt-6 text-slate-600">
-                Reservasi dapat dilakukan mulai H+1 hingga 7 hari ke depan. Bengkel buka Senin–Sabtu, jam 08.00–16.00.
+                Reservasi dapat dilakukan mulai H+1 hingga 7 hari ke depan. Bengkel buka Senin–Sabtu, jam 08.30–16.30 (Jumat istirahat 11.00–14.00).
               </p>
               <div className="mt-8 overflow-hidden rounded-xl">
                 <img src={SERVICES_BG} alt="mechanic" className="h-64 w-full object-cover" />
@@ -294,10 +294,18 @@ export default function Landing() {
           </div>
           <div>
             <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-500">Jam Operasional</div>
-            <div className="mt-4 space-y-1 text-sm">
+            <div className="mt-4 space-y-1 text-sm" data-testid="jam-operasional">
               <div className="flex items-center gap-3">
                 <Clock strokeWidth={1.5} className="h-4 w-4 text-blue-400" />
-                Senin – Sabtu · 08.00 – 16.00
+                Senin – Kamis · 08.30 – 16.30
+              </div>
+              <div className="flex items-start gap-3">
+                <Clock strokeWidth={1.5} className="mt-0.5 h-4 w-4 text-blue-400" />
+                <span>Jumat · 08.30 – 11.00 &amp; 14.00 – 16.30<br /><span className="text-xs text-slate-400">Istirahat Sholat Jumat 11.00 – 14.00</span></span>
+              </div>
+              <div className="flex items-center gap-3">
+                <Clock strokeWidth={1.5} className="h-4 w-4 text-blue-400" />
+                Sabtu · 08.30 – 16.30
               </div>
               <div className="flex items-center gap-3 text-slate-400">
                 <Clock strokeWidth={1.5} className="h-4 w-4" />

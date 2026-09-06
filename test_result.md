@@ -169,6 +169,35 @@ backend:
         agent: "testing"
         comment: "✅ ALL TESTS PASSED (12/12). Verified: (1) GET /api/spareparts returns 268 items, 36 categories, 6 groups in correct order [CVT & Transmisi, Mesin & Bahan Bakar, Kelistrikan, Ban, Rem, Kemudi & Suspensi, Body & Aksesori], every item has required keys (id, category, group, motor, price_label, price, order), price_label starts with 'Rp ', (2) GET /api/spareparts?q=nmax returns 34 items, all contain 'nmax' case-insensitive, (3) GET /api/spareparts?q=NMAX (uppercase) returns same count as lowercase (34 items), (4) GET /api/spareparts?group=Ban returns only 1 group 'Ban' with categories 'Ban Depan' and 'Ban Belakang', items have size/description/price_prefix='Mulai dari', (5) GET /api/spareparts?category=Busi%20NGK returns 8 items, each with variant starting with 'NGK ', (6) GET /api/spareparts?category=Aki%20GS%20Astra returns 4 items with variant and capacity, GTZ8V price_label='Rp 500.000 – Rp 815.000', (7) GET /api/spareparts?q=zzzz returns total_items=0, total_categories=0, groups=[], (8) GET /api/spareparts/meta returns total_items=268, 6 groups with group/categories/count, sum of counts=268, (9) GET /api/spareparts?group=Kelistrikan&q=aerox returns 8 items, all match both filters, (10) Regression: GET /api/mechanics returns 5 mechanics with photo field, GET /api/services returns 4 services without price field. Spareparts feature fully working."
 
+  - task: "Jam operasional baru 08:30-16:30 + istirahat per hari (breaks), slot berbasis sesi, kalender admin kolom istirahat"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Migrasi settings business_hours -> opening 08:30, closing 16:30, breaks=[{weekday:4,start:'11:00',end:'14:00',label}] schedule_version 2. /api/availability: slot per jam dari awal tiap sesi; Jumat -> 08:30,09:30,10:30(closed),14:00,15:00,16:00(closed); hari lain 08:30..15:30 (8 slot); response punya windows & breaks. POST /api/bookings menolak jam di luar sesi/bertabrakan istirahat (400). PUT /admin/business-hours menerima breaks (validasi). /admin/calendar/day mengembalikan columns (slot|break) + cells type break."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL 9 SCHEDULE TESTS PASSED (100% success rate). Verified: (A1) GET /api/business-hours returns opening_time='08:30', closing_time='16:30', breaks contains Friday (weekday 4) break 11:00-14:00. (A2) GET /api/services returns ringan (1h) and berat (2h) service IDs. (A3) GET /api/availability Friday+ringan returns slots [08:30,09:30,10:30,14:00,15:00,16:00] with 10:30 & 16:00 status='closed', 2 windows, 1 break. (A4) GET /api/availability Friday+berat returns 09:30,10:30,15:00,16:00 closed; 08:30,14:00 not closed. (A5) GET /api/availability non-Friday+ringan returns 8 slots 08:30-15:30, none closed. (A6) POST /api/bookings: Friday 10:30 ringan→400, Friday 14:00 ringan→200 (end_time='15:00'), non-Friday 08:00→400, non-Friday 08:30→200 (end_time='09:30'). (A7) PUT /api/admin/business-hours: valid update→200 with breaks echoed, invalid breaks (start>=end)→400, invalid times (opening>=closing)→400. (A8) GET /api/admin/calendar/day Friday returns columns with 1 break type between 10:30 and 14:00, hours=[08:30,09:30,10:30,14:00,15:00,16:00], each mechanic has break cell. (A9) GET /api/admin/calendar/week: Friday capacity=30 (5 mechanics*6 slots), Monday capacity=40 (5 mechanics*8 slots), Sunday capacity=0. All test bookings cancelled. Schedule feature fully working."
+  - task: "Admin CRUD sparepart: GET/POST /api/admin/spareparts, PATCH/DELETE /api/admin/spareparts/{id}"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "POST body {category, group, motor, price, price_label?, price_prefix?, description?, size?, variant?, capacity?} -> price_label otomatis 'Rp 150.000' jika kosong. PATCH partial; string kosong menghapus field opsional; PATCH price tanpa price_label -> label diregenerasi. DELETE -> {ok:true}. Perubahan tampil di GET /api/spareparts publik."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL 6 SPAREPART ADMIN CRUD TESTS PASSED (100% success rate). Verified: (B10) GET /api/admin/spareparts with auth returns 200 with 268 items; without auth returns 401. (B11) POST /api/admin/spareparts creates new item with id, price_label='Rp 45.000', order=268 (max+1). (B12) GET /api/spareparts?q=motorunikxyz (public) returns total_items=1 with created item. (B13) PATCH /api/admin/spareparts/{id}: price update→price_label='Rp 50.000', description/variant set correctly, empty description removes field, custom price_label kept, price update regenerates label to 'Rp 60.000', empty PATCH→400, non-existent id→404. (B14) POST without required motor field→422. (B15) DELETE /api/admin/spareparts/{id}→{ok:true}, DELETE again→404, search motorunikxyz→total_items=0, total spareparts back to 268. Admin sparepart CRUD feature fully working."
+
 frontend:
   - task: "Hapus tampilan harga/pendapatan di Admin (bookings list, pengaturan servis, laporan bulanan) dan update nomor kontak di Landing"
     implemented: true
@@ -184,12 +213,14 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.5"
-  test_sequence: 5
+  version: "1.6"
+  test_sequence: 6
   run_ui: false
 
 test_plan:
   current_focus:
+    - "Jam operasional baru 08:30-16:30 + istirahat per hari (breaks), slot berbasis sesi, kalender admin kolom istirahat"
+    - "Admin CRUD sparepart: GET/POST /api/admin/spareparts, PATCH/DELETE /api/admin/spareparts/{id}"
     - "Sparepart publik: seed 268 item dari spreadsheet, GET /api/spareparts (q/group/category) & GET /api/spareparts/meta"
     - "Upload & hapus foto mekanik (POST/DELETE /api/admin/mechanics/{mid}/photo, static /api/uploads)"
     - "Hapus field price dari services/bookings, model ServiceUpdate & BookingUpdate, dan laporan bulanan (revenue -> active_total/completed_total), PDF tanpa kolom Harga"
@@ -211,3 +242,7 @@ agent_communication:
     message: "Fitur baru: halaman Sparepart. Uji backend publik (tanpa auth): GET /api/spareparts -> total_items=268, total_categories=36, 6 groups berurutan [CVT & Transmisi, Mesin & Bahan Bakar, Kelistrikan, Ban, Rem, Kemudi & Suspensi, Body & Aksesori]; GET /api/spareparts?q=nmax -> hanya item mengandung 'nmax' (case-insensitive), total_items>0; ?group=Ban -> hanya group Ban dengan kategori Ban Depan & Ban Belakang, item punya size & description & price_prefix; ?category=Busi%20NGK -> 8 item dengan variant; ?q=zzzz -> total_items=0, groups=[]; GET /api/spareparts/meta -> total_items=268, 6 groups dengan count. Regression singkat: /api/mechanics, /api/services."
   - agent: "testing"
     message: "✅ SPAREPARTS API TESTING COMPLETE: All 12 tests passed (100% success rate). Feature fully working: (1) GET /api/spareparts returns 268 items, 36 categories, 6 groups in correct order with all required fields, (2) Search 'nmax' returns 34 items (case-insensitive), (3) Uppercase 'NMAX' returns same count, (4) Filter group=Ban returns correct categories with size/description/price_prefix='Mulai dari', (5) Filter category='Busi NGK' returns 8 items with NGK variants, (6) Filter category='Aki GS Astra' returns 4 items, GTZ8V price correct, (7) Empty search 'zzzz' returns 0 items/categories/groups, (8) GET /api/spareparts/meta returns correct metadata (268 items, 6 groups, sum=268), (9) Combined filter group=Kelistrikan&q=aerox works correctly (8 items), (10) Regression tests pass: mechanics with photos, services without price. Backend is fully functional. Ready for main agent to summarize and finish."
+  - agent: "main"
+    message: "Dua fitur baru. (A) Jadwal: GET /api/business-hours -> opening 08:30, closing 16:30, breaks Jumat 11:00-14:00. Availability Jumat (cari tanggal Jumat antara min_date..max_date) untuk servis ringan (1 jam): slot times [08:30,09:30,10:30,14:00,15:00,16:00] dengan 10:30 & 16:00 status closed; untuk servis berat (2 jam) Jumat: 09:30 closed juga, 15:00 closed. Hari Senin-Kamis/Sabtu: 8 slot 08:30..15:30 semua non-closed untuk 1 jam. POST /api/bookings Jumat start 10:30 servis ringan -> 400; start 14:00 -> 200 dengan end_time 15:00; Senin start 08:00 -> 400 (sebelum buka); Senin 08:30 -> 200. PUT /admin/business-hours {opening_time:'08:30',closing_time:'16:30',breaks:[{weekday:4,start:'11:00',end:'14:00',label:'Istirahat Sholat Jumat'}]} -> 200; invalid breaks start>=end -> 400; (kembalikan ke nilai semula setelah tes). GET /admin/calendar/day?date=<Jumat> -> columns berisi 1 kolom type 'break' di antara 10:30 dan 14:00, hours=[08:30,09:30,10:30,14:00,15:00,16:00]. (B) Sparepart admin CRUD sesuai deskripsi task; verifikasi item baru muncul di GET /api/spareparts?q=<motor unik>, lalu hapus. Tanpa auth -> 401. Hapus booking tes yang dibuat jika memungkinkan (PATCH status Dibatalkan)."
+  - agent: "testing"
+    message: "✅ NEW FEATURES TESTING COMPLETE (2026-09-06): All 16 tests passed (100% success rate). Two new features fully verified: (A) SCHEDULE - All 9 tests passed: business hours 08:30-16:30 with Friday break 11:00-14:00, availability slots correct for Friday (6 slots with 10:30 & 16:00 closed for ringan, 09:30,10:30,15:00,16:00 closed for berat) and non-Friday (8 slots, none closed), booking validations work (Friday 10:30→400, Friday 14:00→200, non-Friday 08:00→400, non-Friday 08:30→200), business hours update with validation works, calendar day shows break column between 10:30 and 14:00, calendar week shows correct capacities (Friday=30, Monday=40, Sunday=0). (B) SPAREPART ADMIN CRUD - All 6 tests passed: GET with auth returns 268 items (401 without auth), POST creates item with correct price_label and order, public search finds item, PATCH updates work (price, description, variant, empty string removes field, custom label kept, price regenerates label, empty→400, non-existent→404), POST validation (missing motor→422), DELETE works (ok=true, again→404, search→0, total back to 268). All test bookings cancelled. Backend fully functional."
