@@ -12,6 +12,7 @@ import {
   Wrench, LayoutDashboard, CalendarDays, Users2, Settings, LogOut,
   Loader2, Plus, Trash2, MessageCircle, CheckCircle2, PlayCircle, XCircle, Clock,
   FileText, Download, CalendarRange, History, ChevronLeft, ChevronRight, X,
+  Camera, ImageOff,
 } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
@@ -397,6 +398,32 @@ function Mechanics() {
     try { await api.delete(`/admin/mechanics/${m.id}`); toast.success("Mekanik dihapus"); load(); }
     catch (e) { toast.error(formatApiError(e)); }
   };
+  const [uploadingId, setUploadingId] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const uploadPhoto = async (m, file) => {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Format foto harus JPG, PNG, atau WEBP"); return;
+    }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Ukuran foto maksimal 5 MB"); return; }
+    const fd = new FormData();
+    fd.append("file", file);
+    setUploadingId(m.id); setProgress(0);
+    try {
+      await api.post(`/admin/mechanics/${m.id}/photo`, fd, {
+        headers: { "Content-Type": "multipart/form-data" },
+        onUploadProgress: (ev) => { if (ev.total) setProgress(Math.round((ev.loaded * 100) / ev.total)); },
+      });
+      toast.success(`Foto ${m.name} diperbarui`);
+      load();
+    } catch (e) { toast.error(formatApiError(e)); }
+    finally { setUploadingId(null); setProgress(0); }
+  };
+  const removePhoto = async (m) => {
+    if (!window.confirm(`Hapus foto ${m.name}?`)) return;
+    try { await api.delete(`/admin/mechanics/${m.id}/photo`); toast.success("Foto dihapus"); load(); }
+    catch (e) { toast.error(formatApiError(e)); }
+  };
 
   return (
     <div className="space-y-4" data-testid="admin-mechanics">
@@ -411,23 +438,65 @@ function Mechanics() {
       </Card>
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {list.map((m) => (
-          <Card key={m.id} className="border-slate-200 p-4 flex items-center justify-between gap-3">
-            {m.photo ? (
-              <img src={m.photo} alt={m.name} className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-blue-100" />
-            ) : (
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-blue-600">
-                {m.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+          <Card key={m.id} className="border-slate-200 p-4" data-testid={`mechanic-item-${m.id}`}>
+            <div className="flex items-center gap-4">
+              {/* Foto + tombol ganti */}
+              <label
+                className="group relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-xl ring-2 ring-blue-100"
+                title="Klik untuk ganti foto"
+                data-testid={`photo-label-${m.id}`}
+              >
+                {m.photo ? (
+                  <img src={m.photo} alt={m.name} className="h-full w-full object-cover" />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center bg-blue-50 text-base font-bold text-blue-600">
+                    {m.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+                  </div>
+                )}
+                <div className={`absolute inset-0 flex flex-col items-center justify-center bg-[#0A192F]/70 text-white transition-opacity ${uploadingId === m.id ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                  {uploadingId === m.id ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      <span className="mt-0.5 text-[10px] font-bold">{progress}%</span>
+                    </>
+                  ) : (
+                    <>
+                      <Camera className="h-5 w-5" />
+                      <span className="mt-0.5 text-[10px] font-bold">Ganti</span>
+                    </>
+                  )}
+                </div>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  disabled={uploadingId !== null}
+                  data-testid={`photo-input-${m.id}`}
+                  onChange={(e) => { uploadPhoto(m, e.target.files?.[0]); e.target.value = ""; }}
+                />
+              </label>
+
+              <div className="min-w-0 flex-1">
+                <Input
+                  defaultValue={m.name}
+                  onBlur={(e) => { if (e.target.value !== m.name) rename(m, e.target.value); }}
+                  data-testid={`mechanic-name-${m.id}`}
+                />
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <Button variant={m.status === "active" ? "default" : "outline"} size="sm" onClick={() => toggle(m)}
+                    className={m.status === "active" ? "rounded-full bg-blue-600 hover:bg-blue-700" : "rounded-full"}>
+                    {m.status === "active" ? "Aktif" : "Nonaktif"}
+                  </Button>
+                  {m.photo && (
+                    <Button variant="ghost" size="sm" onClick={() => removePhoto(m)} className="rounded-full text-slate-500 hover:text-red-600"
+                      data-testid={`remove-photo-${m.id}`}>
+                      <ImageOff className="mr-1.5 h-4 w-4" /> Hapus Foto
+                    </Button>
+                  )}
+                </div>
               </div>
-            )}
-            <Input
-              defaultValue={m.name}
-              onBlur={(e) => { if (e.target.value !== m.name) rename(m, e.target.value); }}
-              className="flex-1"
-            />
-            <Button variant={m.status === "active" ? "default" : "outline"} size="sm" onClick={() => toggle(m)}>
-              {m.status === "active" ? "Aktif" : "Nonaktif"}
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => remove(m)}><Trash2 className="h-4 w-4 text-red-500" /></Button>
+              <Button variant="ghost" size="icon" onClick={() => remove(m)} title="Hapus mekanik"><Trash2 className="h-4 w-4 text-red-500" /></Button>
+            </div>
           </Card>
         ))}
       </div>

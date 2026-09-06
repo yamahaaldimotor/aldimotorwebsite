@@ -13,8 +13,9 @@ from datetime import datetime, timezone, timedelta, date, time
 from typing import List, Optional
 from zoneinfo import ZoneInfo
 
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Request, Response, Query, UploadFile, File
 from fastapi.responses import StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, ConfigDict
@@ -31,6 +32,13 @@ WORKSHOP_NAME = os.environ.get("WORKSHOP_NAME", "ALDI MOTOR")
 
 JWT_ALG = "HS256"
 TZ = ZoneInfo("Asia/Makassar")
+
+# Persistent upload storage (served at /api/uploads/...)
+UPLOAD_DIR = ROOT_DIR / "uploads"
+MECHANIC_PHOTO_DIR = UPLOAD_DIR / "mechanics"
+MECHANIC_PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+MAX_PHOTO_BYTES = 5 * 1024 * 1024  # 5 MB
+PHOTO_SIZE = 480
 
 client = AsyncIOMotorClient(MONGO_URL)
 db = client[DB_NAME]
@@ -718,12 +726,69 @@ async def update_mechanic(mid: str, body: MechanicUpdate, user: dict = Depends(g
     return await db.mechanics.find_one({"id": mid}, {"_id": 0})
 
 
+def _remove_uploaded_photo(mid: str):
+    f = MECHANIC_PHOTO_DIR / f"{mid}.jpg"
+    if f.exists():
+        try:
+            f.unlink()
+        except OSError:
+            pass
+
+
 @api.delete("/admin/mechanics/{mid}")
 async def delete_mechanic(mid: str, user: dict = Depends(get_current_user)):
     r = await db.mechanics.delete_one({"id": mid})
     if r.deleted_count == 0:
         raise HTTPException(404, "Mekanik tidak ditemukan")
+    _remove_uploaded_photo(mid)
     return {"ok": True}
+
+
+@api.post("/admin/mechanics/{mid}/photo")
+async def upload_mechanic_photo(mid: str, file: UploadFile = File(...), user: dict = Depends(get_current_user)):
+    m = await db.mechanics.find_one({"id": mid}, {"_id": 0})
+    if not m:
+        raise HTTPException(404, "Mekanik tidak ditemukan")
+    if file.content_type not in ("image/jpeg", "image/png", "image/webp", "image/jpg"):
+        raise HTTPException(400, "Format foto harus JPG, PNG, atau WEBP")
+    raw = await file.read()
+    if len(raw) > MAX_PHOTO_BYTES:
+        raise HTTPException(400, "Ukuran foto maksimal 5 MB")
+    try:
+        from io import BytesIO
+        from PIL import Image, ImageOps
+        img = Image.open(BytesIO(raw))
+        img = ImageOps.exif_transpose(img)
+        # flatten transparency onto brand navy background
+        if img.mode in ("RGBA", "LA", "P"):
+            img = img.convert("RGBA")
+            bg = Image.new("RGBA", img.size, (10, 25, 47, 255))
+            bg.alpha_composite(img)
+            img = bg.convert("RGB")
+        else:
+            img = img.convert("RGB")
+        # center-crop to square then resize
+        img = ImageOps.fit(img, (PHOTO_SIZE, PHOTO_SIZE), Image.LANCZOS, centering=(0.5, 0.35))
+        out_path = MECHANIC_PHOTO_DIR / f"{mid}.jpg"
+        img.save(out_path, "JPEG", quality=88, optimize=True)
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(400, "File foto tidak valid atau rusak")
+    version = int(datetime.now(timezone.utc).timestamp())
+    photo_url = f"/api/uploads/mechanics/{mid}.jpg?v={version}"
+    await db.mechanics.update_one({"id": mid}, {"$set": {"photo": photo_url}})
+    return await db.mechanics.find_one({"id": mid}, {"_id": 0})
+
+
+@api.delete("/admin/mechanics/{mid}/photo")
+async def delete_mechanic_photo(mid: str, user: dict = Depends(get_current_user)):
+    m = await db.mechanics.find_one({"id": mid}, {"_id": 0})
+    if not m:
+        raise HTTPException(404, "Mekanik tidak ditemukan")
+    _remove_uploaded_photo(mid)
+    await db.mechanics.update_one({"id": mid}, {"$unset": {"photo": ""}})
+    return await db.mechanics.find_one({"id": mid}, {"_id": 0})
 
 
 @api.patch("/admin/services/{sid}")
@@ -968,6 +1033,7 @@ async def root():
 
 
 app.include_router(api)
+app.mount("/api/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 app.add_middleware(
     CORSMiddleware,

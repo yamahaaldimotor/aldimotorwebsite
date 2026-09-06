@@ -1,586 +1,617 @@
 #!/usr/bin/env python3
 """
-Backend API Test Suite for ALDI MOTOR
-Tests price removal and WhatsApp number change features
+ALDI MOTOR Backend Test Suite - Mechanic Photo Upload Feature
+Tests the new mechanic photo upload/delete functionality
 """
-
+import os
+import sys
 import requests
-import json
-from datetime import datetime, timedelta
-from typing import Optional
+from io import BytesIO
+from PIL import Image
+import time
 
-# Configuration
-BASE_URL = "https://bf4f7221-ce61-49f2-a3c1-cc17b0180a7b.preview.emergentagent.com/api"
+# Backend URL from frontend/.env
+BACKEND_URL = "https://bf4f7221-ce61-49f2-a3c1-cc17b0180a7b.preview.emergentagent.com"
+API_BASE = f"{BACKEND_URL}/api"
+
+# Test credentials
 ADMIN_USERNAME = "adminaldimotor"
 ADMIN_PASSWORD = "aldimotorjaya"
-EXPECTED_WA = "6285657237827"
 
-# Test results tracking
+# Test state
+token = None
+test_mechanic_id = None
 test_results = []
 
 
-def log_test(test_name: str, passed: bool, message: str):
+def log_test(step, status, message):
     """Log test result"""
-    status = "✅ PASS" if passed else "❌ FAIL"
-    print(f"{status} - {test_name}")
-    if not passed or message:
-        print(f"   {message}")
-    test_results.append({"test": test_name, "passed": passed, "message": message})
+    symbol = "✅" if status == "PASS" else "❌"
+    print(f"{symbol} Step {step}: {message}")
+    test_results.append({"step": step, "status": status, "message": message})
 
 
-def admin_login() -> Optional[str]:
-    """Login as admin and return JWT token"""
-    try:
-        response = requests.post(
-            f"{BASE_URL}/auth/login",
-            json={"username": ADMIN_USERNAME, "password": ADMIN_PASSWORD},
-            timeout=10
-        )
-        if response.status_code == 200:
-            data = response.json()
-            token = data.get("token")
-            log_test("Admin Login", True, f"Logged in as {data['user']['username']}")
-            return token
-        else:
-            log_test("Admin Login", False, f"Status {response.status_code}: {response.text}")
-            return None
-    except Exception as e:
-        log_test("Admin Login", False, f"Exception: {str(e)}")
-        return None
-
-
-def test_1_services_no_price():
-    """Test 1: GET /api/services - verify no price key"""
-    try:
-        response = requests.get(f"{BASE_URL}/services", timeout=10)
-        if response.status_code != 200:
-            log_test("1. GET /api/services", False, f"Status {response.status_code}")
-            return
-        
-        services = response.json()
-        if not isinstance(services, list):
-            log_test("1. GET /api/services", False, "Response is not a list")
-            return
-        
-        if len(services) != 4:
-            log_test("1. GET /api/services", False, f"Expected 4 services, got {len(services)}")
-            return
-        
-        # Check that NONE of them has a "price" key
-        services_with_price = [s for s in services if "price" in s]
-        if services_with_price:
-            log_test("1. GET /api/services", False, 
-                    f"Found {len(services_with_price)} services with 'price' key: {[s.get('name') for s in services_with_price]}")
-            return
-        
-        log_test("1. GET /api/services", True, 
-                f"All 4 services returned without 'price' key: {[s.get('name') for s in services]}")
-        return services
-    except Exception as e:
-        log_test("1. GET /api/services", False, f"Exception: {str(e)}")
-        return None
-
-
-def test_2_availability_flow(services):
-    """Test 2: GET business hours, holidays, availability"""
-    try:
-        # Get business hours
-        response = requests.get(f"{BASE_URL}/business-hours", timeout=10)
-        if response.status_code != 200:
-            log_test("2. GET /api/business-hours", False, f"Status {response.status_code}")
-            return None, None
-        
-        bh_data = response.json()
-        min_date = bh_data.get("min_date")
-        max_date = bh_data.get("max_date")
-        
-        if not min_date or not max_date:
-            log_test("2. GET /api/business-hours", False, "Missing min_date or max_date")
-            return None, None
-        
-        log_test("2. GET /api/business-hours", True, 
-                f"min_date={min_date}, max_date={max_date}")
-        
-        # Get holidays
-        response = requests.get(f"{BASE_URL}/holidays", timeout=10)
-        if response.status_code != 200:
-            log_test("2. GET /api/holidays", False, f"Status {response.status_code}")
-            return None, None
-        
-        holidays = response.json()
-        holiday_dates = [h.get("date") for h in holidays]
-        log_test("2. GET /api/holidays", True, 
-                f"Retrieved {len(holidays)} holidays")
-        
-        # Find a valid date (not Sunday, not holiday)
-        min_dt = datetime.strptime(min_date, "%Y-%m-%d")
-        max_dt = datetime.strptime(max_date, "%Y-%m-%d")
-        
-        test_date = None
-        current = min_dt
-        while current <= max_dt:
-            if current.weekday() != 6 and current.strftime("%Y-%m-%d") not in holiday_dates:
-                test_date = current.strftime("%Y-%m-%d")
-                break
-            current += timedelta(days=1)
-        
-        if not test_date:
-            log_test("2. Find valid booking date", False, "No valid date found")
-            return None, None
-        
-        log_test("2. Find valid booking date", True, f"Using date: {test_date}")
-        
-        # Get availability for "Servis Ringan"
-        ringan_service = next((s for s in services if s.get("code") == "ringan"), None)
-        if not ringan_service:
-            log_test("2. GET /api/availability", False, "Servis Ringan not found")
-            return None, None
-        
-        response = requests.get(
-            f"{BASE_URL}/availability",
-            params={"date": test_date, "service_id": ringan_service["id"]},
-            timeout=10
-        )
-        
-        if response.status_code != 200:
-            log_test("2. GET /api/availability", False, f"Status {response.status_code}")
-            return None, None
-        
-        avail_data = response.json()
-        slots = avail_data.get("slots", [])
-        available_slot = next((s for s in slots if s.get("status") == "available"), None)
-        
-        if not available_slot:
-            log_test("2. GET /api/availability", False, "No available slots found")
-            return None, None
-        
-        log_test("2. GET /api/availability", True, 
-                f"Found available slot at {available_slot['time']}")
-        
-        return test_date, available_slot["time"], ringan_service["id"]
+def login():
+    """Login and get JWT token"""
+    global token
+    print("\n=== AUTHENTICATION ===")
+    resp = requests.post(
+        f"{API_BASE}/auth/login",
+        json={"username": ADMIN_USERNAME, "password": ADMIN_PASSWORD},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        log_test("LOGIN", "FAIL", f"Login failed: {resp.status_code} - {resp.text}")
+        sys.exit(1)
     
-    except Exception as e:
-        log_test("2. Availability flow", False, f"Exception: {str(e)}")
-        return None, None
-
-
-def test_3_create_booking(test_date, start_time, service_id):
-    """Test 3: POST /api/bookings - verify no price, correct WA number"""
-    try:
-        booking_data = {
-            "customer_name": "Test Backend",
-            "whatsapp": "081234567890",
-            "plate_number": "DD 1234 TB",
-            "complaint": "cek rem",
-            "service_id": service_id,
-            "booking_date": test_date,
-            "start_time": start_time
-        }
-        
-        response = requests.post(
-            f"{BASE_URL}/bookings",
-            json=booking_data,
-            timeout=10
-        )
-        
-        if response.status_code != 200:
-            log_test("3. POST /api/bookings", False, 
-                    f"Status {response.status_code}: {response.text}")
-            return None
-        
-        data = response.json()
-        booking = data.get("booking")
-        workshop_wa = data.get("workshop_whatsapp")
-        wa_customer_link = data.get("wa_customer_link")
-        wa_admin_link = data.get("wa_admin_link")
-        
-        # Check 1: booking has NO "price" key
-        if "price" in booking:
-            log_test("3. POST /api/bookings - no price", False, 
-                    f"Booking contains 'price' key: {booking.get('price')}")
-            return None
-        
-        log_test("3. POST /api/bookings - no price", True, 
-                "Booking has no 'price' key")
-        
-        # Check 2: workshop_whatsapp == "6285657237827"
-        if workshop_wa != EXPECTED_WA:
-            log_test("3. POST /api/bookings - WA number", False, 
-                    f"Expected {EXPECTED_WA}, got {workshop_wa}")
-            return None
-        
-        log_test("3. POST /api/bookings - WA number", True, 
-                f"workshop_whatsapp = {EXPECTED_WA}")
-        
-        # Check 3: wa_customer_link starts with correct URL
-        expected_link_prefix = f"https://wa.me/{EXPECTED_WA}"
-        if not wa_customer_link.startswith(expected_link_prefix):
-            log_test("3. POST /api/bookings - customer link", False, 
-                    f"Link doesn't start with {expected_link_prefix}")
-            return None
-        
-        log_test("3. POST /api/bookings - customer link", True, 
-                f"wa_customer_link starts with {expected_link_prefix}")
-        
-        # Check 4: wa_admin_link also uses correct WA
-        if not wa_admin_link.startswith(expected_link_prefix):
-            log_test("3. POST /api/bookings - admin link", False, 
-                    f"Link doesn't start with {expected_link_prefix}")
-            return None
-        
-        log_test("3. POST /api/bookings - admin link", True, 
-                f"wa_admin_link uses {EXPECTED_WA}")
-        
-        return booking["id"]
+    data = resp.json()
+    token = data.get("token")
+    if not token:
+        log_test("LOGIN", "FAIL", "No token in response")
+        sys.exit(1)
     
-    except Exception as e:
-        log_test("3. POST /api/bookings", False, f"Exception: {str(e)}")
-        return None
+    log_test("LOGIN", "PASS", f"Login successful, token received")
+    return token
 
 
-def test_4_admin_bookings(token, booking_id):
-    """Test 4: GET /api/admin/bookings - verify no price key"""
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        response = requests.get(
-            f"{BASE_URL}/admin/bookings",
-            headers=headers,
-            timeout=10
-        )
-        
-        if response.status_code != 200:
-            log_test("4. GET /api/admin/bookings", False, 
-                    f"Status {response.status_code}")
-            return
-        
-        bookings = response.json()
-        if not isinstance(bookings, list):
-            log_test("4. GET /api/admin/bookings", False, "Response is not a list")
-            return
-        
-        # Check that NONE of them has a "price" key
-        bookings_with_price = [b for b in bookings if "price" in b]
-        if bookings_with_price:
-            log_test("4. GET /api/admin/bookings", False, 
-                    f"Found {len(bookings_with_price)} bookings with 'price' key")
-            return
-        
-        log_test("4. GET /api/admin/bookings", True, 
-                f"All {len(bookings)} bookings have no 'price' key")
+def test_get_mechanics():
+    """Test 1: GET /api/mechanics - verify 5 mechanics with real names and photo fields"""
+    print("\n=== TEST 1: GET /api/mechanics ===")
+    resp = requests.get(f"{API_BASE}/mechanics", timeout=10)
     
-    except Exception as e:
-        log_test("4. GET /api/admin/bookings", False, f"Exception: {str(e)}")
-
-
-def test_5_update_booking(token, booking_id):
-    """Test 5: PATCH /api/admin/bookings - status works, price ignored"""
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        
-        # Test 5a: Update status to "Dikonfirmasi"
-        response = requests.patch(
-            f"{BASE_URL}/admin/bookings/{booking_id}",
-            headers=headers,
-            json={"status": "Dikonfirmasi"},
-            timeout=10
-        )
-        
-        if response.status_code != 200:
-            log_test("5a. PATCH booking status", False, 
-                    f"Status {response.status_code}")
-            return
-        
-        updated = response.json()
-        if updated.get("status") != "Dikonfirmasi":
-            log_test("5a. PATCH booking status", False, 
-                    f"Status not updated: {updated.get('status')}")
-            return
-        
-        log_test("5a. PATCH booking status", True, 
-                "Status updated to 'Dikonfirmasi'")
-        
-        # Test 5b: Try to add price field (should be ignored)
-        response = requests.patch(
-            f"{BASE_URL}/admin/bookings/{booking_id}",
-            headers=headers,
-            json={"price": 5000},
-            timeout=10
-        )
-        
-        if response.status_code != 200:
-            log_test("5b. PATCH booking with price", False, 
-                    f"Status {response.status_code}")
-            return
-        
-        updated = response.json()
-        if "price" in updated:
-            log_test("5b. PATCH booking with price", False, 
-                    f"Price field was added: {updated.get('price')}")
-            return
-        
-        log_test("5b. PATCH booking with price", True, 
-                "Price field ignored (not added to booking)")
+    if resp.status_code != 200:
+        log_test("1", "FAIL", f"GET /api/mechanics returned {resp.status_code}")
+        return False
     
-    except Exception as e:
-        log_test("5. PATCH /api/admin/bookings", False, f"Exception: {str(e)}")
-
-
-def test_6_update_service(token, service_id):
-    """Test 6: PATCH /api/admin/services - duration works, price alone returns 400"""
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        
-        # Test 6a: Update duration_hours
-        response = requests.patch(
-            f"{BASE_URL}/admin/services/{service_id}",
-            headers=headers,
-            json={"duration_hours": 1},
-            timeout=10
-        )
-        
-        if response.status_code != 200:
-            log_test("6a. PATCH service duration", False, 
-                    f"Status {response.status_code}")
-            return
-        
-        log_test("6a. PATCH service duration", True, 
-                "Duration updated successfully")
-        
-        # Test 6b: Try to update price alone (should return 400)
-        response = requests.patch(
-            f"{BASE_URL}/admin/services/{service_id}",
-            headers=headers,
-            json={"price": 100},
-            timeout=10
-        )
-        
-        if response.status_code != 400:
-            log_test("6b. PATCH service price only", False, 
-                    f"Expected 400, got {response.status_code}")
-            return
-        
-        error_data = response.json()
-        if "Tidak ada perubahan" not in error_data.get("detail", ""):
-            log_test("6b. PATCH service price only", False, 
-                    f"Expected 'Tidak ada perubahan', got: {error_data.get('detail')}")
-            return
-        
-        log_test("6b. PATCH service price only", True, 
-                "Returns 400 'Tidak ada perubahan' (price field not recognized)")
+    mechanics = resp.json()
     
-    except Exception as e:
-        log_test("6. PATCH /api/admin/services", False, f"Exception: {str(e)}")
-
-
-def test_7_monthly_report(token, test_date):
-    """Test 7: GET /api/admin/reports/monthly - no revenue fields"""
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        
-        # Use the year and month from test_date
-        dt = datetime.strptime(test_date, "%Y-%m-%d")
-        year = dt.year
-        month = dt.month
-        
-        response = requests.get(
-            f"{BASE_URL}/admin/reports/monthly",
-            headers=headers,
-            params={"year": year, "month": month},
-            timeout=10
-        )
-        
-        if response.status_code != 200:
-            log_test("7. GET /api/admin/reports/monthly", False, 
-                    f"Status {response.status_code}")
-            return
-        
-        data = response.json()
-        
-        # Check required keys exist
-        required_keys = ["total", "active_total", "completed_total", "by_status", "by_service", "bookings"]
-        missing_keys = [k for k in required_keys if k not in data]
-        if missing_keys:
-            log_test("7. Monthly report - required keys", False, 
-                    f"Missing keys: {missing_keys}")
-            return
-        
-        log_test("7. Monthly report - required keys", True, 
-                f"Has all required keys: {required_keys}")
-        
-        # Check that revenue fields do NOT exist
-        revenue_keys = [k for k in data.keys() if "revenue" in k.lower()]
-        if revenue_keys:
-            log_test("7. Monthly report - no revenue", False, 
-                    f"Found revenue keys: {revenue_keys}")
-            return
-        
-        log_test("7. Monthly report - no revenue", True, 
-                "No revenue_total or revenue_completed fields")
+    # Check we have 5 mechanics
+    if len(mechanics) < 5:
+        log_test("1", "FAIL", f"Expected at least 5 mechanics, got {len(mechanics)}")
+        return False
     
-    except Exception as e:
-        log_test("7. GET /api/admin/reports/monthly", False, f"Exception: {str(e)}")
-
-
-def test_8_monthly_pdf(token, test_date):
-    """Test 8: GET /api/admin/reports/monthly.pdf - PDF download"""
-    try:
-        dt = datetime.strptime(test_date, "%Y-%m-%d")
-        year = dt.year
-        month = dt.month
-        
-        response = requests.get(
-            f"{BASE_URL}/admin/reports/monthly.pdf",
-            params={"year": year, "month": month, "token": token},
-            timeout=15
-        )
-        
-        if response.status_code != 200:
-            log_test("8. GET /api/admin/reports/monthly.pdf", False, 
-                    f"Status {response.status_code}")
-            return
-        
-        # Check content type
-        content_type = response.headers.get("content-type", "")
-        if "application/pdf" not in content_type:
-            log_test("8. PDF content-type", False, 
-                    f"Expected application/pdf, got {content_type}")
-            return
-        
-        log_test("8. PDF content-type", True, 
-                f"Content-Type: {content_type}")
-        
-        # Check PDF signature
-        content = response.content
-        if not content.startswith(b"%PDF"):
-            log_test("8. PDF signature", False, 
-                    "Content doesn't start with %PDF")
-            return
-        
-        log_test("8. PDF signature", True, 
-                f"PDF file generated ({len(content)} bytes)")
+    # Expected real names
+    expected_names = ["Andi Muh Wahidin", "Ahmad Balla", "Kasim", "Ansar", "Muh Risal"]
+    found_names = [m.get("name") for m in mechanics]
     
-    except Exception as e:
-        log_test("8. GET /api/admin/reports/monthly.pdf", False, f"Exception: {str(e)}")
-
-
-def test_9_admin_stats(token):
-    """Test 9: GET /api/admin/stats - basic check"""
-    try:
-        headers = {"Authorization": f"Bearer {token}"}
-        response = requests.get(
-            f"{BASE_URL}/admin/stats",
-            headers=headers,
-            timeout=10
-        )
-        
-        if response.status_code != 200:
-            log_test("9. GET /api/admin/stats", False, 
-                    f"Status {response.status_code}")
-            return
-        
-        data = response.json()
-        required_keys = ["total", "today", "tomorrow", "by_status"]
-        missing_keys = [k for k in required_keys if k not in data]
-        
-        if missing_keys:
-            log_test("9. GET /api/admin/stats", False, 
-                    f"Missing keys: {missing_keys}")
-            return
-        
-        log_test("9. GET /api/admin/stats", True, 
-                f"Stats retrieved: total={data['total']}, today={data['today']}, tomorrow={data['tomorrow']}")
+    # Check all expected names are present
+    missing_names = [name for name in expected_names if name not in found_names]
+    if missing_names:
+        log_test("1", "FAIL", f"Missing mechanics: {missing_names}. Found: {found_names}")
+        return False
     
+    # Check each mechanic has a photo field
+    mechanics_without_photo = [m.get("name") for m in mechanics if "photo" not in m or not m["photo"]]
+    if mechanics_without_photo:
+        log_test("1", "FAIL", f"Mechanics without photo field: {mechanics_without_photo}")
+        return False
+    
+    # Verify photo field format (should be like "/mechanics/<slug>.jpg")
+    for m in mechanics:
+        photo = m.get("photo", "")
+        if not photo.startswith("/mechanics/") and not photo.startswith("/api/uploads/mechanics/"):
+            log_test("1", "FAIL", f"Mechanic {m.get('name')} has invalid photo format: {photo}")
+            return False
+    
+    log_test("1", "PASS", f"Found {len(mechanics)} mechanics with real names and photo fields")
+    return True
+
+
+def test_create_mechanic():
+    """Test 2: POST /api/admin/mechanics - create test mechanic"""
+    global test_mechanic_id
+    print("\n=== TEST 2: POST /api/admin/mechanics ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.post(
+        f"{API_BASE}/admin/mechanics",
+        json={"name": "Test Mekanik Foto"},
+        headers=headers,
+        timeout=10
+    )
+    
+    if resp.status_code != 200:
+        log_test("2", "FAIL", f"POST /api/admin/mechanics returned {resp.status_code}: {resp.text}")
+        return False
+    
+    mechanic = resp.json()
+    test_mechanic_id = mechanic.get("id")
+    
+    if not test_mechanic_id:
+        log_test("2", "FAIL", "No id in response")
+        return False
+    
+    if mechanic.get("name") != "Test Mekanik Foto":
+        log_test("2", "FAIL", f"Name mismatch: expected 'Test Mekanik Foto', got '{mechanic.get('name')}'")
+        return False
+    
+    log_test("2", "PASS", f"Created test mechanic with id: {test_mechanic_id}")
+    return True
+
+
+def create_test_image(width, height, format="PNG"):
+    """Create a test image using PIL"""
+    img = Image.new("RGB", (width, height), color=(73, 109, 137))
+    # Add some pattern to make it recognizable
+    from PIL import ImageDraw
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([width//4, height//4, 3*width//4, 3*height//4], fill=(255, 200, 100))
+    draw.text((width//2 - 20, height//2), "TEST", fill=(0, 0, 0))
+    
+    buf = BytesIO()
+    img.save(buf, format=format, quality=95)
+    buf.seek(0)
+    return buf
+
+
+def test_upload_photo_png():
+    """Test 3a: POST /api/admin/mechanics/{id}/photo with PNG"""
+    print("\n=== TEST 3a: Upload PNG photo ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    # Create 800x600 PNG
+    img_buf = create_test_image(800, 600, "PNG")
+    
+    files = {"file": ("test.png", img_buf, "image/png")}
+    resp = requests.post(
+        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
+        files=files,
+        headers=headers,
+        timeout=15
+    )
+    
+    if resp.status_code != 200:
+        log_test("3a", "FAIL", f"Upload PNG returned {resp.status_code}: {resp.text}")
+        return False
+    
+    mechanic = resp.json()
+    photo_url = mechanic.get("photo")
+    
+    if not photo_url:
+        log_test("3a", "FAIL", "No photo field in response")
+        return False
+    
+    if not photo_url.startswith(f"/api/uploads/mechanics/{test_mechanic_id}.jpg"):
+        log_test("3a", "FAIL", f"Photo URL format incorrect: {photo_url}")
+        return False
+    
+    if "?v=" not in photo_url:
+        log_test("3a", "FAIL", f"Photo URL missing version parameter: {photo_url}")
+        return False
+    
+    log_test("3a", "PASS", f"PNG uploaded successfully, photo URL: {photo_url}")
+    return photo_url
+
+
+def test_upload_photo_jpeg():
+    """Test 3b: POST /api/admin/mechanics/{id}/photo with JPEG"""
+    print("\n=== TEST 3b: Upload JPEG photo ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    # Create 800x600 JPEG
+    img_buf = create_test_image(800, 600, "JPEG")
+    
+    files = {"file": ("test.jpg", img_buf, "image/jpeg")}
+    resp = requests.post(
+        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
+        files=files,
+        headers=headers,
+        timeout=15
+    )
+    
+    if resp.status_code != 200:
+        log_test("3b", "FAIL", f"Upload JPEG returned {resp.status_code}: {resp.text}")
+        return False
+    
+    mechanic = resp.json()
+    photo_url = mechanic.get("photo")
+    
+    if not photo_url:
+        log_test("3b", "FAIL", "No photo field in response")
+        return False
+    
+    log_test("3b", "PASS", f"JPEG uploaded successfully, photo URL: {photo_url}")
+    return photo_url
+
+
+def test_get_uploaded_photo(photo_url):
+    """Test 4: GET uploaded photo and verify it's 480x480 JPEG"""
+    print("\n=== TEST 4: GET uploaded photo ===")
+    
+    # Extract path without query params
+    photo_path = photo_url.split("?")[0]
+    full_url = f"{BACKEND_URL}{photo_path}"
+    
+    resp = requests.get(full_url, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("4", "FAIL", f"GET {photo_path} returned {resp.status_code}")
+        return False
+    
+    content_type = resp.headers.get("content-type", "")
+    if "image/jpeg" not in content_type:
+        log_test("4", "FAIL", f"Content-Type is {content_type}, expected image/jpeg")
+        return False
+    
+    # Verify image dimensions with PIL
+    try:
+        img = Image.open(BytesIO(resp.content))
+        width, height = img.size
+        
+        if width != 480 or height != 480:
+            log_test("4", "FAIL", f"Image dimensions are {width}x{height}, expected 480x480")
+            return False
+        
+        log_test("4", "PASS", f"Photo retrieved successfully: 480x480 JPEG, {len(resp.content)} bytes")
+        return True
     except Exception as e:
-        log_test("9. GET /api/admin/stats", False, f"Exception: {str(e)}")
+        log_test("4", "FAIL", f"Failed to verify image: {e}")
+        return False
+
+
+def test_upload_txt_file():
+    """Test 5a: Upload .txt file - should return 400"""
+    print("\n=== TEST 5a: Upload .txt file (negative test) ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    txt_content = BytesIO(b"This is a text file, not an image")
+    files = {"file": ("test.txt", txt_content, "text/plain")}
+    
+    resp = requests.post(
+        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
+        files=files,
+        headers=headers,
+        timeout=10
+    )
+    
+    if resp.status_code != 400:
+        log_test("5a", "FAIL", f"Expected 400 for .txt file, got {resp.status_code}")
+        return False
+    
+    log_test("5a", "PASS", "Correctly rejected .txt file with 400")
+    return True
+
+
+def test_upload_large_file():
+    """Test 5b: Upload file > 5MB - should return 400"""
+    print("\n=== TEST 5b: Upload file > 5MB (negative test) ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    # Create a large PNG (3000x3000 with random noise should be > 5MB)
+    img = Image.new("RGB", (3000, 3000))
+    import random
+    pixels = img.load()
+    for i in range(3000):
+        for j in range(3000):
+            pixels[i, j] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    size_mb = len(buf.getvalue()) / (1024 * 1024)
+    
+    if size_mb <= 5:
+        log_test("5b", "FAIL", f"Test image is only {size_mb:.2f}MB, need > 5MB")
+        return False
+    
+    files = {"file": ("large.png", buf, "image/png")}
+    
+    resp = requests.post(
+        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
+        files=files,
+        headers=headers,
+        timeout=15
+    )
+    
+    if resp.status_code != 400:
+        log_test("5b", "FAIL", f"Expected 400 for {size_mb:.2f}MB file, got {resp.status_code}")
+        return False
+    
+    log_test("5b", "PASS", f"Correctly rejected {size_mb:.2f}MB file with 400")
+    return True
+
+
+def test_upload_without_auth():
+    """Test 5c: Upload without authentication - should return 401"""
+    print("\n=== TEST 5c: Upload without auth (negative test) ===")
+    
+    img_buf = create_test_image(100, 100, "JPEG")
+    files = {"file": ("test.jpg", img_buf, "image/jpeg")}
+    
+    resp = requests.post(
+        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
+        files=files,
+        timeout=10
+    )
+    
+    if resp.status_code != 401:
+        log_test("5c", "FAIL", f"Expected 401 without auth, got {resp.status_code}")
+        return False
+    
+    log_test("5c", "PASS", "Correctly rejected upload without auth with 401")
+    return True
+
+
+def test_upload_nonexistent_mechanic():
+    """Test 5d: Upload to non-existent mechanic - should return 404"""
+    print("\n=== TEST 5d: Upload to non-existent mechanic (negative test) ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    img_buf = create_test_image(100, 100, "JPEG")
+    files = {"file": ("test.jpg", img_buf, "image/jpeg")}
+    
+    fake_id = "00000000-0000-0000-0000-000000000000"
+    resp = requests.post(
+        f"{API_BASE}/admin/mechanics/{fake_id}/photo",
+        files=files,
+        headers=headers,
+        timeout=10
+    )
+    
+    if resp.status_code != 404:
+        log_test("5d", "FAIL", f"Expected 404 for non-existent mechanic, got {resp.status_code}")
+        return False
+    
+    log_test("5d", "PASS", "Correctly returned 404 for non-existent mechanic")
+    return True
+
+
+def test_delete_photo():
+    """Test 6: DELETE /api/admin/mechanics/{id}/photo"""
+    print("\n=== TEST 6: DELETE photo ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    resp = requests.delete(
+        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
+        headers=headers,
+        timeout=10
+    )
+    
+    if resp.status_code != 200:
+        log_test("6", "FAIL", f"DELETE photo returned {resp.status_code}: {resp.text}")
+        return False
+    
+    mechanic = resp.json()
+    
+    if "photo" in mechanic and mechanic["photo"]:
+        log_test("6", "FAIL", f"Photo field still present after delete: {mechanic.get('photo')}")
+        return False
+    
+    log_test("6", "PASS", "Photo deleted successfully, no photo field in response")
+    return True
+
+
+def test_photo_file_deleted():
+    """Test 6b: Verify photo file returns 404 after deletion"""
+    print("\n=== TEST 6b: Verify photo file deleted ===")
+    
+    photo_path = f"/api/uploads/mechanics/{test_mechanic_id}.jpg"
+    full_url = f"{BACKEND_URL}{photo_path}"
+    
+    resp = requests.get(full_url, timeout=10)
+    
+    if resp.status_code != 404:
+        log_test("6b", "FAIL", f"Expected 404 for deleted photo, got {resp.status_code}")
+        return False
+    
+    log_test("6b", "PASS", "Photo file correctly returns 404 after deletion")
+    return True
+
+
+def test_reupload_and_delete_mechanic():
+    """Test 7: Re-upload photo, then delete mechanic, verify file deleted"""
+    print("\n=== TEST 7: Re-upload and delete mechanic ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    # Re-upload photo
+    img_buf = create_test_image(500, 500, "JPEG")
+    files = {"file": ("test.jpg", img_buf, "image/jpeg")}
+    
+    resp = requests.post(
+        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
+        files=files,
+        headers=headers,
+        timeout=15
+    )
+    
+    if resp.status_code != 200:
+        log_test("7", "FAIL", f"Re-upload failed: {resp.status_code}")
+        return False
+    
+    # Delete mechanic
+    resp = requests.delete(
+        f"{API_BASE}/admin/mechanics/{test_mechanic_id}",
+        headers=headers,
+        timeout=10
+    )
+    
+    if resp.status_code != 200:
+        log_test("7", "FAIL", f"Delete mechanic returned {resp.status_code}: {resp.text}")
+        return False
+    
+    # Verify photo file is deleted
+    photo_path = f"/api/uploads/mechanics/{test_mechanic_id}.jpg"
+    full_url = f"{BACKEND_URL}{photo_path}"
+    
+    resp = requests.get(full_url, timeout=10)
+    
+    if resp.status_code != 404:
+        log_test("7", "FAIL", f"Photo file still accessible after mechanic deletion: {resp.status_code}")
+        return False
+    
+    log_test("7", "PASS", "Mechanic deleted, photo file correctly removed (404)")
+    return True
+
+
+def test_regression_services():
+    """Test 8a: Regression - GET /api/services (no price)"""
+    print("\n=== TEST 8a: Regression - GET /api/services ===")
+    
+    resp = requests.get(f"{API_BASE}/services", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("8a", "FAIL", f"GET /api/services returned {resp.status_code}")
+        return False
+    
+    services = resp.json()
+    
+    # Check no service has price field
+    services_with_price = [s.get("name") for s in services if "price" in s]
+    if services_with_price:
+        log_test("8a", "FAIL", f"Services with price field: {services_with_price}")
+        return False
+    
+    log_test("8a", "PASS", f"GET /api/services returned {len(services)} services without price field")
+    return True
+
+
+def test_regression_stats():
+    """Test 8b: Regression - GET /api/admin/stats"""
+    print("\n=== TEST 8b: Regression - GET /api/admin/stats ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    resp = requests.get(f"{API_BASE}/admin/stats", headers=headers, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("8b", "FAIL", f"GET /api/admin/stats returned {resp.status_code}")
+        return False
+    
+    stats = resp.json()
+    
+    # Just verify it returns data
+    if "total" not in stats:
+        log_test("8b", "FAIL", "Stats response missing 'total' field")
+        return False
+    
+    log_test("8b", "PASS", f"GET /api/admin/stats returned successfully")
+    return True
+
+
+def test_regression_monthly_report():
+    """Test 8c: Regression - GET /api/admin/reports/monthly"""
+    print("\n=== TEST 8c: Regression - GET /api/admin/reports/monthly ===")
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    resp = requests.get(
+        f"{API_BASE}/admin/reports/monthly",
+        params={"year": 2026, "month": 9},
+        headers=headers,
+        timeout=10
+    )
+    
+    if resp.status_code != 200:
+        log_test("8c", "FAIL", f"GET /api/admin/reports/monthly returned {resp.status_code}")
+        return False
+    
+    report = resp.json()
+    
+    # Verify has active_total and completed_total, no revenue fields
+    if "active_total" not in report:
+        log_test("8c", "FAIL", "Report missing 'active_total' field")
+        return False
+    
+    if "completed_total" not in report:
+        log_test("8c", "FAIL", "Report missing 'completed_total' field")
+        return False
+    
+    if "revenue_total" in report or "revenue_completed" in report:
+        log_test("8c", "FAIL", "Report contains revenue fields (should be removed)")
+        return False
+    
+    log_test("8c", "PASS", "Monthly report has active_total/completed_total, no revenue fields")
+    return True
+
+
+def print_summary():
+    """Print test summary"""
+    print("\n" + "="*60)
+    print("TEST SUMMARY")
+    print("="*60)
+    
+    passed = sum(1 for r in test_results if r["status"] == "PASS")
+    failed = sum(1 for r in test_results if r["status"] == "FAIL")
+    total = len(test_results)
+    
+    print(f"\nTotal Tests: {total}")
+    print(f"Passed: {passed} ✅")
+    print(f"Failed: {failed} ❌")
+    print(f"Success Rate: {(passed/total*100):.1f}%")
+    
+    if failed > 0:
+        print("\n❌ FAILED TESTS:")
+        for r in test_results:
+            if r["status"] == "FAIL":
+                print(f"  - Step {r['step']}: {r['message']}")
+    
+    print("\n" + "="*60)
+    
+    return failed == 0
 
 
 def main():
     """Run all tests"""
-    print("=" * 70)
-    print("ALDI MOTOR Backend API Test Suite")
-    print("Testing: Price removal & WhatsApp number change")
-    print("=" * 70)
-    print()
+    print("="*60)
+    print("ALDI MOTOR - Mechanic Photo Upload Feature Test")
+    print("="*60)
     
-    # Login
-    token = admin_login()
-    if not token:
-        print("\n❌ Cannot proceed without admin token")
-        return
-    
-    print()
-    
-    # Test 1: Services without price
-    services = test_1_services_no_price()
-    if not services:
-        print("\n❌ Cannot proceed without services data")
-        return
-    
-    print()
-    
-    # Test 2: Availability flow
-    result = test_2_availability_flow(services)
-    if result == (None, None):
-        print("\n❌ Cannot proceed without valid booking date/time")
-        return
-    
-    test_date, start_time, service_id = result
-    print()
-    
-    # Test 3: Create booking
-    booking_id = test_3_create_booking(test_date, start_time, service_id)
-    if not booking_id:
-        print("\n⚠️  Booking creation failed, some tests will be skipped")
-    
-    print()
-    
-    # Test 4: Admin bookings
-    test_4_admin_bookings(token, booking_id)
-    print()
-    
-    # Test 5: Update booking
-    if booking_id:
-        test_5_update_booking(token, booking_id)
-        print()
-    
-    # Test 6: Update service
-    test_6_update_service(token, service_id)
-    print()
-    
-    # Test 7: Monthly report
-    test_7_monthly_report(token, test_date)
-    print()
-    
-    # Test 8: Monthly PDF
-    test_8_monthly_pdf(token, test_date)
-    print()
-    
-    # Test 9: Admin stats
-    test_9_admin_stats(token)
-    print()
-    
-    # Summary
-    print("=" * 70)
-    print("TEST SUMMARY")
-    print("=" * 70)
-    
-    passed = sum(1 for r in test_results if r["passed"])
-    total = len(test_results)
-    
-    print(f"\nTotal: {passed}/{total} tests passed")
-    
-    failed_tests = [r for r in test_results if not r["passed"]]
-    if failed_tests:
-        print(f"\n❌ Failed tests ({len(failed_tests)}):")
-        for r in failed_tests:
-            print(f"   - {r['test']}")
-            if r['message']:
-                print(f"     {r['message']}")
-    else:
-        print("\n✅ All tests passed!")
-    
-    print()
+    try:
+        # Login
+        login()
+        
+        # Test 1: GET mechanics
+        test_get_mechanics()
+        
+        # Test 2: Create test mechanic
+        if not test_create_mechanic():
+            print("\n❌ Cannot continue without test mechanic")
+            return False
+        
+        # Test 3: Upload photos (PNG and JPEG)
+        photo_url = test_upload_photo_png()
+        if photo_url:
+            # Test 4: Verify uploaded photo
+            test_get_uploaded_photo(photo_url)
+        
+        test_upload_photo_jpeg()
+        
+        # Test 5: Negative tests
+        test_upload_txt_file()
+        test_upload_large_file()
+        test_upload_without_auth()
+        test_upload_nonexistent_mechanic()
+        
+        # Test 6: Delete photo
+        test_delete_photo()
+        test_photo_file_deleted()
+        
+        # Test 7: Re-upload and delete mechanic
+        test_reupload_and_delete_mechanic()
+        
+        # Test 8: Regression tests
+        test_regression_services()
+        test_regression_stats()
+        test_regression_monthly_report()
+        
+        # Print summary
+        success = print_summary()
+        
+        return success
+        
+    except Exception as e:
+        print(f"\n❌ FATAL ERROR: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 
 if __name__ == "__main__":
-    main()
+    success = main()
+    sys.exit(0 if success else 1)

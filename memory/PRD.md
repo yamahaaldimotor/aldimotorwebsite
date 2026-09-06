@@ -41,6 +41,10 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
 - Seed: migrasi otomatis nama placeholder "Mekanik N" -> nama asli + foto, dan sinkronisasi mechanic_name pada booking.
 - Landing: section baru "Tim Mekanik" (#mekanik, bg navy) di bawah Layanan, data dari GET /api/mechanics (hanya status active). Link nav "Tim Mekanik" ditambahkan. Admin tab Mekanik menampilkan avatar foto.
 
+## Update 2026-09-06 (v1.3) - Upload Foto Mekanik
+- POST /api/admin/mechanics/{mid}/photo (multipart 'file', jpg/png/webp, max 5MB) -> crop persegi 480x480 JPEG, disimpan di backend/uploads/mechanics/{mid}.jpg, disajikan via StaticFiles /api/uploads. DELETE .../photo menghapus foto. Hapus mekanik ikut menghapus file.
+- Admin tab Mekanik: klik foto -> pilih file -> upload dengan progress; tombol "Hapus Foto". Foto tampil di section Tim Mekanik beranda.
+
 ## Backlog (P1/P2)
 - P1: Kalender view mingguan/bulanan untuk admin
 - P1: Notifikasi Twilio WhatsApp API (kirim otomatis, bukan wa.me link)

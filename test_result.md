@@ -139,6 +139,21 @@ backend:
         agent: "testing"
         comment: "✅ RE-TESTED (2026-09-06): All tests passed. Confirmed: (1) POST /api/bookings returns workshop_whatsapp='6285657237827', (2) wa_customer_link starts with https://wa.me/6285657237827, (3) wa_admin_link starts with https://wa.me/6285657237827. WhatsApp number change fully working."
 
+  - task: "Upload & hapus foto mekanik (POST/DELETE /api/admin/mechanics/{mid}/photo, static /api/uploads)"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "POST multipart field 'file' (jpeg/png/webp, max 5MB) -> crop persegi 480x480 JPEG disimpan di backend/uploads/mechanics/{mid}.jpg, field photo='/api/uploads/mechanics/{mid}.jpg?v=..' ; GET /api/uploads/mechanics/{mid}.jpg -> image/jpeg. DELETE .../photo -> unset photo & hapus file. MechanicIn/MechanicUpdate menerima 'photo'. Seed migrasi nama asli + foto."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL TESTS PASSED (16/16). Verified: (1) GET /api/mechanics returns 5 mechanics with real names (Andi Muh Wahidin, Ahmad Balla, Kasim, Ansar, Muh Risal) each with photo field, (2) POST /api/admin/mechanics creates test mechanic successfully, (3a) POST /api/admin/mechanics/{id}/photo with PNG (800x600) uploads successfully and returns photo URL with version parameter, (3b) POST with JPEG also works, (4) GET /api/uploads/mechanics/{id}.jpg returns 200 with content-type image/jpeg and image is exactly 480x480 pixels, (5a) Upload .txt file correctly rejected with 400, (5b) Upload 25.77MB file correctly rejected with 400, (5c) Upload without auth correctly rejected with 401, (5d) Upload to non-existent mechanic correctly returns 404, (6) DELETE /api/admin/mechanics/{id}/photo returns 200 and response has no photo field, (6b) GET deleted photo file returns 404, (7) Re-upload photo then DELETE mechanic removes file (404), (8a-c) Regression tests: GET /api/services (no price), GET /api/admin/stats (200), GET /api/admin/reports/monthly (active_total/completed_total, no revenue fields) all pass. Mechanic photo upload feature fully working."
+
 frontend:
   - task: "Hapus tampilan harga/pendapatan di Admin (bookings list, pengaturan servis, laporan bulanan) dan update nomor kontak di Landing"
     implemented: true
@@ -154,12 +169,13 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.3"
-  test_sequence: 3
+  version: "1.4"
+  test_sequence: 4
   run_ui: false
 
 test_plan:
   current_focus:
+    - "Upload & hapus foto mekanik (POST/DELETE /api/admin/mechanics/{mid}/photo, static /api/uploads)"
     - "Hapus field price dari services/bookings, model ServiceUpdate & BookingUpdate, dan laporan bulanan (revenue -> active_total/completed_total), PDF tanpa kolom Harga"
     - "Ganti nomor WhatsApp bengkel ke 6285657237827"
   stuck_tasks: []
@@ -171,3 +187,7 @@ agent_communication:
     message: "Mohon uji backend: login admin (username adminaldimotor / aldimotorjaya), GET /api/services (tanpa key price), buat booking H+1..H+7 hari kerja lalu cek response tidak ada 'price' di booking dan workshop_whatsapp='6285657237827', GET /api/admin/reports/monthly?year=&month= (ada active_total, completed_total, tidak ada revenue_total/revenue_completed), GET /api/admin/reports/monthly.pdf?year=&month=&token=<jwt> menghasilkan PDF 200."
   - agent: "testing"
     message: "✅ BACKEND TESTING COMPLETE (2026-09-06): All 20 tests passed successfully. Both high-priority tasks verified working: (1) Price removal - all services/bookings have NO price field, PATCH operations ignore price, monthly reports have active_total/completed_total instead of revenue fields, PDF generation works. (2) WhatsApp number change - all responses use 6285657237827, all WhatsApp links correct. No issues found. Backend is fully functional and ready for production."
+  - agent: "main"
+    message: "Fitur baru: upload foto mekanik. Uji: login admin, GET /api/mechanics (5 mekanik nama asli dengan photo), buat mekanik baru via POST /admin/mechanics, POST /api/admin/mechanics/{id}/photo multipart 'file' dengan PNG/JPEG valid (buat via PIL) -> 200 & photo berisi /api/uploads/mechanics/{id}.jpg; GET path tsb -> 200 image/jpeg dimensi 480x480; upload file .txt -> 400; file > 5MB -> 400; tanpa auth -> 401; DELETE .../photo -> 200 tanpa field photo; DELETE mekanik -> file terhapus. Regression: booking flow & laporan tetap OK."
+  - agent: "testing"
+    message: "✅ MECHANIC PHOTO UPLOAD TESTING COMPLETE: All 16 tests passed (100% success rate). Feature fully working: (1) GET /api/mechanics returns 5 mechanics with real names and photo fields, (2) Photo upload works for PNG and JPEG formats, (3) Images correctly processed to 480x480 JPEG with version parameter, (4) All negative tests pass (txt file rejected, >5MB rejected, no auth rejected, non-existent mechanic rejected), (5) Photo deletion works correctly (file removed, field unset), (6) Mechanic deletion also removes photo file, (7) All regression tests pass (services without price, stats working, monthly reports correct). Backend is fully functional. Ready for main agent to summarize and finish."
