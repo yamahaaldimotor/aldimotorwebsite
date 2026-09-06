@@ -41,4 +41,11 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
 - P2: Multi-cabang (multi-tenant)
 
 ## Credentials
-Admin: admin@aldimotor.com / admin123
+Admin: username `adminaldimotor` / password `aldimotorjaya` (dari backend/.env ADMIN_USERNAME/ADMIN_PASSWORD)
+
+## Import dari GitHub (2026-09-06)
+- Project di-import ulang dari GitHub. File `.env` tidak ikut (gitignored) sehingga dibuat ulang:
+  - backend/.env: MONGO_URL, DB_NAME=aldi_motor_db, JWT_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD, WORKSHOP_WHATSAPP, WORKSHOP_NAME
+  - frontend/.env: REACT_APP_BACKEND_URL, WDS_SOCKET_PORT=443
+- Dependency backend (pip) & frontend (yarn) diinstall, kedua service berjalan normal.
+- Fitur yang sudah ada sejak commit terakhir: export laporan PDF (reportlab), tombol simpan bukti reservasi, konfirmasi WA ke nomor bengkel.
