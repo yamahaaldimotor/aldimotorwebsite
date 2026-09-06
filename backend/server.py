@@ -26,7 +26,7 @@ DB_NAME = os.environ["DB_NAME"]
 JWT_SECRET = os.environ["JWT_SECRET"]
 ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "adminaldimotor")
 ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD", "aldimotorjaya")
-WORKSHOP_WHATSAPP = os.environ.get("WORKSHOP_WHATSAPP", "6281234567890")
+WORKSHOP_WHATSAPP = os.environ.get("WORKSHOP_WHATSAPP", "6285657237827")
 WORKSHOP_NAME = os.environ.get("WORKSHOP_NAME", "ALDI MOTOR")
 
 JWT_ALG = "HS256"
@@ -109,7 +109,6 @@ class MechanicUpdate(BaseModel):
 class ServiceUpdate(BaseModel):
     duration_hours: Optional[float] = None
     description: Optional[str] = None
-    price: Optional[float] = None
 
 class HolidayIn(BaseModel):
     date: str  # YYYY-MM-DD
@@ -132,7 +131,6 @@ class BookingUpdate(BaseModel):
     status: Optional[str] = None
     duration_hours: Optional[float] = None
     mechanic_id: Optional[str] = None
-    price: Optional[float] = None
 
 
 # ----------------- Seed / Init -----------------
@@ -161,10 +159,10 @@ async def seed_data():
 
     # Services
     default_services = [
-        {"code": "ringan", "name": "Servis Ringan", "description": "Servis berkala dan pemeriksaan ringan kendaraan.", "duration_hours": 1.0, "price": 75000},
-        {"code": "berat", "name": "Servis Berat", "description": "Penanganan kerusakan atau servis dengan tingkat pengerjaan lebih kompleks.", "duration_hours": 2.0, "price": 200000},
-        {"code": "overhaul", "name": "Overhaul", "description": "Pengerjaan pembongkaran dan pemeriksaan komponen mesin secara menyeluruh.", "duration_hours": 4.0, "price": 500000},
-        {"code": "request", "name": "Request Customer", "description": "Customer dapat menjelaskan kebutuhan atau pekerjaan khusus.", "duration_hours": 1.0, "price": 0},
+        {"code": "ringan", "name": "Servis Ringan", "description": "Servis berkala dan pemeriksaan ringan kendaraan.", "duration_hours": 1.0},
+        {"code": "berat", "name": "Servis Berat", "description": "Penanganan kerusakan atau servis dengan tingkat pengerjaan lebih kompleks.", "duration_hours": 2.0},
+        {"code": "overhaul", "name": "Overhaul", "description": "Pengerjaan pembongkaran dan pemeriksaan komponen mesin secara menyeluruh.", "duration_hours": 4.0},
+        {"code": "request", "name": "Request Customer", "description": "Customer dapat menjelaskan kebutuhan atau pekerjaan khusus.", "duration_hours": 1.0},
     ]
     for svc in default_services:
         exists = await db.services.find_one({"code": svc["code"]})
@@ -175,8 +173,10 @@ async def seed_data():
                 "status": "active",
                 "created_at": datetime.now(timezone.utc).isoformat(),
             })
-        elif "price" not in exists:
-            await db.services.update_one({"code": svc["code"]}, {"$set": {"price": svc["price"]}})
+
+    # Migrate: hapus field harga (sistem tidak memakai pembayaran/harga)
+    await db.services.update_many({"price": {"$exists": True}}, {"$unset": {"price": ""}})
+    await db.bookings.update_many({"price": {"$exists": True}}, {"$unset": {"price": ""}})
 
     # Mechanics
     count = await db.mechanics.count_documents({})
@@ -477,7 +477,6 @@ async def create_booking(body: BookingCreate):
         "service_name": service["name"],
         "service_code": service.get("code"),
         "duration_hours": duration,
-        "price": float(service.get("price", 0) or 0),
         "mechanic_id": available_mech["id"],
         "mechanic_name": available_mech["name"],
         "booking_date": body.booking_date,
@@ -643,8 +642,6 @@ async def update_booking(booking_id: str, body: BookingUpdate, user: dict = Depe
     if body.duration_hours is not None:
         updates["duration_hours"] = float(body.duration_hours)
         updates["end_time"] = add_hours_str(b["start_time"], float(body.duration_hours))
-    if body.price is not None:
-        updates["price"] = float(body.price)
     if body.mechanic_id:
         m = await db.mechanics.find_one({"id": body.mechanic_id}, {"_id": 0})
         if not m:
@@ -747,11 +744,6 @@ async def delete_holiday(hid: str, user: dict = Depends(get_current_user)):
 INDO_MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni",
                "Juli", "Agustus", "September", "Oktober", "November", "Desember"]
 
-def _fmt_rupiah(n: float) -> str:
-    n = int(round(n or 0))
-    s = f"{n:,}".replace(",", ".")
-    return f"Rp {s}"
-
 async def _monthly_data(year: int, month: int):
     from calendar import monthrange
     if month < 1 or month > 12:
@@ -767,23 +759,19 @@ async def _monthly_data(year: int, month: int):
     total = len(bookings)
     by_status = {s: 0 for s in ["Menunggu Konfirmasi", "Dikonfirmasi", "Sedang Diproses", "Selesai", "Dibatalkan"]}
     by_service = {}
-    revenue_total = 0.0
-    revenue_completed = 0.0
+    active_total = 0
     for b in bookings:
         by_status[b["status"]] = by_status.get(b["status"], 0) + 1
         by_service[b["service_name"]] = by_service.get(b["service_name"], 0) + 1
-        p = float(b.get("price", 0) or 0)
         if b["status"] != "Dibatalkan":
-            revenue_total += p
-        if b["status"] == "Selesai":
-            revenue_completed += p
+            active_total += 1
 
     return {
         "period": {"year": year, "month": month, "label": f"{INDO_MONTHS[month-1]} {year}",
                    "from": date_from, "to": date_to},
         "total": total,
-        "revenue_total": revenue_total,
-        "revenue_completed": revenue_completed,
+        "active_total": active_total,
+        "completed_total": by_status.get("Selesai", 0),
         "by_status": by_status,
         "by_service": by_service,
         "bookings": bookings,
@@ -851,8 +839,8 @@ async def monthly_report_pdf(
     # Summary boxes
     summary_rows = [
         ["Total Reservasi", str(data["total"]),
-         "Pendapatan (Selesai)", _fmt_rupiah(data["revenue_completed"])],
-        ["Pendapatan Aktif *", _fmt_rupiah(data["revenue_total"]),
+         "Reservasi Selesai", str(data["completed_total"])],
+        ["Reservasi Aktif *", str(data["active_total"]),
          "Periode", f"{data['period']['from']} s/d {data['period']['to']}"],
     ]
     tbl = Table(summary_rows, colWidths=[4.2 * cm, 4.2 * cm, 4.2 * cm, 4.2 * cm])
@@ -912,7 +900,7 @@ async def monthly_report_pdf(
     if not data["bookings"]:
         elems.append(Paragraph("Tidak ada reservasi pada periode ini.", small_st))
     else:
-        det = [["No Reservasi", "Tanggal", "Jam", "Customer", "Servis", "Mekanik", "Status", "Harga"]]
+        det = [["No Reservasi", "Tanggal", "Jam", "Customer", "Servis", "Mekanik", "Status"]]
         for b in data["bookings"]:
             det.append([
                 b["booking_number"],
@@ -922,16 +910,14 @@ async def monthly_report_pdf(
                 b["service_name"],
                 b["mechanic_name"],
                 b["status"],
-                _fmt_rupiah(b.get("price", 0)),
             ])
-        dt = Table(det, colWidths=[2.7*cm, 2.1*cm, 1.8*cm, 3*cm, 2.5*cm, 2*cm, 2.4*cm, 2.3*cm], repeatRows=1)
+        dt = Table(det, colWidths=[3*cm, 2.3*cm, 2.2*cm, 3.6*cm, 2.8*cm, 2.3*cm, 2.8*cm], repeatRows=1)
         dt.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), dark),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
             ("FONTSIZE", (0, 0), (-1, 0), 9),
             ("FONTSIZE", (0, 1), (-1, -1), 8.5),
-            ("ALIGN", (7, 1), (7, -1), "RIGHT"),
             ("GRID", (0, 0), (-1, -1), 0.4, colors.HexColor("#E2E8F0")),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8FAFC")]),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 5),

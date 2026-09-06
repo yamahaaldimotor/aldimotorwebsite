@@ -101,3 +101,73 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+user_problem_statement: "ALDI MOTOR - sistem reservasi servis motor. Perubahan terbaru: hapus semua fitur harga/pendapatan (reservasi & dashboard admin) dan ganti nomor WA konfirmasi ke 6285657237827."
+
+backend:
+  - task: "Hapus field price dari services/bookings, model ServiceUpdate & BookingUpdate, dan laporan bulanan (revenue -> active_total/completed_total), PDF tanpa kolom Harga"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "GET /api/services tidak lagi mengandung price; POST /api/bookings tidak menyimpan price; PATCH /admin/bookings & /admin/services mengabaikan price; GET /admin/reports/monthly mengembalikan active_total & completed_total (tanpa revenue_*); PDF monthly.pdf tetap bisa diunduh. Startup migration $unset price pada koleksi services & bookings."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL TESTS PASSED (20/20). Verified: (1) GET /api/services returns 4 services with NO price key, (2) POST /api/bookings creates booking without price field, (3) PATCH /api/admin/bookings ignores price field when sent, (4) PATCH /api/admin/services with price only returns 400 'Tidak ada perubahan', (5) GET /api/admin/bookings returns all bookings without price key, (6) GET /api/admin/reports/monthly has active_total & completed_total but NO revenue_total/revenue_completed, (7) GET /api/admin/reports/monthly.pdf generates valid PDF (2957 bytes, application/pdf, starts with %PDF)."
+      - working: true
+        agent: "testing"
+        comment: "✅ RE-TESTED (2026-09-06): All 20 tests passed. Confirmed: (1) GET /api/services returns 4 services with NO price key, (2) POST /api/bookings creates booking without price field, (3) PATCH /api/admin/bookings ignores price field (returns 200 but price not added), (4) PATCH /api/admin/services with price only returns 400 'Tidak ada perubahan', (5) GET /api/admin/bookings returns all bookings without price key, (6) GET /api/admin/reports/monthly has active_total & completed_total but NO revenue_total/revenue_completed, (7) GET /api/admin/reports/monthly.pdf generates valid PDF (3018 bytes, application/pdf, starts with %PDF). Price removal feature fully working."
+  - task: "Ganti nomor WhatsApp bengkel ke 6285657237827"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/.env"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "POST /api/bookings response: workshop_whatsapp == '6285657237827' dan wa_customer_link mengarah ke https://wa.me/6285657237827"
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL TESTS PASSED. Verified: (1) POST /api/bookings returns workshop_whatsapp='6285657237827', (2) wa_customer_link starts with https://wa.me/6285657237827, (3) wa_admin_link also uses 6285657237827. WhatsApp number change fully implemented and working correctly."
+      - working: true
+        agent: "testing"
+        comment: "✅ RE-TESTED (2026-09-06): All tests passed. Confirmed: (1) POST /api/bookings returns workshop_whatsapp='6285657237827', (2) wa_customer_link starts with https://wa.me/6285657237827, (3) wa_admin_link starts with https://wa.me/6285657237827. WhatsApp number change fully working."
+
+frontend:
+  - task: "Hapus tampilan harga/pendapatan di Admin (bookings list, pengaturan servis, laporan bulanan) dan update nomor kontak di Landing"
+    implemented: true
+    working: "NA"
+    file: "frontend/src/pages/Admin.jsx, frontend/src/pages/Landing.jsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Belum diuji UI."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.3"
+  test_sequence: 3
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Hapus field price dari services/bookings, model ServiceUpdate & BookingUpdate, dan laporan bulanan (revenue -> active_total/completed_total), PDF tanpa kolom Harga"
+    - "Ganti nomor WhatsApp bengkel ke 6285657237827"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Mohon uji backend: login admin (username adminaldimotor / aldimotorjaya), GET /api/services (tanpa key price), buat booking H+1..H+7 hari kerja lalu cek response tidak ada 'price' di booking dan workshop_whatsapp='6285657237827', GET /api/admin/reports/monthly?year=&month= (ada active_total, completed_total, tidak ada revenue_total/revenue_completed), GET /api/admin/reports/monthly.pdf?year=&month=&token=<jwt> menghasilkan PDF 200."
+  - agent: "testing"
+    message: "✅ BACKEND TESTING COMPLETE (2026-09-06): All 20 tests passed successfully. Both high-priority tasks verified working: (1) Price removal - all services/bookings have NO price field, PATCH operations ignore price, monthly reports have active_total/completed_total instead of revenue fields, PDF generation works. (2) WhatsApp number change - all responses use 6285657237827, all WhatsApp links correct. No issues found. Backend is fully functional and ready for production."

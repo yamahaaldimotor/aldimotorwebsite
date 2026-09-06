@@ -20,7 +20,6 @@ import { id as idLocale } from "date-fns/locale";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { API } from "@/lib/apiClient";
 
-const rupiah = (n) => "Rp " + Math.round(Number(n) || 0).toLocaleString("id-ID");
 const MONTHS = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
 
 const STATUSES = ["Menunggu Konfirmasi", "Dikonfirmasi", "Sedang Diproses", "Selesai", "Dibatalkan"];
@@ -192,13 +191,6 @@ function Bookings() {
       load();
     } catch (e) { toast.error(formatApiError(e)); }
   };
-  const updatePrice = async (id, price) => {
-    try {
-      await api.patch(`/admin/bookings/${id}`, { price });
-      toast.success("Harga diperbarui");
-      load();
-    } catch (e) { toast.error(formatApiError(e)); }
-  };
 
   return (
     <div className="space-y-4" data-testid="admin-bookings">
@@ -241,9 +233,6 @@ function Bookings() {
                   </div>
                   <div className="mt-1 text-sm text-slate-500">
                     {b.service_name} · {b.booking_date} · {b.start_time}–{b.end_time} · {b.mechanic_name}
-                  </div>
-                  <div className="mt-1 text-sm font-semibold text-slate-900">
-                    Harga: {rupiah(b.price)}
                   </div>
                   <div className="mt-2 text-xs text-slate-500">Keluhan: {b.complaint}</div>
                 </div>
@@ -311,15 +300,6 @@ function Bookings() {
                       }}
                     />
                   )}
-                  <Input
-                    type="number" min="0" step="1000" defaultValue={b.price || 0}
-                    className="w-28" placeholder="Harga"
-                    data-testid={`price-input-${b.booking_number}`}
-                    onBlur={(e) => {
-                      const v = parseFloat(e.target.value);
-                      if (!isNaN(v) && v !== (b.price || 0)) updatePrice(b.id, v);
-                    }}
-                  />
                   <a href={`https://wa.me/${b.whatsapp}`} target="_blank" rel="noreferrer">
                     <Button variant="outline" size="icon" data-testid={`wa-btn-${b.booking_number}`}><MessageCircle className="h-4 w-4" /></Button>
                   </a>
@@ -523,16 +503,6 @@ function SettingsPanel() {
                     />
                     <span className="text-xs text-slate-500">jam</span>
                   </div>
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Harga</div>
-                  <Input type="number" min="0" step="1000" defaultValue={s.price || 0} className="w-32"
-                    onBlur={(e) => {
-                      const v = parseFloat(e.target.value);
-                      if (!isNaN(v) && v !== (s.price || 0)) saveService(s, { price: v });
-                    }}
-                    data-testid={`price-${s.code}`}
-                  />
                 </div>
               </div>
             </div>
@@ -844,8 +814,8 @@ function Reports() {
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <StatCard testid="report-total" label="Total Reservasi" value={data.total} />
             <StatCard testid="report-selesai" label="Selesai" value={data.by_status["Selesai"] || 0} />
-            <StatCard label="Pendapatan Selesai" value={rupiah(data.revenue_completed)} />
-            <StatCard label="Pendapatan Aktif" value={rupiah(data.revenue_total)} />
+            <StatCard label="Reservasi Aktif" value={data.active_total ?? 0} />
+            <StatCard label="Dibatalkan" value={data.by_status["Dibatalkan"] || 0} />
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -890,7 +860,7 @@ function Reports() {
                       <th className="py-2 pr-3">Customer</th>
                       <th className="py-2 pr-3">Servis</th>
                       <th className="py-2 pr-3">Status</th>
-                      <th className="py-2 pr-3 text-right">Harga</th>
+                      <th className="py-2 pr-3">Mekanik</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -901,7 +871,7 @@ function Reports() {
                         <td className="py-2 pr-3">{b.customer_name}</td>
                         <td className="py-2 pr-3">{b.service_name}</td>
                         <td className="py-2 pr-3"><Badge className={statusColor[b.status]}>{b.status}</Badge></td>
-                        <td className="py-2 pr-3 text-right font-medium">{rupiah(b.price)}</td>
+                        <td className="py-2 pr-3">{b.mechanic_name}</td>
                       </tr>
                     ))}
                   </tbody>

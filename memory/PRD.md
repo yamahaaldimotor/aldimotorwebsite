@@ -32,6 +32,10 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
   - Admin login (JWT)
   - Admin Dashboard: overview stats, bookings list dengan action buttons (Konfirmasi, Mulai Servis, Selesaikan, Batalkan), mekanik CRUD, pengaturan jam operasional/durasi/hari libur
 
+## Update 2026-09-06 (v1.1)
+- Semua fitur harga/pendapatan dihapus (sistem fokus reservasi, tanpa payment): field `price` dihapus dari services & bookings (migrasi $unset saat startup), laporan bulanan memakai `active_total`/`completed_total` (tanpa revenue), PDF tanpa kolom Harga, UI admin tanpa input/tampilan harga.
+- Nomor WA konfirmasi bengkel diganti ke 6285657237827 (backend/.env WORKSHOP_WHATSAPP + default di server.py + teks kontak di Landing).
+
 ## Backlog (P1/P2)
 - P1: Kalender view mingguan/bulanan untuk admin
 - P1: Notifikasi Twilio WhatsApp API (kirim otomatis, bukan wa.me link)

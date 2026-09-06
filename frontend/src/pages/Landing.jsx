@@ -205,7 +205,7 @@ export default function Landing() {
             <div className="mt-4 space-y-2 text-sm">
               <div className="flex items-center gap-3">
                 <Phone strokeWidth={1.5} className="h-4 w-4 text-blue-400" />
-                +62 812-3456-7890
+                +62 856-5723-7827
               </div>
               <div className="flex items-center gap-3">
                 <MapPin strokeWidth={1.5} className="h-4 w-4 text-blue-400" />
