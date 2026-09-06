@@ -101,10 +101,12 @@ class LoginReq(BaseModel):
 class MechanicIn(BaseModel):
     name: str
     status: Optional[str] = "active"  # active | inactive
+    photo: Optional[str] = None  # URL/path foto profil
 
 class MechanicUpdate(BaseModel):
     name: Optional[str] = None
     status: Optional[str] = None
+    photo: Optional[str] = None
 
 class ServiceUpdate(BaseModel):
     duration_hours: Optional[float] = None
@@ -178,16 +180,37 @@ async def seed_data():
     await db.services.update_many({"price": {"$exists": True}}, {"$unset": {"price": ""}})
     await db.bookings.update_many({"price": {"$exists": True}}, {"$unset": {"price": ""}})
 
-    # Mechanics
+    # Mechanics (profil asli tim ALDI MOTOR)
+    default_mechanics = [
+        {"name": "Andi Muh Wahidin", "photo": "/mechanics/andi-muh-wahidin.jpg"},
+        {"name": "Ahmad Balla", "photo": "/mechanics/ahmad-balla.jpg"},
+        {"name": "Kasim", "photo": "/mechanics/kasim.jpg"},
+        {"name": "Ansar", "photo": "/mechanics/ansar.jpg"},
+        {"name": "Muh Risal", "photo": "/mechanics/muh-risal.jpg"},
+    ]
     count = await db.mechanics.count_documents({})
     if count == 0:
-        for i in range(1, 6):
+        for i, m in enumerate(default_mechanics):
             await db.mechanics.insert_one({
                 "id": str(uuid.uuid4()),
-                "name": f"Mekanik {i}",
+                **m,
                 "status": "active",
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": (datetime.now(timezone.utc) + timedelta(seconds=i)).isoformat(),
             })
+    else:
+        # Migrate: ganti nama placeholder "Mekanik N" ke profil asli + foto (berurutan)
+        placeholders = await db.mechanics.find({"name": {"$regex": r"^Mekanik \d+$"}}, {"_id": 0}).to_list(100)
+        placeholders.sort(key=lambda m: m.get("name", ""))
+        for m, real in zip(placeholders, default_mechanics):
+            await db.mechanics.update_one({"id": m["id"]}, {"$set": real})
+        # Lengkapi foto untuk mekanik dengan nama asli yang belum punya foto
+        for real in default_mechanics:
+            await db.mechanics.update_one(
+                {"name": real["name"], "photo": {"$exists": False}}, {"$set": {"photo": real["photo"]}}
+            )
+        # Sinkronkan nama mekanik pada booking lama
+        for m in await db.mechanics.find({}, {"_id": 0}).to_list(100):
+            await db.bookings.update_many({"mechanic_id": m["id"]}, {"$set": {"mechanic_name": m["name"]}})
 
     # Business hours
     if not await db.settings.find_one({"key": "business_hours"}):

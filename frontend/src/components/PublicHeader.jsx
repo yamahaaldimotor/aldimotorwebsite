@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 const navItems = [
   { label: "Beranda", href: "/#beranda" },
   { label: "Layanan", href: "/#layanan" },
+  { label: "Tim Mekanik", href: "/#mekanik" },
   { label: "Cara Reservasi", href: "/#cara-reservasi" },
   { label: "Kontak", href: "/#kontak" },
 ];

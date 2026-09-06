@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import PublicHeader from "@/components/PublicHeader";
+import api from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -26,7 +28,46 @@ const flow = [
   { icon: CheckCircle2, title: "Datang Sesuai Jadwal", desc: "Tanpa antre, mekanik siap menangani motor Anda." },
 ];
 
+function MechanicCard({ m, index }) {
+  const initials = m.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+  return (
+    <div
+      data-testid={`mechanic-card-${index}`}
+      className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 transition-all hover:-translate-y-1 hover:border-blue-400/40 hover:bg-white/10"
+    >
+      <div className="relative aspect-square overflow-hidden bg-gradient-to-b from-[#0A192F] to-blue-600">
+        {m.photo ? (
+          <img
+            src={m.photo}
+            alt={m.name}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center font-display text-5xl font-bold text-white/80">
+            {initials}
+          </div>
+        )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[#0A192F] to-transparent" />
+      </div>
+      <div className="p-5">
+        <div className="font-display text-lg font-semibold text-white">{m.name}</div>
+        <div className="mt-1 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.2em] text-blue-300">
+          <Wrench strokeWidth={1.5} className="h-3.5 w-3.5" /> Mekanik
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Landing() {
+  const [mechanics, setMechanics] = useState([]);
+  useEffect(() => {
+    api.get("/mechanics")
+      .then((r) => setMechanics((r.data || []).filter((m) => m.status === "active")))
+      .catch(() => setMechanics([]));
+  }, []);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <PublicHeader />
@@ -120,6 +161,36 @@ export default function Landing() {
             </Card>
             );
           })}
+        </div>
+      </section>
+
+      {/* TIM MEKANIK */}
+      <section id="mekanik" className="relative overflow-hidden bg-[#0A192F] py-20 text-white md:py-28">
+        <div className="pointer-events-none absolute -left-32 top-0 h-96 w-96 rounded-full bg-blue-600/20 blur-3xl" />
+        <div className="pointer-events-none absolute -right-32 bottom-0 h-96 w-96 rounded-full bg-blue-500/10 blur-3xl" />
+        <div className="relative mx-auto max-w-7xl px-4 md:px-8">
+          <div className="mb-14 flex flex-col justify-between gap-4 md:flex-row md:items-end">
+            <div>
+              <div className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-blue-400">Tim Mekanik</div>
+              <h2 className="font-display text-4xl font-semibold tracking-tight md:text-5xl">
+                Ditangani mekanik <br />profesional & terlatih.
+              </h2>
+            </div>
+            <p className="max-w-md text-slate-300">
+              {mechanics.length > 0 ? `${mechanics.length} mekanik` : "Mekanik"} berpengalaman siap merawat motor Anda.
+              Sistem mengalokasikan mekanik secara otomatis sesuai jadwal reservasi.
+            </p>
+          </div>
+
+          {mechanics.length === 0 ? (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center text-sm text-slate-300">
+              Data mekanik belum tersedia.
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5" data-testid="mechanics-grid">
+              {mechanics.map((m, i) => <MechanicCard key={m.id} m={m} index={i} />)}
+            </div>
+          )}
         </div>
       </section>
 

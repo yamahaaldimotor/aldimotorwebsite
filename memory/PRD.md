@@ -36,6 +36,11 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
 - Semua fitur harga/pendapatan dihapus (sistem fokus reservasi, tanpa payment): field `price` dihapus dari services & bookings (migrasi $unset saat startup), laporan bulanan memakai `active_total`/`completed_total` (tanpa revenue), PDF tanpa kolom Harga, UI admin tanpa input/tampilan harga.
 - Nomor WA konfirmasi bengkel diganti ke 6285657237827 (backend/.env WORKSHOP_WHATSAPP + default di server.py + teks kontak di Landing).
 
+## Update 2026-09-06 (v1.2) - Profil Mekanik
+- 5 mekanik memakai nama & foto asli: Andi Muh Wahidin, Ahmad Balla, Kasim, Ansar, Muh Risal. Foto diproses (background merah -> gradien biru navy/brand) dan disimpan di frontend/public/mechanics/*.jpg; field `photo` di koleksi mechanics (MechanicIn/MechanicUpdate mendukung photo).
+- Seed: migrasi otomatis nama placeholder "Mekanik N" -> nama asli + foto, dan sinkronisasi mechanic_name pada booking.
+- Landing: section baru "Tim Mekanik" (#mekanik, bg navy) di bawah Layanan, data dari GET /api/mechanics (hanya status active). Link nav "Tim Mekanik" ditambahkan. Admin tab Mekanik menampilkan avatar foto.
+
 ## Backlog (P1/P2)
 - P1: Kalender view mingguan/bulanan untuk admin
 - P1: Notifikasi Twilio WhatsApp API (kirim otomatis, bukan wa.me link)

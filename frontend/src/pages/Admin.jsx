@@ -412,6 +412,13 @@ function Mechanics() {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {list.map((m) => (
           <Card key={m.id} className="border-slate-200 p-4 flex items-center justify-between gap-3">
+            {m.photo ? (
+              <img src={m.photo} alt={m.name} className="h-11 w-11 shrink-0 rounded-full object-cover ring-2 ring-blue-100" />
+            ) : (
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-blue-600">
+                {m.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()}
+              </div>
+            )}
             <Input
               defaultValue={m.name}
               onBlur={(e) => { if (e.target.value !== m.name) rename(m, e.target.value); }}
