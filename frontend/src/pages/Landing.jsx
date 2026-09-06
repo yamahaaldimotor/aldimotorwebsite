@@ -8,7 +8,7 @@ import {
   CalendarClock, Users2, MessageCircle, ArrowRight,
   Wrench, Cog, Settings2, MessageSquareText,
   MousePointerClick, CalendarCheck, Bell, CheckCircle2,
-  Phone, MapPin, Clock,
+  Phone, MapPin, Clock, Package,
 } from "lucide-react";
 
 const HERO_IMG = "https://images.unsplash.com/photo-1581858544302-c40e2254ff87?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njl8MHwxfHNlYXJjaHwzfHxtb3RvcmN5Y2xlJTIwd29ya3Nob3AlMjBjbGVhbnxlbnwwfHx8fDE3ODc0NTgyMzV8MA&ixlib=rb-4.1.0&q=85";
@@ -101,6 +101,16 @@ export default function Landing() {
                   Buat Reservasi <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
+              <Link to="/sparepart">
+                <Button
+                  data-testid="hero-sparepart-btn"
+                  size="lg"
+                  variant="outline"
+                  className="rounded-full border-white/30 bg-white/10 px-8 py-6 text-base text-white backdrop-blur hover:bg-white/20 hover:text-white transition-colors"
+                >
+                  <Package className="mr-2 h-4 w-4" /> Info Sparepart
+                </Button>
+              </Link>
               <a href="#layanan" className="text-sm font-medium text-white/80 underline-offset-4 hover:underline">
                 Lihat Layanan →
               </a>
@@ -161,6 +171,30 @@ export default function Landing() {
             </Card>
             );
           })}
+        </div>
+
+        {/* Banner Sparepart */}
+        <div
+          data-testid="sparepart-banner"
+          className="mt-8 flex flex-col items-start justify-between gap-5 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-white p-6 md:flex-row md:items-center md:p-8"
+        >
+          <div className="flex items-start gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+              <Package strokeWidth={1.5} className="h-6 w-6" />
+            </div>
+            <div>
+              <div className="text-xs font-bold uppercase tracking-[0.2em] text-blue-600">Sparepart Original</div>
+              <h3 className="mt-1 font-display text-2xl font-semibold tracking-tight">Cek ketersediaan & harga sparepart</h3>
+              <p className="mt-1 max-w-xl text-sm text-slate-600">
+                Ratusan varian sparepart Yamaha — V-Belt, aki, ban, busi, hingga throttle body — lengkap dengan kecocokan tipe motor.
+              </p>
+            </div>
+          </div>
+          <Link to="/sparepart" className="shrink-0">
+            <Button data-testid="banner-sparepart-btn" className="rounded-full bg-blue-600 px-6 hover:bg-blue-700 transition-colors">
+              Lihat Sparepart <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         </div>
       </section>
 

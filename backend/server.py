@@ -220,6 +220,17 @@ async def seed_data():
         for m in await db.mechanics.find({}, {"_id": 0}).to_list(100):
             await db.bookings.update_many({"mechanic_id": m["id"]}, {"$set": {"mechanic_name": m["name"]}})
 
+    # Spareparts (dari spreadsheet "Data untuk web.xlsx" sheet Sparepart)
+    if await db.spareparts.count_documents({}) == 0:
+        seed_file = ROOT_DIR / "spareparts_seed.json"
+        if seed_file.exists():
+            import json
+            with open(seed_file, encoding="utf-8") as f:
+                parts = json.load(f)
+            if parts:
+                await db.spareparts.insert_many(parts)
+                logger.info("Seeded %d spareparts", len(parts))
+
     # Business hours
     if not await db.settings.find_one({"key": "business_hours"}):
         await db.settings.insert_one({
@@ -308,6 +319,75 @@ async def list_holidays():
     docs = await db.holidays.find({}, {"_id": 0}).to_list(500)
     docs.sort(key=lambda d: d.get("date", ""))
     return docs
+
+
+# ----------------- Public: spareparts -----------------
+GROUP_ORDER = ["CVT & Transmisi", "Mesin & Bahan Bakar", "Kelistrikan", "Ban", "Rem, Kemudi & Suspensi", "Body & Aksesori"]
+
+
+@api.get("/spareparts")
+async def list_spareparts(q: Optional[str] = None, group: Optional[str] = None, category: Optional[str] = None):
+    """Daftar sparepart dikelompokkan per kategori. Filter opsional: q (cari), group, category."""
+    query = {}
+    if group:
+        query["group"] = group
+    if category:
+        query["category"] = category
+    docs = await db.spareparts.find(query, {"_id": 0}).to_list(2000)
+    if q:
+        ql = q.lower().strip()
+        docs = [
+            d for d in docs
+            if ql in d.get("category", "").lower()
+            or ql in d.get("motor", "").lower()
+            or ql in d.get("variant", "").lower()
+            or ql in d.get("group", "").lower()
+            or ql in (d.get("description") or "").lower()
+        ]
+    docs.sort(key=lambda d: d.get("order", 0))
+
+    categories = []
+    index = {}
+    for d in docs:
+        key = d["category"]
+        if key not in index:
+            index[key] = {"category": key, "group": d["group"], "items": []}
+            categories.append(index[key])
+        index[key]["items"].append(d)
+
+    groups = []
+    gindex = {}
+    for c in categories:
+        g = c["group"]
+        if g not in gindex:
+            gindex[g] = {"group": g, "categories": []}
+            groups.append(gindex[g])
+        gindex[g]["categories"].append(c)
+    groups.sort(key=lambda g: GROUP_ORDER.index(g["group"]) if g["group"] in GROUP_ORDER else 99)
+
+    return {
+        "total_items": len(docs),
+        "total_categories": len(categories),
+        "groups": groups,
+    }
+
+
+@api.get("/spareparts/meta")
+async def spareparts_meta():
+    docs = await db.spareparts.find({}, {"_id": 0, "group": 1, "category": 1, "order": 1}).to_list(2000)
+    docs.sort(key=lambda d: d.get("order", 0))
+    groups = []
+    seen = {}
+    for d in docs:
+        g = d["group"]
+        if g not in seen:
+            seen[g] = {"group": g, "categories": [], "count": 0}
+            groups.append(seen[g])
+        if d["category"] not in seen[g]["categories"]:
+            seen[g]["categories"].append(d["category"])
+        seen[g]["count"] += 1
+    groups.sort(key=lambda g: GROUP_ORDER.index(g["group"]) if g["group"] in GROUP_ORDER else 99)
+    return {"total_items": len(docs), "groups": groups}
 
 
 # ----------------- Customer plate history (public, minimal fields) -----------------

@@ -154,6 +154,21 @@ backend:
         agent: "testing"
         comment: "✅ ALL TESTS PASSED (16/16). Verified: (1) GET /api/mechanics returns 5 mechanics with real names (Andi Muh Wahidin, Ahmad Balla, Kasim, Ansar, Muh Risal) each with photo field, (2) POST /api/admin/mechanics creates test mechanic successfully, (3a) POST /api/admin/mechanics/{id}/photo with PNG (800x600) uploads successfully and returns photo URL with version parameter, (3b) POST with JPEG also works, (4) GET /api/uploads/mechanics/{id}.jpg returns 200 with content-type image/jpeg and image is exactly 480x480 pixels, (5a) Upload .txt file correctly rejected with 400, (5b) Upload 25.77MB file correctly rejected with 400, (5c) Upload without auth correctly rejected with 401, (5d) Upload to non-existent mechanic correctly returns 404, (6) DELETE /api/admin/mechanics/{id}/photo returns 200 and response has no photo field, (6b) GET deleted photo file returns 404, (7) Re-upload photo then DELETE mechanic removes file (404), (8a-c) Regression tests: GET /api/services (no price), GET /api/admin/stats (200), GET /api/admin/reports/monthly (active_total/completed_total, no revenue fields) all pass. Mechanic photo upload feature fully working."
 
+  - task: "Sparepart publik: seed 268 item dari spreadsheet, GET /api/spareparts (q/group/category) & GET /api/spareparts/meta"
+    implemented: true
+    working: true
+    file: "backend/server.py, backend/spareparts_seed.json"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Seed saat startup jika koleksi spareparts kosong. GET /api/spareparts -> {total_items, total_categories, groups:[{group, categories:[{category, group, items:[{id, category, group, motor, price_label, price, description?, size?, variant?, capacity?, price_prefix?, order}]}]}]}. Filter q (case-insensitive di category/motor/variant/group/description), group, category. /meta -> {total_items, groups:[{group, categories:[str], count}]}"
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL TESTS PASSED (12/12). Verified: (1) GET /api/spareparts returns 268 items, 36 categories, 6 groups in correct order [CVT & Transmisi, Mesin & Bahan Bakar, Kelistrikan, Ban, Rem, Kemudi & Suspensi, Body & Aksesori], every item has required keys (id, category, group, motor, price_label, price, order), price_label starts with 'Rp ', (2) GET /api/spareparts?q=nmax returns 34 items, all contain 'nmax' case-insensitive, (3) GET /api/spareparts?q=NMAX (uppercase) returns same count as lowercase (34 items), (4) GET /api/spareparts?group=Ban returns only 1 group 'Ban' with categories 'Ban Depan' and 'Ban Belakang', items have size/description/price_prefix='Mulai dari', (5) GET /api/spareparts?category=Busi%20NGK returns 8 items, each with variant starting with 'NGK ', (6) GET /api/spareparts?category=Aki%20GS%20Astra returns 4 items with variant and capacity, GTZ8V price_label='Rp 500.000 – Rp 815.000', (7) GET /api/spareparts?q=zzzz returns total_items=0, total_categories=0, groups=[], (8) GET /api/spareparts/meta returns total_items=268, 6 groups with group/categories/count, sum of counts=268, (9) GET /api/spareparts?group=Kelistrikan&q=aerox returns 8 items, all match both filters, (10) Regression: GET /api/mechanics returns 5 mechanics with photo field, GET /api/services returns 4 services without price field. Spareparts feature fully working."
+
 frontend:
   - task: "Hapus tampilan harga/pendapatan di Admin (bookings list, pengaturan servis, laporan bulanan) dan update nomor kontak di Landing"
     implemented: true
@@ -169,12 +184,13 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.4"
-  test_sequence: 4
+  version: "1.5"
+  test_sequence: 5
   run_ui: false
 
 test_plan:
   current_focus:
+    - "Sparepart publik: seed 268 item dari spreadsheet, GET /api/spareparts (q/group/category) & GET /api/spareparts/meta"
     - "Upload & hapus foto mekanik (POST/DELETE /api/admin/mechanics/{mid}/photo, static /api/uploads)"
     - "Hapus field price dari services/bookings, model ServiceUpdate & BookingUpdate, dan laporan bulanan (revenue -> active_total/completed_total), PDF tanpa kolom Harga"
     - "Ganti nomor WhatsApp bengkel ke 6285657237827"
@@ -191,3 +207,7 @@ agent_communication:
     message: "Fitur baru: upload foto mekanik. Uji: login admin, GET /api/mechanics (5 mekanik nama asli dengan photo), buat mekanik baru via POST /admin/mechanics, POST /api/admin/mechanics/{id}/photo multipart 'file' dengan PNG/JPEG valid (buat via PIL) -> 200 & photo berisi /api/uploads/mechanics/{id}.jpg; GET path tsb -> 200 image/jpeg dimensi 480x480; upload file .txt -> 400; file > 5MB -> 400; tanpa auth -> 401; DELETE .../photo -> 200 tanpa field photo; DELETE mekanik -> file terhapus. Regression: booking flow & laporan tetap OK."
   - agent: "testing"
     message: "✅ MECHANIC PHOTO UPLOAD TESTING COMPLETE: All 16 tests passed (100% success rate). Feature fully working: (1) GET /api/mechanics returns 5 mechanics with real names and photo fields, (2) Photo upload works for PNG and JPEG formats, (3) Images correctly processed to 480x480 JPEG with version parameter, (4) All negative tests pass (txt file rejected, >5MB rejected, no auth rejected, non-existent mechanic rejected), (5) Photo deletion works correctly (file removed, field unset), (6) Mechanic deletion also removes photo file, (7) All regression tests pass (services without price, stats working, monthly reports correct). Backend is fully functional. Ready for main agent to summarize and finish."
+  - agent: "main"
+    message: "Fitur baru: halaman Sparepart. Uji backend publik (tanpa auth): GET /api/spareparts -> total_items=268, total_categories=36, 6 groups berurutan [CVT & Transmisi, Mesin & Bahan Bakar, Kelistrikan, Ban, Rem, Kemudi & Suspensi, Body & Aksesori]; GET /api/spareparts?q=nmax -> hanya item mengandung 'nmax' (case-insensitive), total_items>0; ?group=Ban -> hanya group Ban dengan kategori Ban Depan & Ban Belakang, item punya size & description & price_prefix; ?category=Busi%20NGK -> 8 item dengan variant; ?q=zzzz -> total_items=0, groups=[]; GET /api/spareparts/meta -> total_items=268, 6 groups dengan count. Regression singkat: /api/mechanics, /api/services."
+  - agent: "testing"
+    message: "✅ SPAREPARTS API TESTING COMPLETE: All 12 tests passed (100% success rate). Feature fully working: (1) GET /api/spareparts returns 268 items, 36 categories, 6 groups in correct order with all required fields, (2) Search 'nmax' returns 34 items (case-insensitive), (3) Uppercase 'NMAX' returns same count, (4) Filter group=Ban returns correct categories with size/description/price_prefix='Mulai dari', (5) Filter category='Busi NGK' returns 8 items with NGK variants, (6) Filter category='Aki GS Astra' returns 4 items, GTZ8V price correct, (7) Empty search 'zzzz' returns 0 items/categories/groups, (8) GET /api/spareparts/meta returns correct metadata (268 items, 6 groups, sum=268), (9) Combined filter group=Kelistrikan&q=aerox works correctly (8 items), (10) Regression tests pass: mechanics with photos, services without price. Backend is fully functional. Ready for main agent to summarize and finish."

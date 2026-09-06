@@ -8,6 +8,7 @@ const navItems = [
   { label: "Beranda", href: "/#beranda" },
   { label: "Layanan", href: "/#layanan" },
   { label: "Tim Mekanik", href: "/#mekanik" },
+  { label: "Sparepart", href: "/sparepart", route: true },
   { label: "Cara Reservasi", href: "/#cara-reservasi" },
   { label: "Kontak", href: "/#kontak" },
 ];
@@ -35,16 +36,15 @@ export default function PublicHeader() {
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
-          {navItems.map((it) => (
-            <a
-              key={it.href}
-              href={it.href}
-              data-testid={`nav-${it.label.toLowerCase().replace(/\s/g, "-")}`}
-              className="text-sm font-medium text-slate-700 transition-colors hover:text-blue-600"
-            >
-              {it.label}
-            </a>
-          ))}
+          {navItems.map((it) => {
+            const cls = `text-sm font-medium transition-colors hover:text-blue-600 ${it.route && location.pathname === it.href ? "text-blue-600" : "text-slate-700"}`;
+            const tid = `nav-${it.label.toLowerCase().replace(/\s/g, "-")}`;
+            return it.route ? (
+              <Link key={it.href} to={it.href} data-testid={tid} className={cls}>{it.label}</Link>
+            ) : (
+              <a key={it.href} href={it.href} data-testid={tid} className={cls}>{it.label}</a>
+            );
+          })}
           <Link
             to={dashboardHref}
             data-testid="nav-dashboard"
@@ -80,14 +80,15 @@ export default function PublicHeader() {
         <div className="border-t border-slate-200 bg-white md:hidden">
           <div className="flex flex-col gap-4 px-4 py-4">
             {navItems.map((it) => (
-              <a
-                key={it.href}
-                href={it.href}
-                onClick={() => setOpen(false)}
-                className="text-sm font-medium text-slate-700"
-              >
-                {it.label}
-              </a>
+              it.route ? (
+                <Link key={it.href} to={it.href} onClick={() => setOpen(false)} className="text-sm font-medium text-slate-700">
+                  {it.label}
+                </Link>
+              ) : (
+                <a key={it.href} href={it.href} onClick={() => setOpen(false)} className="text-sm font-medium text-slate-700">
+                  {it.label}
+                </a>
+              )
             ))}
             <Link
               to={dashboardHref}

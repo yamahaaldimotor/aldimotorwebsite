@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { Toaster } from "@/components/ui/sonner";
 import Landing from "@/pages/Landing";
 import Reservasi from "@/pages/Reservasi";
+import Sparepart from "@/pages/Sparepart";
 import AdminLogin from "@/pages/AdminLogin";
 import Admin from "@/pages/Admin";
 
@@ -22,6 +23,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/reservasi" element={<Reservasi />} />
+            <Route path="/sparepart" element={<Sparepart />} />
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route path="/admin/*" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
           </Routes>

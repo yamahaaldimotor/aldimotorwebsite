@@ -530,6 +530,416 @@ def test_regression_monthly_report():
     return True
 
 
+def test_spareparts_basic():
+    """Test 9: GET /api/spareparts - basic structure"""
+    print("\n=== TEST 9: GET /api/spareparts (basic) ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("9", "FAIL", f"GET /api/spareparts returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    # Check total_items == 268
+    if data.get("total_items") != 268:
+        log_test("9", "FAIL", f"Expected total_items=268, got {data.get('total_items')}")
+        return False
+    
+    # Check total_categories == 36
+    if data.get("total_categories") != 36:
+        log_test("9", "FAIL", f"Expected total_categories=36, got {data.get('total_categories')}")
+        return False
+    
+    # Check groups has exactly 6 entries
+    groups = data.get("groups", [])
+    if len(groups) != 6:
+        log_test("9", "FAIL", f"Expected 6 groups, got {len(groups)}")
+        return False
+    
+    # Check group order
+    expected_order = ["CVT & Transmisi", "Mesin & Bahan Bakar", "Kelistrikan", "Ban", "Rem, Kemudi & Suspensi", "Body & Aksesori"]
+    actual_order = [g.get("group") for g in groups]
+    
+    if actual_order != expected_order:
+        log_test("9", "FAIL", f"Group order mismatch. Expected: {expected_order}, Got: {actual_order}")
+        return False
+    
+    # Verify every item has required keys
+    for group in groups:
+        for category in group.get("categories", []):
+            for item in category.get("items", []):
+                required_keys = ["id", "category", "group", "motor", "price_label", "price", "order"]
+                missing_keys = [k for k in required_keys if k not in item]
+                if missing_keys:
+                    log_test("9", "FAIL", f"Item missing keys: {missing_keys}. Item: {item.get('id')}")
+                    return False
+                
+                # Check price_label starts with "Rp "
+                if not item.get("price_label", "").startswith("Rp "):
+                    log_test("9", "FAIL", f"price_label doesn't start with 'Rp ': {item.get('price_label')}")
+                    return False
+    
+    log_test("9", "PASS", f"GET /api/spareparts: 268 items, 36 categories, 6 groups in correct order")
+    return True
+
+
+def test_spareparts_search_nmax_lowercase():
+    """Test 10: GET /api/spareparts?q=nmax (lowercase)"""
+    print("\n=== TEST 10: GET /api/spareparts?q=nmax ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", params={"q": "nmax"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("10", "FAIL", f"GET /api/spareparts?q=nmax returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    total_items = data.get("total_items", 0)
+    
+    if total_items == 0:
+        log_test("10", "FAIL", "Expected total_items > 0 for query 'nmax'")
+        return False
+    
+    # Verify every returned item contains "nmax" (case-insensitive)
+    for group in data.get("groups", []):
+        for category in group.get("categories", []):
+            for item in category.get("items", []):
+                searchable = f"{item.get('category', '')} {item.get('motor', '')} {item.get('variant', '')} {item.get('group', '')} {item.get('description', '')}".lower()
+                if "nmax" not in searchable:
+                    log_test("10", "FAIL", f"Item doesn't contain 'nmax': {item.get('motor')} - {item.get('category')}")
+                    return False
+    
+    log_test("10", "PASS", f"Search 'nmax' returned {total_items} items, all contain 'nmax'")
+    return total_items
+
+
+def test_spareparts_search_nmax_uppercase():
+    """Test 11: GET /api/spareparts?q=NMAX (uppercase) - should return same count"""
+    print("\n=== TEST 11: GET /api/spareparts?q=NMAX (uppercase) ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", params={"q": "NMAX"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("11", "FAIL", f"GET /api/spareparts?q=NMAX returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    uppercase_count = data.get("total_items", 0)
+    
+    # Get lowercase count from previous test
+    resp_lower = requests.get(f"{API_BASE}/spareparts", params={"q": "nmax"}, timeout=10)
+    lowercase_count = resp_lower.json().get("total_items", 0)
+    
+    if uppercase_count != lowercase_count:
+        log_test("11", "FAIL", f"Uppercase 'NMAX' returned {uppercase_count} items, lowercase 'nmax' returned {lowercase_count}")
+        return False
+    
+    log_test("11", "PASS", f"Search 'NMAX' (uppercase) returned same count as lowercase: {uppercase_count} items")
+    return True
+
+
+def test_spareparts_filter_group_ban():
+    """Test 12: GET /api/spareparts?group=Ban"""
+    print("\n=== TEST 12: GET /api/spareparts?group=Ban ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", params={"group": "Ban"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("12", "FAIL", f"GET /api/spareparts?group=Ban returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    groups = data.get("groups", [])
+    
+    # Should have only 1 group
+    if len(groups) != 1:
+        log_test("12", "FAIL", f"Expected 1 group, got {len(groups)}")
+        return False
+    
+    # Group should be "Ban"
+    if groups[0].get("group") != "Ban":
+        log_test("12", "FAIL", f"Expected group 'Ban', got '{groups[0].get('group')}'")
+        return False
+    
+    # Check categories
+    categories = groups[0].get("categories", [])
+    category_names = [c.get("category") for c in categories]
+    
+    expected_categories = ["Ban Depan", "Ban Belakang"]
+    if not all(cat in category_names for cat in expected_categories):
+        log_test("12", "FAIL", f"Expected categories {expected_categories}, got {category_names}")
+        return False
+    
+    # Verify items have size, description, price_prefix
+    for category in categories:
+        for item in category.get("items", []):
+            if "size" not in item:
+                log_test("12", "FAIL", f"Item missing 'size': {item.get('motor')}")
+                return False
+            if "description" not in item:
+                log_test("12", "FAIL", f"Item missing 'description': {item.get('motor')}")
+                return False
+            if item.get("price_prefix") != "Mulai dari":
+                log_test("12", "FAIL", f"Expected price_prefix='Mulai dari', got '{item.get('price_prefix')}'")
+                return False
+    
+    log_test("12", "PASS", f"Filter group=Ban: 1 group with Ban Depan & Ban Belakang, items have size/description/price_prefix")
+    return True
+
+
+def test_spareparts_filter_category_busi():
+    """Test 13: GET /api/spareparts?category=Busi NGK"""
+    print("\n=== TEST 13: GET /api/spareparts?category=Busi NGK ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", params={"category": "Busi NGK"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("13", "FAIL", f"GET /api/spareparts?category=Busi NGK returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    total_items = data.get("total_items", 0)
+    
+    # Should have 8 items
+    if total_items != 8:
+        log_test("13", "FAIL", f"Expected 8 items for 'Busi NGK', got {total_items}")
+        return False
+    
+    # Verify each item has variant starting with "NGK "
+    for group in data.get("groups", []):
+        for category in group.get("categories", []):
+            for item in category.get("items", []):
+                variant = item.get("variant", "")
+                if not variant.startswith("NGK "):
+                    log_test("13", "FAIL", f"Variant doesn't start with 'NGK ': {variant}")
+                    return False
+    
+    log_test("13", "PASS", f"Filter category='Busi NGK': 8 items, all variants start with 'NGK '")
+    return True
+
+
+def test_spareparts_filter_category_aki():
+    """Test 14: GET /api/spareparts?category=Aki GS Astra"""
+    print("\n=== TEST 14: GET /api/spareparts?category=Aki GS Astra ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", params={"category": "Aki GS Astra"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("14", "FAIL", f"GET /api/spareparts?category=Aki GS Astra returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    total_items = data.get("total_items", 0)
+    
+    # Should have 4 items
+    if total_items != 4:
+        log_test("14", "FAIL", f"Expected 4 items for 'Aki GS Astra', got {total_items}")
+        return False
+    
+    # Verify each item has variant and capacity
+    gtz8v_item = None
+    for group in data.get("groups", []):
+        for category in group.get("categories", []):
+            for item in category.get("items", []):
+                if "variant" not in item:
+                    log_test("14", "FAIL", f"Item missing 'variant': {item.get('motor')}")
+                    return False
+                if "capacity" not in item:
+                    log_test("14", "FAIL", f"Item missing 'capacity': {item.get('motor')}")
+                    return False
+                
+                # Find GTZ8V item
+                if "GTZ8V" in item.get("variant", ""):
+                    gtz8v_item = item
+    
+    # Check GTZ8V price_label
+    if not gtz8v_item:
+        log_test("14", "FAIL", "GTZ8V item not found")
+        return False
+    
+    expected_price_label = "Rp 500.000 – Rp 815.000"
+    if gtz8v_item.get("price_label") != expected_price_label:
+        log_test("14", "FAIL", f"GTZ8V price_label: expected '{expected_price_label}', got '{gtz8v_item.get('price_label')}'")
+        return False
+    
+    log_test("14", "PASS", f"Filter category='Aki GS Astra': 4 items with variant/capacity, GTZ8V price correct")
+    return True
+
+
+def test_spareparts_search_empty():
+    """Test 15: GET /api/spareparts?q=zzzz (no results)"""
+    print("\n=== TEST 15: GET /api/spareparts?q=zzzz (empty) ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", params={"q": "zzzz"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("15", "FAIL", f"GET /api/spareparts?q=zzzz returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    if data.get("total_items") != 0:
+        log_test("15", "FAIL", f"Expected total_items=0, got {data.get('total_items')}")
+        return False
+    
+    if data.get("total_categories") != 0:
+        log_test("15", "FAIL", f"Expected total_categories=0, got {data.get('total_categories')}")
+        return False
+    
+    if len(data.get("groups", [])) != 0:
+        log_test("15", "FAIL", f"Expected empty groups array, got {len(data.get('groups', []))} groups")
+        return False
+    
+    log_test("15", "PASS", "Search 'zzzz' returned 0 items, 0 categories, empty groups")
+    return True
+
+
+def test_spareparts_meta():
+    """Test 16: GET /api/spareparts/meta"""
+    print("\n=== TEST 16: GET /api/spareparts/meta ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts/meta", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("16", "FAIL", f"GET /api/spareparts/meta returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    # Check total_items == 268
+    if data.get("total_items") != 268:
+        log_test("16", "FAIL", f"Expected total_items=268, got {data.get('total_items')}")
+        return False
+    
+    # Check 6 groups
+    groups = data.get("groups", [])
+    if len(groups) != 6:
+        log_test("16", "FAIL", f"Expected 6 groups, got {len(groups)}")
+        return False
+    
+    # Verify each group has group, categories (list of str), count
+    total_count = 0
+    for group in groups:
+        if "group" not in group:
+            log_test("16", "FAIL", f"Group missing 'group' field")
+            return False
+        
+        if "categories" not in group or not isinstance(group["categories"], list):
+            log_test("16", "FAIL", f"Group '{group.get('group')}' missing or invalid 'categories' field")
+            return False
+        
+        # Check categories are strings
+        if not all(isinstance(cat, str) for cat in group["categories"]):
+            log_test("16", "FAIL", f"Group '{group.get('group')}' has non-string categories")
+            return False
+        
+        if "count" not in group:
+            log_test("16", "FAIL", f"Group '{group.get('group')}' missing 'count' field")
+            return False
+        
+        total_count += group["count"]
+    
+    # Sum of counts should equal 268
+    if total_count != 268:
+        log_test("16", "FAIL", f"Sum of group counts is {total_count}, expected 268")
+        return False
+    
+    log_test("16", "PASS", f"GET /api/spareparts/meta: 268 items, 6 groups with categories/count, sum=268")
+    return True
+
+
+def test_spareparts_combined_filter():
+    """Test 17: GET /api/spareparts?group=Kelistrikan&q=aerox"""
+    print("\n=== TEST 17: GET /api/spareparts?group=Kelistrikan&q=aerox ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", params={"group": "Kelistrikan", "q": "aerox"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("17", "FAIL", f"GET /api/spareparts?group=Kelistrikan&q=aerox returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    # Verify all items are in Kelistrikan group and match aerox
+    for group in data.get("groups", []):
+        if group.get("group") != "Kelistrikan":
+            log_test("17", "FAIL", f"Found group '{group.get('group')}', expected only 'Kelistrikan'")
+            return False
+        
+        for category in group.get("categories", []):
+            for item in category.get("items", []):
+                # Check group
+                if item.get("group") != "Kelistrikan":
+                    log_test("17", "FAIL", f"Item has group '{item.get('group')}', expected 'Kelistrikan'")
+                    return False
+                
+                # Check contains aerox
+                searchable = f"{item.get('category', '')} {item.get('motor', '')} {item.get('variant', '')} {item.get('group', '')} {item.get('description', '')}".lower()
+                if "aerox" not in searchable:
+                    log_test("17", "FAIL", f"Item doesn't contain 'aerox': {item.get('motor')} - {item.get('category')}")
+                    return False
+    
+    total_items = data.get("total_items", 0)
+    log_test("17", "PASS", f"Combined filter group=Kelistrikan&q=aerox: {total_items} items, all match both filters")
+    return True
+
+
+def test_regression_mechanics_with_photo():
+    """Test 18: Regression - GET /api/mechanics (5 with photo)"""
+    print("\n=== TEST 18: Regression - GET /api/mechanics ===")
+    
+    resp = requests.get(f"{API_BASE}/mechanics", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("18", "FAIL", f"GET /api/mechanics returned {resp.status_code}")
+        return False
+    
+    mechanics = resp.json()
+    
+    # Should have at least 5 mechanics
+    if len(mechanics) < 5:
+        log_test("18", "FAIL", f"Expected at least 5 mechanics, got {len(mechanics)}")
+        return False
+    
+    # Check each has photo
+    mechanics_without_photo = [m.get("name") for m in mechanics if "photo" not in m or not m["photo"]]
+    if mechanics_without_photo:
+        log_test("18", "FAIL", f"Mechanics without photo: {mechanics_without_photo}")
+        return False
+    
+    log_test("18", "PASS", f"GET /api/mechanics: {len(mechanics)} mechanics, all have photo field")
+    return True
+
+
+def test_regression_services_no_price():
+    """Test 19: Regression - GET /api/services (4, no price)"""
+    print("\n=== TEST 19: Regression - GET /api/services ===")
+    
+    resp = requests.get(f"{API_BASE}/services", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("19", "FAIL", f"GET /api/services returned {resp.status_code}")
+        return False
+    
+    services = resp.json()
+    
+    # Should have 4 services
+    if len(services) != 4:
+        log_test("19", "FAIL", f"Expected 4 services, got {len(services)}")
+        return False
+    
+    # Check no service has price
+    services_with_price = [s.get("name") for s in services if "price" in s]
+    if services_with_price:
+        log_test("19", "FAIL", f"Services with price field: {services_with_price}")
+        return False
+    
+    log_test("19", "PASS", f"GET /api/services: 4 services, none have price field")
+    return True
+
+
 def print_summary():
     """Print test summary"""
     print("\n" + "="*60)
@@ -559,46 +969,35 @@ def print_summary():
 def main():
     """Run all tests"""
     print("="*60)
-    print("ALDI MOTOR - Mechanic Photo Upload Feature Test")
+    print("ALDI MOTOR - Backend API Test Suite")
     print("="*60)
     
     try:
         # Login
         login()
         
-        # Test 1: GET mechanics
-        test_get_mechanics()
+        # NEW SPAREPARTS TESTS (Priority)
+        print("\n" + "="*60)
+        print("SPAREPARTS API TESTS")
+        print("="*60)
         
-        # Test 2: Create test mechanic
-        if not test_create_mechanic():
-            print("\n❌ Cannot continue without test mechanic")
-            return False
+        test_spareparts_basic()
+        test_spareparts_search_nmax_lowercase()
+        test_spareparts_search_nmax_uppercase()
+        test_spareparts_filter_group_ban()
+        test_spareparts_filter_category_busi()
+        test_spareparts_filter_category_aki()
+        test_spareparts_search_empty()
+        test_spareparts_meta()
+        test_spareparts_combined_filter()
         
-        # Test 3: Upload photos (PNG and JPEG)
-        photo_url = test_upload_photo_png()
-        if photo_url:
-            # Test 4: Verify uploaded photo
-            test_get_uploaded_photo(photo_url)
+        # REGRESSION TESTS
+        print("\n" + "="*60)
+        print("REGRESSION TESTS")
+        print("="*60)
         
-        test_upload_photo_jpeg()
-        
-        # Test 5: Negative tests
-        test_upload_txt_file()
-        test_upload_large_file()
-        test_upload_without_auth()
-        test_upload_nonexistent_mechanic()
-        
-        # Test 6: Delete photo
-        test_delete_photo()
-        test_photo_file_deleted()
-        
-        # Test 7: Re-upload and delete mechanic
-        test_reupload_and_delete_mechanic()
-        
-        # Test 8: Regression tests
-        test_regression_services()
-        test_regression_stats()
-        test_regression_monthly_report()
+        test_regression_mechanics_with_photo()
+        test_regression_services_no_price()
         
         # Print summary
         success = print_summary()

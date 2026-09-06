@@ -45,6 +45,13 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
 - POST /api/admin/mechanics/{mid}/photo (multipart 'file', jpg/png/webp, max 5MB) -> crop persegi 480x480 JPEG, disimpan di backend/uploads/mechanics/{mid}.jpg, disajikan via StaticFiles /api/uploads. DELETE .../photo menghapus foto. Hapus mekanik ikut menghapus file.
 - Admin tab Mekanik: klik foto -> pilih file -> upload dengan progress; tombol "Hapus Foto". Foto tampil di section Tim Mekanik beranda.
 
+## Update 2026-09-06 (v1.4) - Halaman Sparepart
+- Data dari "Data untuk web.xlsx" sheet Sparepart diparse -> backend/spareparts_seed.json (268 item, 36 jenis, 6 kelompok: CVT & Transmisi, Mesin & Bahan Bakar, Kelistrikan, Ban, Rem/Kemudi/Suspensi, Body & Aksesori). Seed ke koleksi `spareparts` saat startup jika kosong.
+- API publik: GET /api/spareparts?q=&group=&category= (grouped), GET /api/spareparts/meta.
+- Frontend: halaman /sparepart (hero, search debounce, chip kelompok, sidebar quick-jump, tabel per jenis dengan kolom dinamis: tipe/kapasitas/ukuran/keterangan/harga, CTA reservasi + WA). Link "Sparepart" di header, tombol "Info Sparepart" di hero beranda, banner sparepart di bawah Layanan.
+- Harga sparepart DITAMPILKAN (sesuai Sheet4 spreadsheet: "Harga sparepart dan oli ditampilkan") — berbeda dengan harga jasa servis yang sudah dihapus.
+- Sheet lain di spreadsheet belum dipakai: Yamalube (oli), Jadwal Operasional (08.30-16.30, Jumat istirahat 11.00-14.00), Data Mekanik (trained at / date of issue), Data Service (biaya jasa overhaul per tipe motor), Visi&Misi.
+
 ## Backlog (P1/P2)
 - P1: Kalender view mingguan/bulanan untuk admin
 - P1: Notifikasi Twilio WhatsApp API (kirim otomatis, bukan wa.me link)

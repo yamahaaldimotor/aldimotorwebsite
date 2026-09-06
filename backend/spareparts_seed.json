@@ -1,0 +1,2478 @@
+[
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "Mio M3 125",
+  "price_label": "Rp 145.000",
+  "price": 145000,
+  "id": "820d260c-d836-5d21-97f4-3d85847b6650",
+  "order": 0
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "Mio Z",
+  "price_label": "Rp 145.000",
+  "price": 145000,
+  "id": "86c4406e-656c-542c-a46b-8825798b91cd",
+  "order": 1
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "Mio S",
+  "price_label": "Rp 150.000",
+  "price": 150000,
+  "id": "8b01bc9d-8984-5986-aaa0-56953253fafd",
+  "order": 2
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "Gear 125",
+  "price_label": "Rp 155.000",
+  "price": 155000,
+  "id": "d71221b4-2b21-533d-b208-9e7951352bb4",
+  "order": 3
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "Fino 125",
+  "price_label": "Rp 150.000",
+  "price": 150000,
+  "id": "33285bf8-296c-578d-b374-1986b1dbc476",
+  "order": 4
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "X-Ride 125",
+  "price_label": "Rp 155.000",
+  "price": 155000,
+  "id": "577bef4a-7134-5273-bb6e-12d223bd0023",
+  "order": 5
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "FreeGo 125",
+  "price_label": "Rp 160.000",
+  "price": 160000,
+  "id": "537f865b-bf0c-5706-8194-9d19a1097e28",
+  "order": 6
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "Lexi 125",
+  "price_label": "Rp 170.000",
+  "price": 170000,
+  "id": "c955ab2d-3b54-5ee3-bb74-214b5956da93",
+  "order": 7
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "Lexi LX 155",
+  "price_label": "Rp 180.000",
+  "price": 180000,
+  "id": "21ffb36f-0880-52cb-a308-50b5a437bb37",
+  "order": 8
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "Aerox 155",
+  "price_label": "Rp 190.000",
+  "price": 190000,
+  "id": "528b9f6e-f38a-5784-8742-d37f7a6f9fc4",
+  "order": 9
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "NMAX 155",
+  "price_label": "Rp 195.000",
+  "price": 195000,
+  "id": "f0c0a930-1d46-59b7-939e-74554b6e2608",
+  "order": 10
+ },
+ {
+  "category": "Mangkok Kampas Ganda",
+  "group": "CVT & Transmisi",
+  "motor": "NMAX Turbo",
+  "price_label": "Rp 220.000",
+  "price": 220000,
+  "id": "07e92ead-518d-55ac-8202-b2f9ca97ee75",
+  "order": 11
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "Jupiter Z",
+  "price_label": "Rp 155.000",
+  "price": 155000,
+  "id": "556a5246-15e3-5c8d-906d-91e948351349",
+  "order": 12
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "Jupiter MX 135",
+  "price_label": "Rp 180.000",
+  "price": 180000,
+  "id": "b46c47f6-c8c6-53fb-9d7d-969442cc8aba",
+  "order": 13
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "MX King 150",
+  "price_label": "Rp 265.000",
+  "price": 265000,
+  "id": "a4a3bf60-c893-57fc-a18b-4755514f6ac0",
+  "order": 14
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "Vixion",
+  "price_label": "Rp 280.000",
+  "price": 280000,
+  "id": "999a7c11-fdf3-5b8b-a84b-7936aa0d3dd5",
+  "order": 15
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "Vixion R",
+  "price_label": "Rp 320.000",
+  "price": 320000,
+  "id": "1def1176-0b03-5ad0-ac95-8734901fb7e6",
+  "order": 16
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "XSR 155",
+  "price_label": "Rp 350.000",
+  "price": 350000,
+  "id": "029de14d-7841-572a-b39d-b9d10c0c43f9",
+  "order": 17
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "WR 155R",
+  "price_label": "Rp 395.000",
+  "price": 395000,
+  "id": "bfa50b9e-7fb1-5d3c-b7a1-183f8fbe28e4",
+  "order": 18
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "R15 V3",
+  "price_label": "Rp 450.000",
+  "price": 450000,
+  "id": "ce12b6bd-9a05-52b1-b6c3-1f9f4d128258",
+  "order": 19
+ },
+ {
+  "category": "Gear Set",
+  "group": "CVT & Transmisi",
+  "motor": "R15 V4",
+  "price_label": "Rp 495.000",
+  "price": 495000,
+  "id": "bcc26e4d-d270-5968-b237-a66105f326ff",
+  "order": 20
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "NMAX 155",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "2c259359-2ec5-577a-a361-da104bfb1139",
+  "order": 21
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Aerox 155",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "9ac8c638-9cea-5f9a-8c93-b8ad1e5d699b",
+  "order": 22
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Lexi 155",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "92d1a214-dab3-5f56-886b-634d3ab04b19",
+  "order": 23
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "XMAX 250",
+  "price_label": "Rp 75.000",
+  "price": 75000,
+  "id": "b8011655-f2af-56d6-91c3-f9cdfa8c9413",
+  "order": 24
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "R15",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "d6f536db-ad27-5221-8f6c-451fcf192278",
+  "order": 25
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "MT-15",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "8ac132b9-4622-58aa-b6b5-146177c0c30c",
+  "order": 26
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Vixion",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "0723ca54-78b6-5e76-ba11-3878af5321e9",
+  "order": 27
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "XSR 155",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "055b40a3-31e9-5cfb-b9d7-af0810dca948",
+  "order": 28
+ },
+ {
+  "category": "Filter Oli",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "WR 155R",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "6f656213-a267-5a56-8dc4-2f7304010ade",
+  "order": 29
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "Mio M3",
+  "price_label": "Rp 115.000",
+  "price": 115000,
+  "id": "3e8fa24a-abbe-568b-8ffc-9c6a045d8c26",
+  "order": 30
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "Mio Z",
+  "price_label": "Rp 115.000",
+  "price": 115000,
+  "id": "95cffa2d-dcb0-565a-87f0-07c0606c298c",
+  "order": 31
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "Mio S",
+  "price_label": "Rp 115.000",
+  "price": 115000,
+  "id": "31b2fff9-c550-53d2-b5c0-3f65c57ad71c",
+  "order": 32
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "Gear 125",
+  "price_label": "Rp 120.000",
+  "price": 120000,
+  "id": "251836ed-d3af-57f3-8a06-05b9f9352de0",
+  "order": 33
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "Fino 125",
+  "price_label": "Rp 120.000",
+  "price": 120000,
+  "id": "2a4738cd-7259-5b70-af16-dc153e212647",
+  "order": 34
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "X-Ride 125",
+  "price_label": "Rp 125.000",
+  "price": 125000,
+  "id": "0e06cbe9-c2c1-54e9-9617-f89d1a9c9460",
+  "order": 35
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "FreeGo 125",
+  "price_label": "Rp 130.000",
+  "price": 130000,
+  "id": "125607e5-640e-5c81-ac42-7fd803306f5e",
+  "order": 36
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "Lexi 125",
+  "price_label": "Rp 140.000",
+  "price": 140000,
+  "id": "7f6b529e-0147-57a9-9ade-670a11a89952",
+  "order": 37
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "Aerox 155",
+  "price_label": "Rp 165.000",
+  "price": 165000,
+  "id": "eaf9cb5b-15e1-56f3-ae9d-16f63d193ebd",
+  "order": 38
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "NMAX 155",
+  "price_label": "Rp 185.000",
+  "price": 185000,
+  "id": "cdb0d11b-ce2d-57af-901f-785866539175",
+  "order": 39
+ },
+ {
+  "category": "V-Belt",
+  "group": "CVT & Transmisi",
+  "motor": "NMAX Turbo",
+  "price_label": "Rp 220.000",
+  "price": 220000,
+  "id": "8ed2e31a-ab4d-5f99-84e3-61959159051d",
+  "order": 40
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "Mio M3",
+  "price_label": "Rp 185.000",
+  "price": 185000,
+  "id": "e2928786-490a-54cf-be68-0d555ce50ca5",
+  "order": 41
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "Gear 125",
+  "price_label": "Rp 190.000",
+  "price": 190000,
+  "id": "e782604a-68ee-59aa-b740-c626bd71be31",
+  "order": 42
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "Fazzio",
+  "price_label": "Rp 210.000",
+  "price": 210000,
+  "id": "d95266a5-e814-5d63-bb11-35104f0b0655",
+  "order": 43
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "FreeGo",
+  "price_label": "Rp 220.000",
+  "price": 220000,
+  "id": "cb810096-1d4d-5301-a4ba-ca5691f044ae",
+  "order": 44
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "Lexi",
+  "price_label": "Rp 235.000",
+  "price": 235000,
+  "id": "f6cc02d7-16fc-5b44-b6a7-e39ee4eb38ae",
+  "order": 45
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "Aerox",
+  "price_label": "Rp 250.000",
+  "price": 250000,
+  "id": "bd880e7d-eff0-5cdd-81d1-d867aca51c7a",
+  "order": 46
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "NMAX",
+  "price_label": "Rp 250.000",
+  "price": 250000,
+  "id": "22b68c92-9f88-5870-bcb5-2993c3e17ec4",
+  "order": 47
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "Vixion",
+  "price_label": "Rp 260.000",
+  "price": 260000,
+  "id": "bbcdee02-ca53-593d-a954-46faea373d8f",
+  "order": 48
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "XSR 155",
+  "price_label": "Rp 280.000",
+  "price": 280000,
+  "id": "e86d5eab-6034-5a43-bc4c-71220bb02e92",
+  "order": 49
+ },
+ {
+  "category": "Aki",
+  "group": "Kelistrikan",
+  "motor": "R15",
+  "price_label": "Rp 320.000",
+  "price": 320000,
+  "id": "e8f615c9-f1f5-51ea-bced-86e18397ddff",
+  "order": 50
+ },
+ {
+  "category": "Roller CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Mio M3",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "28c517be-3ddc-52d4-b114-84b6c956c4c1",
+  "order": 51
+ },
+ {
+  "category": "Roller CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Gear 125",
+  "price_label": "Rp 60.000",
+  "price": 60000,
+  "id": "36997112-f428-52e4-af61-6a27602c34eb",
+  "order": 52
+ },
+ {
+  "category": "Roller CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Fazzio",
+  "price_label": "Rp 65.000",
+  "price": 65000,
+  "id": "1fb83329-e717-5ce4-8114-3ed49175a27c",
+  "order": 53
+ },
+ {
+  "category": "Roller CVT",
+  "group": "CVT & Transmisi",
+  "motor": "FreeGo",
+  "price_label": "Rp 65.000",
+  "price": 65000,
+  "id": "0c7ff0d3-6a1d-595f-a05c-2f336aadabc5",
+  "order": 54
+ },
+ {
+  "category": "Roller CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Lexi",
+  "price_label": "Rp 68.000",
+  "price": 68000,
+  "id": "02dd73d6-b3bd-5405-a54b-9fba9bea308c",
+  "order": 55
+ },
+ {
+  "category": "Roller CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Aerox",
+  "price_label": "Rp 75.000",
+  "price": 75000,
+  "id": "5e36cb35-5535-5d26-8b87-acb3025a88ab",
+  "order": 56
+ },
+ {
+  "category": "Roller CVT",
+  "group": "CVT & Transmisi",
+  "motor": "NMAX",
+  "price_label": "Rp 68.000",
+  "price": 68000,
+  "id": "cf2bac88-6b35-5b2d-82fb-d94e60b6f5ce",
+  "order": 57
+ },
+ {
+  "category": "Roller CVT",
+  "group": "CVT & Transmisi",
+  "motor": "XMAX 250",
+  "price_label": "Rp 120.000",
+  "price": 120000,
+  "id": "29c887c1-bb6f-5b8b-b5ed-d5fdcfddef66",
+  "order": 58
+ },
+ {
+  "category": "Slider CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Mio M3",
+  "price_label": "Rp 25.000",
+  "price": 25000,
+  "id": "97bd186e-145a-59b7-ab15-2c404db83dc0",
+  "order": 59
+ },
+ {
+  "category": "Slider CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Gear 125",
+  "price_label": "Rp 28.000",
+  "price": 28000,
+  "id": "faee6030-612d-5275-8242-346b6475e34f",
+  "order": 60
+ },
+ {
+  "category": "Slider CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Fazzio",
+  "price_label": "Rp 30.000",
+  "price": 30000,
+  "id": "f19a9abe-b4a6-5049-871b-5c51a7177c88",
+  "order": 61
+ },
+ {
+  "category": "Slider CVT",
+  "group": "CVT & Transmisi",
+  "motor": "FreeGo",
+  "price_label": "Rp 30.000",
+  "price": 30000,
+  "id": "d84c8108-1b03-5f5c-99c9-6428039d569e",
+  "order": 62
+ },
+ {
+  "category": "Slider CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Lexi",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "2316d981-b750-5b25-8834-3527a64f7526",
+  "order": 63
+ },
+ {
+  "category": "Slider CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Aerox",
+  "price_label": "Rp 38.000",
+  "price": 38000,
+  "id": "7e51f1b4-a021-5f0c-b95a-561cab0c5b5d",
+  "order": 64
+ },
+ {
+  "category": "Slider CVT",
+  "group": "CVT & Transmisi",
+  "motor": "NMAX",
+  "price_label": "Rp 36.000",
+  "price": 36000,
+  "id": "da0ce4e9-c269-5f74-9e59-7239c47940b6",
+  "order": 65
+ },
+ {
+  "category": "Slider CVT",
+  "group": "CVT & Transmisi",
+  "motor": "XMAX 250",
+  "price_label": "Rp 60.000",
+  "price": 60000,
+  "id": "c6c10fe7-cf82-501f-9899-fd5e821b66b4",
+  "order": 66
+ },
+ {
+  "category": "Bohlam Lampu Depan",
+  "group": "Kelistrikan",
+  "motor": "Mio M3",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "6efd4011-5db3-5c80-aa83-bd6751b1d70c",
+  "order": 67
+ },
+ {
+  "category": "Bohlam Lampu Depan",
+  "group": "Kelistrikan",
+  "motor": "Gear 125",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "c4db1d21-38a0-5b24-b6c3-3983bfbbd28a",
+  "order": 68
+ },
+ {
+  "category": "Bohlam Lampu Depan",
+  "group": "Kelistrikan",
+  "motor": "Fazzio",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "d5e84020-4a5e-5b14-876f-8758da491df7",
+  "order": 69
+ },
+ {
+  "category": "Bohlam Lampu Depan",
+  "group": "Kelistrikan",
+  "motor": "FreeGo",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "13a9c64e-8b5e-5450-a9f9-53fd79d228a2",
+  "order": 70
+ },
+ {
+  "category": "Bohlam Lampu Depan",
+  "group": "Kelistrikan",
+  "motor": "Lexi",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "4feebe29-df78-542e-80c7-39b70f7472d2",
+  "order": 71
+ },
+ {
+  "category": "Bohlam Lampu Depan",
+  "group": "Kelistrikan",
+  "motor": "Aerox",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "401faccd-7ea8-50fb-8518-75c6569e89e8",
+  "order": 72
+ },
+ {
+  "category": "Bohlam Lampu Depan",
+  "group": "Kelistrikan",
+  "motor": "NMAX",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "fe0d2408-c252-594c-bc6e-ec9d2c4f6237",
+  "order": 73
+ },
+ {
+  "category": "Bohlam Lampu Depan",
+  "group": "Kelistrikan",
+  "motor": "Vixion",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "0c7d463e-afc1-50da-ad15-78c1d81155bd",
+  "order": 74
+ },
+ {
+  "category": "Bohlam Lampu Belakang",
+  "group": "Kelistrikan",
+  "motor": "Mio M3",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "86c537b9-d1ce-54ee-a5e7-a6bcbfbd5751",
+  "order": 75
+ },
+ {
+  "category": "Bohlam Lampu Belakang",
+  "group": "Kelistrikan",
+  "motor": "Gear 125",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "2d797300-c229-519e-9f71-5061d1837b76",
+  "order": 76
+ },
+ {
+  "category": "Bohlam Lampu Belakang",
+  "group": "Kelistrikan",
+  "motor": "Fazzio",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "4a189a6c-b6a2-5214-a333-58172077405e",
+  "order": 77
+ },
+ {
+  "category": "Bohlam Lampu Belakang",
+  "group": "Kelistrikan",
+  "motor": "FreeGo",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "49d7278c-6578-5b31-8c95-e6fab5d166a1",
+  "order": 78
+ },
+ {
+  "category": "Bohlam Lampu Belakang",
+  "group": "Kelistrikan",
+  "motor": "Lexi",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "6cd61a38-9f17-510c-bd2f-850cd55cacce",
+  "order": 79
+ },
+ {
+  "category": "Bohlam Lampu Belakang",
+  "group": "Kelistrikan",
+  "motor": "Aerox",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "0a71dbde-c08a-5485-9035-7807e3f415cc",
+  "order": 80
+ },
+ {
+  "category": "Bohlam Lampu Belakang",
+  "group": "Kelistrikan",
+  "motor": "NMAX",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "a2b6fc79-8932-50fa-a36a-b9c80eb25ccf",
+  "order": 81
+ },
+ {
+  "category": "Bohlam Lampu Belakang",
+  "group": "Kelistrikan",
+  "motor": "Vixion",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "f55bd285-e2c9-5667-92ff-4b792f5e8967",
+  "order": 82
+ },
+ {
+  "category": "Bohlam Lampu Sein",
+  "group": "Kelistrikan",
+  "motor": "Mio M3",
+  "price_label": "Rp 15.000",
+  "price": 15000,
+  "id": "8d6fc613-ceb9-5aba-9cc9-4db10fe6b07f",
+  "order": 83
+ },
+ {
+  "category": "Bohlam Lampu Sein",
+  "group": "Kelistrikan",
+  "motor": "Gear 125",
+  "price_label": "Rp 15.000",
+  "price": 15000,
+  "id": "ef4c49ec-9d9f-508c-a6dd-45c94e499582",
+  "order": 84
+ },
+ {
+  "category": "Bohlam Lampu Sein",
+  "group": "Kelistrikan",
+  "motor": "Fazzio",
+  "price_label": "Rp 18.000",
+  "price": 18000,
+  "id": "9eb51bf2-2865-5dd4-b4e4-5a67c9bb86f5",
+  "order": 85
+ },
+ {
+  "category": "Bohlam Lampu Sein",
+  "group": "Kelistrikan",
+  "motor": "FreeGo",
+  "price_label": "Rp 18.000",
+  "price": 18000,
+  "id": "725ba23e-ca1b-50a9-9a2a-aceb3ab3ccdd",
+  "order": 86
+ },
+ {
+  "category": "Bohlam Lampu Sein",
+  "group": "Kelistrikan",
+  "motor": "Lexi",
+  "price_label": "Rp 18.000",
+  "price": 18000,
+  "id": "d051e7ad-5ddf-51c8-bb0f-e9b0823401d4",
+  "order": 87
+ },
+ {
+  "category": "Bohlam Lampu Sein",
+  "group": "Kelistrikan",
+  "motor": "Aerox",
+  "price_label": "Rp 20.000",
+  "price": 20000,
+  "id": "62c22c3b-2e90-5a62-937f-7806e873961e",
+  "order": 88
+ },
+ {
+  "category": "Bohlam Lampu Sein",
+  "group": "Kelistrikan",
+  "motor": "NMAX",
+  "price_label": "Rp 20.000",
+  "price": 20000,
+  "id": "732f89e4-cb5d-5914-b881-bf47379ef016",
+  "order": 89
+ },
+ {
+  "category": "Bohlam Lampu Sein",
+  "group": "Kelistrikan",
+  "motor": "Vixion",
+  "price_label": "Rp 20.000",
+  "price": 20000,
+  "id": "7d44a000-ec81-5c24-9536-8df44d21d5d6",
+  "order": 90
+ },
+ {
+  "category": "Rantai Motor",
+  "group": "CVT & Transmisi",
+  "motor": "Jupiter Z",
+  "price_label": "Rp 125.000",
+  "price": 125000,
+  "id": "cf75fc72-4633-5420-9bcf-b5a0ae08e466",
+  "order": 91
+ },
+ {
+  "category": "Rantai Motor",
+  "group": "CVT & Transmisi",
+  "motor": "MX King 150",
+  "price_label": "Rp 335.000",
+  "price": 335000,
+  "id": "a9b9ae58-d9f1-5cc7-9828-8b91bfeabd16",
+  "order": 92
+ },
+ {
+  "category": "Rantai Motor",
+  "group": "CVT & Transmisi",
+  "motor": "Vixion",
+  "price_label": "Rp 250.000",
+  "price": 250000,
+  "id": "8aca49b6-c24a-5661-89ea-87ac48d26f77",
+  "order": 93
+ },
+ {
+  "category": "Rantai Motor",
+  "group": "CVT & Transmisi",
+  "motor": "Vixion R",
+  "price_label": "Rp 280.000",
+  "price": 280000,
+  "id": "19f24378-a631-5073-aafd-df5e6211c092",
+  "order": 94
+ },
+ {
+  "category": "Rantai Motor",
+  "group": "CVT & Transmisi",
+  "motor": "XSR 155",
+  "price_label": "Rp 300.000",
+  "price": 300000,
+  "id": "286378bf-8d8e-52ef-a9ac-8be2260de0ca",
+  "order": 95
+ },
+ {
+  "category": "Rantai Motor",
+  "group": "CVT & Transmisi",
+  "motor": "WR155R",
+  "price_label": "Rp 350.000",
+  "price": 350000,
+  "id": "38fa4580-222b-5629-8bcd-29049dedb0fc",
+  "order": 96
+ },
+ {
+  "category": "Rantai Motor",
+  "group": "CVT & Transmisi",
+  "motor": "R15",
+  "price_label": "Rp 390.000",
+  "price": 390000,
+  "id": "7b592649-1a18-5efd-ae8c-9b4abcbc4901",
+  "order": 97
+ },
+ {
+  "category": "Kabel Gas",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Mio M3",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "7252c051-692b-5f1a-86d8-b4a823a320e1",
+  "order": 98
+ },
+ {
+  "category": "Kabel Gas",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Gear 125",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "e28fa0a6-6a76-5d2e-b7cc-231bc3843047",
+  "order": 99
+ },
+ {
+  "category": "Kabel Gas",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Lexi",
+  "price_label": "Rp 70.000",
+  "price": 70000,
+  "id": "f0ce5fa4-4085-5a8e-85be-3da2837f47da",
+  "order": 100
+ },
+ {
+  "category": "Kabel Gas",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Aerox",
+  "price_label": "Rp 80.000",
+  "price": 80000,
+  "id": "8adbc747-a0fc-50cd-9994-587bba8c9032",
+  "order": 101
+ },
+ {
+  "category": "Kabel Gas",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "NMAX",
+  "price_label": "Rp 86.000",
+  "price": 86000,
+  "id": "0df746a8-3d49-57b7-b8e8-a48112da4ca5",
+  "order": 102
+ },
+ {
+  "category": "Kabel Gas",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Vixion",
+  "price_label": "Rp 65.000",
+  "price": 65000,
+  "id": "ee9be757-cfef-5463-8910-219b1ef223e7",
+  "order": 103
+ },
+ {
+  "category": "Kabel Gas",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "R15",
+  "price_label": "Rp 90.000",
+  "price": 90000,
+  "id": "90fcbd17-0460-5080-a333-01f730508093",
+  "order": 104
+ },
+ {
+  "category": "Kabel Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Mio M3",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "b04babb2-62b6-5038-9842-f55b0e0b2c11",
+  "order": 105
+ },
+ {
+  "category": "Kabel Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Jupiter Z",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "116943e2-602d-58bc-940e-0d85123f9a95",
+  "order": 106
+ },
+ {
+  "category": "Kabel Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "MX King",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "fe1a62d9-2c73-5b74-bcd8-82cbe633e7dc",
+  "order": 107
+ },
+ {
+  "category": "Kabel Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Vixion",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "32c6b451-978e-5225-bf33-f7761e2ef45b",
+  "order": 108
+ },
+ {
+  "category": "Kabel Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "R15",
+  "price_label": "Rp 70.000",
+  "price": 70000,
+  "id": "27714dfe-e623-5282-b420-f89457429213",
+  "order": 109
+ },
+ {
+  "category": "Per CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Mio M3",
+  "price_label": "Rp 30.000",
+  "price": 30000,
+  "id": "12065c30-524a-5674-95ad-3912e4d5a598",
+  "order": 110
+ },
+ {
+  "category": "Per CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Gear 125",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "e0db72f6-6d7a-5b51-8e83-1de7f61add8a",
+  "order": 111
+ },
+ {
+  "category": "Per CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Fazzio",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "bff16481-6ae3-5587-9272-308632476db9",
+  "order": 112
+ },
+ {
+  "category": "Per CVT",
+  "group": "CVT & Transmisi",
+  "motor": "FreeGo",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "61327a96-795a-5936-aeec-146aa06f501a",
+  "order": 113
+ },
+ {
+  "category": "Per CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Lexi",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "a9829fe7-b2ff-5de1-a434-e3f5e2bf1af6",
+  "order": 114
+ },
+ {
+  "category": "Per CVT",
+  "group": "CVT & Transmisi",
+  "motor": "Aerox",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "19cb7c9e-13c7-56fc-8553-c755f3888e7c",
+  "order": 115
+ },
+ {
+  "category": "Per CVT",
+  "group": "CVT & Transmisi",
+  "motor": "NMAX",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "593ad1ff-011e-5f0c-b3af-f40d74417add",
+  "order": 116
+ },
+ {
+  "category": "Bearing Komstir",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Mio M3",
+  "price_label": "Rp 85.000",
+  "price": 85000,
+  "id": "58e1518f-7a69-5ca6-b43f-bf1faf8814b7",
+  "order": 117
+ },
+ {
+  "category": "Bearing Komstir",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Gear 125",
+  "price_label": "Rp 95.000",
+  "price": 95000,
+  "id": "d86f636d-0b2c-5666-99b3-dfde6de3debb",
+  "order": 118
+ },
+ {
+  "category": "Bearing Komstir",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Lexi",
+  "price_label": "Rp 110.000",
+  "price": 110000,
+  "id": "948957c1-570e-5a50-9da1-fca673c5474a",
+  "order": 119
+ },
+ {
+  "category": "Bearing Komstir",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Aerox",
+  "price_label": "Rp 120.000",
+  "price": 120000,
+  "id": "9f102dd9-a673-53df-8f3f-ee6759c3cabd",
+  "order": 120
+ },
+ {
+  "category": "Bearing Komstir",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "NMAX",
+  "price_label": "Rp 125.000",
+  "price": 125000,
+  "id": "df3119e1-ff16-5ebe-9e69-d9f869e8dc67",
+  "order": 121
+ },
+ {
+  "category": "Bearing Komstir",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Vixion",
+  "price_label": "Rp 130.000",
+  "price": 130000,
+  "id": "1e025a83-1cd0-5480-9fa4-ce3f3380b215",
+  "order": 122
+ },
+ {
+  "category": "Bearing Komstir",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "R15",
+  "price_label": "Rp 150.000",
+  "price": 150000,
+  "id": "fb99e3d4-9ba6-5d7b-958f-95672d7e9632",
+  "order": 123
+ },
+ {
+  "category": "Klakson",
+  "group": "Kelistrikan",
+  "motor": "Mio M3",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "a1fabec1-17a6-5183-8307-e346a1a9589e",
+  "order": 124
+ },
+ {
+  "category": "Klakson",
+  "group": "Kelistrikan",
+  "motor": "Gear 125",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "934cd46c-db38-5e17-a837-7622ca9ec7c4",
+  "order": 125
+ },
+ {
+  "category": "Klakson",
+  "group": "Kelistrikan",
+  "motor": "Fazzio",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "cf460ab5-171f-5bc1-b5ca-d534960d7fe1",
+  "order": 126
+ },
+ {
+  "category": "Klakson",
+  "group": "Kelistrikan",
+  "motor": "Lexi",
+  "price_label": "Rp 60.000",
+  "price": 60000,
+  "id": "bdade35e-f128-5857-9519-9f0081d16aba",
+  "order": 127
+ },
+ {
+  "category": "Klakson",
+  "group": "Kelistrikan",
+  "motor": "Aerox",
+  "price_label": "Rp 65.000",
+  "price": 65000,
+  "id": "7f625b04-f2ed-508c-9044-5e1a0813c385",
+  "order": 128
+ },
+ {
+  "category": "Klakson",
+  "group": "Kelistrikan",
+  "motor": "NMAX",
+  "price_label": "Rp 65.000",
+  "price": 65000,
+  "id": "6971dbd5-6d49-5e9e-abc6-a2304420ec75",
+  "order": 129
+ },
+ {
+  "category": "Klakson",
+  "group": "Kelistrikan",
+  "motor": "Vixion",
+  "price_label": "Rp 70.000",
+  "price": 70000,
+  "id": "eddefc32-98cf-5ad8-9f6e-f9e955cdd4ba",
+  "order": 130
+ },
+ {
+  "category": "Kunci Kontak Assy",
+  "group": "Kelistrikan",
+  "motor": "Jupiter Z1",
+  "price_label": "Rp 100.000 – Rp 150.000",
+  "price": 100000,
+  "id": "2de0ba1d-2500-5598-bbcd-93ff38b5ab1c",
+  "order": 131
+ },
+ {
+  "category": "Kunci Kontak Assy",
+  "group": "Kelistrikan",
+  "motor": "Mio M3 125, Gear 125",
+  "price_label": "Rp 120.000 – Rp 180.000",
+  "price": 120000,
+  "id": "04b0b2f4-62ff-5252-a2d6-96bf0659f297",
+  "order": 132
+ },
+ {
+  "category": "Kunci Kontak Assy",
+  "group": "Kelistrikan",
+  "motor": "Fazzio Hybrid, FreeGo 125, Lexi 125, MX King 150, Vixion 150",
+  "price_label": "Rp 180.000 – Rp 300.000",
+  "price": 180000,
+  "id": "899cf445-fd12-51a9-9f16-b0aff01b3f03",
+  "order": 133
+ },
+ {
+  "category": "Kunci Kontak Assy",
+  "group": "Kelistrikan",
+  "motor": "Aerox 155, NMAX 155, XSR 155",
+  "price_label": "Rp 220.000 – Rp 350.000",
+  "price": 220000,
+  "id": "439b4faf-396a-5995-a011-22767185e407",
+  "order": 134
+ },
+ {
+  "category": "Kunci Kontak Assy",
+  "group": "Kelistrikan",
+  "motor": "XMAX 250",
+  "price_label": "Rp 350.000 – Rp 650.000",
+  "price": 350000,
+  "id": "289929a6-8b85-5832-a5cb-51eb77ae187a",
+  "order": 135
+ },
+ {
+  "category": "Seal Shock Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Mio M3",
+  "price_label": "Rp 30.000",
+  "price": 30000,
+  "id": "47c99863-389d-5c6b-ba94-a37620ad8685",
+  "order": 136
+ },
+ {
+  "category": "Seal Shock Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Gear 125",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "86c406a7-4c1c-52bd-8e65-fb187d36d2b1",
+  "order": 137
+ },
+ {
+  "category": "Seal Shock Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Lexi",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "e20c4466-55bf-5db6-8f7a-03d46de4e893",
+  "order": 138
+ },
+ {
+  "category": "Seal Shock Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Aerox",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "ca432e10-ef71-5d04-8947-8425cdd3f205",
+  "order": 139
+ },
+ {
+  "category": "Seal Shock Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "NMAX",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "6fb83be7-30c1-5925-912d-aa55aa8997a3",
+  "order": 140
+ },
+ {
+  "category": "Seal Shock Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Vixion",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "4dcacd89-94f0-5995-b70b-50e608e89e00",
+  "order": 141
+ },
+ {
+  "category": "Seal Shock Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "R15",
+  "price_label": "Rp 60.000",
+  "price": 60000,
+  "id": "5d798d3e-8e2e-5ebe-8b16-7ecb01235b63",
+  "order": 142
+ },
+ {
+  "category": "Shockbreaker Belakang",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Mio M3",
+  "price_label": "Rp 280.000",
+  "price": 280000,
+  "id": "e7cf3b86-bc59-5e3b-a98d-de193a3dce9f",
+  "order": 143
+ },
+ {
+  "category": "Shockbreaker Belakang",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Gear 125",
+  "price_label": "Rp 320.000",
+  "price": 320000,
+  "id": "042557a6-15fb-5bde-9af3-c350c34feb1d",
+  "order": 144
+ },
+ {
+  "category": "Shockbreaker Belakang",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Fazzio",
+  "price_label": "Rp 350.000",
+  "price": 350000,
+  "id": "60030ed1-419a-5600-bdf9-25d4bb7b0b0f",
+  "order": 145
+ },
+ {
+  "category": "Shockbreaker Belakang",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Lexi",
+  "price_label": "Rp 420.000",
+  "price": 420000,
+  "id": "da21c2ce-196b-5f23-b901-9553532c40a0",
+  "order": 146
+ },
+ {
+  "category": "Shockbreaker Belakang",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Aerox",
+  "price_label": "Rp 500.000",
+  "price": 500000,
+  "id": "5701adb9-7f26-5232-930e-c37964558ff7",
+  "order": 147
+ },
+ {
+  "category": "Shockbreaker Belakang",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "NMAX",
+  "price_label": "Rp 550.000",
+  "price": 550000,
+  "id": "643a0cc4-e177-55ae-bbf1-9bab1c91e493",
+  "order": 148
+ },
+ {
+  "category": "Shockbreaker Belakang",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "XMAX 250",
+  "price_label": "Rp 850.000",
+  "price": 850000,
+  "id": "7c4668a3-5f8a-5aad-ab49-9859bc7cebb6",
+  "order": 149
+ },
+ {
+  "category": "Kabel Speedometer",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Mio M3",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "4f0217c7-e45b-53f3-9749-0ef3ce801247",
+  "order": 150
+ },
+ {
+  "category": "Kabel Speedometer",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Jupiter Z",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "5c7ce099-da82-54d4-ae86-12624f36c338",
+  "order": 151
+ },
+ {
+  "category": "Kabel Speedometer",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "MX King",
+  "price_label": "Rp 60.000",
+  "price": 60000,
+  "id": "1719ce75-dc78-5d9d-b701-a4330c450886",
+  "order": 152
+ },
+ {
+  "category": "Kabel Speedometer",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Vixion",
+  "price_label": "Rp 65.000",
+  "price": 65000,
+  "id": "3ef890f7-8a00-5f8e-8544-9dc9ecae98b8",
+  "order": 153
+ },
+ {
+  "category": "Kabel Speedometer",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "R15",
+  "price_label": "Rp 80.000",
+  "price": 80000,
+  "id": "42b64d03-6605-5bf9-aedc-764e6d5bdeac",
+  "order": 154
+ },
+ {
+  "category": "Piringan Cakram Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Mio M3",
+  "price_label": "Rp 180.000",
+  "price": 180000,
+  "id": "4aab88c2-8201-548b-8b91-8cad5b8f3cd8",
+  "order": 155
+ },
+ {
+  "category": "Piringan Cakram Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Gear 125",
+  "price_label": "Rp 200.000",
+  "price": 200000,
+  "id": "b990d260-3714-5da5-9a57-1aa0ef1456ae",
+  "order": 156
+ },
+ {
+  "category": "Piringan Cakram Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Lexi",
+  "price_label": "Rp 250.000",
+  "price": 250000,
+  "id": "60f152ed-1f93-5ae1-af34-497b7e7c2849",
+  "order": 157
+ },
+ {
+  "category": "Piringan Cakram Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Aerox",
+  "price_label": "Rp 290.000",
+  "price": 290000,
+  "id": "1d465c3d-5d96-5e63-8a87-b24d4258f9bd",
+  "order": 158
+ },
+ {
+  "category": "Piringan Cakram Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "NMAX",
+  "price_label": "Rp 325.000",
+  "price": 325000,
+  "id": "df45ec45-4ee8-5cef-9480-bd6b1f2a530d",
+  "order": 159
+ },
+ {
+  "category": "Piringan Cakram Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Vixion",
+  "price_label": "Rp 350.000",
+  "price": 350000,
+  "id": "d23b0e4a-c58d-5ec0-b49d-222dfd484d30",
+  "order": 160
+ },
+ {
+  "category": "Piringan Cakram Depan",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "R15",
+  "price_label": "Rp 450.000",
+  "price": 450000,
+  "id": "a0922e70-8727-5c84-a34f-c4077b9569d4",
+  "order": 161
+ },
+ {
+  "category": "Fuel Pump",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Mio M3",
+  "price_label": "Rp 380.000",
+  "price": 380000,
+  "id": "0a32df41-fdac-525a-853a-e438b8b0ea4d",
+  "order": 162
+ },
+ {
+  "category": "Fuel Pump",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Gear 125",
+  "price_label": "Rp 420.000",
+  "price": 420000,
+  "id": "4b85e687-b46a-5284-ba26-3ad5334d81e1",
+  "order": 163
+ },
+ {
+  "category": "Fuel Pump",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Fazzio",
+  "price_label": "Rp 450.000",
+  "price": 450000,
+  "id": "029d4415-b06e-589c-b456-7e920573e65a",
+  "order": 164
+ },
+ {
+  "category": "Fuel Pump",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "FreeGo",
+  "price_label": "Rp 480.000",
+  "price": 480000,
+  "id": "c06ab0d0-58b1-5346-8aeb-5e399f48aa79",
+  "order": 165
+ },
+ {
+  "category": "Fuel Pump",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Lexi",
+  "price_label": "Rp 550.000",
+  "price": 550000,
+  "id": "8e792886-9131-5158-9883-c46e25f16bd4",
+  "order": 166
+ },
+ {
+  "category": "Fuel Pump",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Aerox",
+  "price_label": "Rp 650.000",
+  "price": 650000,
+  "id": "56515018-2a20-534b-8554-eb6ad334b5cc",
+  "order": 167
+ },
+ {
+  "category": "Fuel Pump",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "NMAX",
+  "price_label": "Rp 750.000",
+  "price": 750000,
+  "id": "cbe1d602-275e-5b8d-9897-7e9b8f5d7709",
+  "order": 168
+ },
+ {
+  "category": "Fuel Pump",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "XMAX 250",
+  "price_label": "Rp 1.250.000",
+  "price": 1250000,
+  "id": "4bc6813c-8e85-5500-a7c2-217aa6e2cc1d",
+  "order": 169
+ },
+ {
+  "category": "Saringan Bensin",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Mio M3",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "d395dc4a-ae60-5e9b-ad7e-bfed1a83d95b",
+  "order": 170
+ },
+ {
+  "category": "Saringan Bensin",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Gear 125",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "5fde2a34-c793-5eae-86ea-9f47804bd546",
+  "order": 171
+ },
+ {
+  "category": "Saringan Bensin",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Fazzio",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "740d8a70-5cd9-5d88-b602-c0082a16a336",
+  "order": 172
+ },
+ {
+  "category": "Saringan Bensin",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "FreeGo",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "4eab3de1-91b1-5711-9a19-29e7f26465f6",
+  "order": 173
+ },
+ {
+  "category": "Saringan Bensin",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Lexi",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "9e2e9442-23db-576a-bcbe-9ffb62bc6e15",
+  "order": 174
+ },
+ {
+  "category": "Saringan Bensin",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Aerox",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "507be101-dd76-5fa2-bd7b-93da918d63d7",
+  "order": 175
+ },
+ {
+  "category": "Saringan Bensin",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "NMAX",
+  "price_label": "Rp 60.000",
+  "price": 60000,
+  "id": "470bf47c-c438-5a54-af08-60f65ce7171c",
+  "order": 176
+ },
+ {
+  "category": "Saringan Bensin",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "XMAX 250",
+  "price_label": "Rp 95.000",
+  "price": 95000,
+  "id": "e932dfc4-43e6-5fe9-ba01-68471dab0bf8",
+  "order": 177
+ },
+ {
+  "category": "Injector",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Mio M3",
+  "price_label": "Rp 280.000",
+  "price": 280000,
+  "id": "c0173f6a-bf44-545e-8cb3-9715a15d1109",
+  "order": 178
+ },
+ {
+  "category": "Injector",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Gear 125",
+  "price_label": "Rp 300.000",
+  "price": 300000,
+  "id": "93ce0bcd-d8a3-50ed-bdd3-62dd0e8f34b4",
+  "order": 179
+ },
+ {
+  "category": "Injector",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Fazzio",
+  "price_label": "Rp 320.000",
+  "price": 320000,
+  "id": "92f4089e-34c9-559b-b836-10b85f6c76c6",
+  "order": 180
+ },
+ {
+  "category": "Injector",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "FreeGo",
+  "price_label": "Rp 320.000",
+  "price": 320000,
+  "id": "19f89b38-b6e6-5165-bfc2-0b048474336a",
+  "order": 181
+ },
+ {
+  "category": "Injector",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Lexi",
+  "price_label": "Rp 350.000",
+  "price": 350000,
+  "id": "d50b32b3-e893-5f18-9f88-651e0407bf9d",
+  "order": 182
+ },
+ {
+  "category": "Injector",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Aerox",
+  "price_label": "Rp 450.000",
+  "price": 450000,
+  "id": "1df45682-5e7c-5f43-b87f-9c27375d4d7b",
+  "order": 183
+ },
+ {
+  "category": "Injector",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "NMAX",
+  "price_label": "Rp 480.000",
+  "price": 480000,
+  "id": "2e7c4bd1-7cd6-5ca4-8c7e-e322c5ad68b1",
+  "order": 184
+ },
+ {
+  "category": "Injector",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "XMAX 250",
+  "price_label": "Rp 850.000",
+  "price": 850000,
+  "id": "f850e25f-6120-5387-b0d2-959842db9855",
+  "order": 185
+ },
+ {
+  "category": "Throttle Body",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Mio M3",
+  "price_label": "Rp 550.000",
+  "price": 550000,
+  "id": "2df63833-f8ed-550e-94aa-c320fb0b9675",
+  "order": 186
+ },
+ {
+  "category": "Throttle Body",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Gear 125",
+  "price_label": "Rp 600.000",
+  "price": 600000,
+  "id": "6c7a4c3c-0ad1-5a67-8c9c-4d2035b2cd5c",
+  "order": 187
+ },
+ {
+  "category": "Throttle Body",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Fazzio",
+  "price_label": "Rp 650.000",
+  "price": 650000,
+  "id": "ec3e51c4-e419-5e70-a6f7-e70778678e07",
+  "order": 188
+ },
+ {
+  "category": "Throttle Body",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "FreeGo",
+  "price_label": "Rp 650.000",
+  "price": 650000,
+  "id": "1daed9ed-3870-5773-9f98-c48e2f468276",
+  "order": 189
+ },
+ {
+  "category": "Throttle Body",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Lexi",
+  "price_label": "Rp 700.000",
+  "price": 700000,
+  "id": "f8038b77-80c8-567a-851e-bf8d10f3c530",
+  "order": 190
+ },
+ {
+  "category": "Throttle Body",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Aerox",
+  "price_label": "Rp 850.000",
+  "price": 850000,
+  "id": "7df669bb-ca92-5619-b450-3abab4e5c829",
+  "order": 191
+ },
+ {
+  "category": "Throttle Body",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "NMAX",
+  "price_label": "Rp 900.000",
+  "price": 900000,
+  "id": "d2bc15b8-a7f8-5648-a33b-aeabf4629d97",
+  "order": 192
+ },
+ {
+  "category": "Throttle Body",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "XMAX 250",
+  "price_label": "Rp 1.600.000",
+  "price": 1600000,
+  "id": "ccceda41-a577-58d0-b1d7-d9d9894c0362",
+  "order": 193
+ },
+ {
+  "category": "Karet Footstep",
+  "group": "Body & Aksesori",
+  "motor": "Mio M3",
+  "price_label": "Rp 18.000",
+  "price": 18000,
+  "id": "332e51d8-35b1-5022-a668-a855983413ae",
+  "order": 194
+ },
+ {
+  "category": "Karet Footstep",
+  "group": "Body & Aksesori",
+  "motor": "Gear 125",
+  "price_label": "Rp 20.000",
+  "price": 20000,
+  "id": "1b86fcf7-1a9f-5d84-9ea1-a6e43cffb1c0",
+  "order": 195
+ },
+ {
+  "category": "Karet Footstep",
+  "group": "Body & Aksesori",
+  "motor": "Jupiter Z",
+  "price_label": "Rp 18.000",
+  "price": 18000,
+  "id": "4cd14b16-d276-5b8f-9c5c-feab16a017f1",
+  "order": 196
+ },
+ {
+  "category": "Karet Footstep",
+  "group": "Body & Aksesori",
+  "motor": "MX King",
+  "price_label": "Rp 25.000",
+  "price": 25000,
+  "id": "dbc1a94f-a399-5b84-aa69-e76e84cac23c",
+  "order": 197
+ },
+ {
+  "category": "Karet Footstep",
+  "group": "Body & Aksesori",
+  "motor": "Vixion",
+  "price_label": "Rp 30.000",
+  "price": 30000,
+  "id": "e1da0df4-28f6-58f5-bbec-5d7a0e8edb8d",
+  "order": 198
+ },
+ {
+  "category": "Karet Footstep",
+  "group": "Body & Aksesori",
+  "motor": "XSR 155",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "c48ece62-46ec-58e6-bed1-6f61e7c6a9c6",
+  "order": 199
+ },
+ {
+  "category": "Karet Footstep",
+  "group": "Body & Aksesori",
+  "motor": "R15",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "8ea5724f-1ece-59d4-a3df-29eb68ca2f9c",
+  "order": 200
+ },
+ {
+  "category": "Handle Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Mio M3",
+  "price_label": "Rp 30.000",
+  "price": 30000,
+  "id": "350c7f53-a2a3-5553-b6c7-af3165052f6b",
+  "order": 201
+ },
+ {
+  "category": "Handle Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Gear 125",
+  "price_label": "Rp 35.000",
+  "price": 35000,
+  "id": "1ae2099d-db8e-5a8c-8ca1-f834adbae68b",
+  "order": 202
+ },
+ {
+  "category": "Handle Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Lexi",
+  "price_label": "Rp 40.000",
+  "price": 40000,
+  "id": "7208e2d0-5942-5071-923f-1cb8e828a044",
+  "order": 203
+ },
+ {
+  "category": "Handle Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Aerox",
+  "price_label": "Rp 45.000",
+  "price": 45000,
+  "id": "cd4fb5a1-c9f5-51bf-b31f-9255ab8162f8",
+  "order": 204
+ },
+ {
+  "category": "Handle Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "NMAX",
+  "price_label": "Rp 50.000",
+  "price": 50000,
+  "id": "22863086-7f11-5a51-b753-c2f3b4cced2d",
+  "order": 205
+ },
+ {
+  "category": "Handle Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "Vixion",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "d1a1194c-6a61-598c-86b3-05f819585c37",
+  "order": 206
+ },
+ {
+  "category": "Handle Rem",
+  "group": "Rem, Kemudi & Suspensi",
+  "motor": "R15",
+  "price_label": "Rp 70.000",
+  "price": 70000,
+  "id": "98d464f0-cb77-5ac8-9263-ae107916e80b",
+  "order": 207
+ },
+ {
+  "category": "Cover Knalpot",
+  "group": "Body & Aksesori",
+  "motor": "Mio M3",
+  "price_label": "Rp 75.000",
+  "price": 75000,
+  "id": "6fbce56c-f672-5df0-b44b-5e4b3e8d7fb7",
+  "order": 208
+ },
+ {
+  "category": "Cover Knalpot",
+  "group": "Body & Aksesori",
+  "motor": "Gear 125",
+  "price_label": "Rp 80.000",
+  "price": 80000,
+  "id": "3fcc638b-40dd-55ad-a1ee-5805ea3c3128",
+  "order": 209
+ },
+ {
+  "category": "Cover Knalpot",
+  "group": "Body & Aksesori",
+  "motor": "Fazzio",
+  "price_label": "Rp 90.000",
+  "price": 90000,
+  "id": "90591a67-5e53-5ee4-90fc-8210a25cab21",
+  "order": 210
+ },
+ {
+  "category": "Cover Knalpot",
+  "group": "Body & Aksesori",
+  "motor": "Lexi",
+  "price_label": "Rp 100.000",
+  "price": 100000,
+  "id": "eef34909-f8eb-5e38-99fc-5bacf304c428",
+  "order": 211
+ },
+ {
+  "category": "Cover Knalpot",
+  "group": "Body & Aksesori",
+  "motor": "Aerox",
+  "price_label": "Rp 120.000",
+  "price": 120000,
+  "id": "1cf311d9-cc30-5a34-852b-d892c3b1c431",
+  "order": 212
+ },
+ {
+  "category": "Cover Knalpot",
+  "group": "Body & Aksesori",
+  "motor": "NMAX",
+  "price_label": "Rp 150.000",
+  "price": 150000,
+  "id": "4daacbd0-6b5c-5672-b388-2fa5d0e43f20",
+  "order": 213
+ },
+ {
+  "category": "Cover Knalpot",
+  "group": "Body & Aksesori",
+  "motor": "R15",
+  "price_label": "Rp 220.000",
+  "price": 220000,
+  "id": "348eeb0e-06f1-5503-8e22-b294b48a0555",
+  "order": 214
+ },
+ {
+  "category": "Karet Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Mio M3",
+  "price_label": "Rp 10.000",
+  "price": 10000,
+  "id": "54cc86b7-6764-5400-a0ca-fd5ec9b9437d",
+  "order": 215
+ },
+ {
+  "category": "Karet Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Gear 125",
+  "price_label": "Rp 12.000",
+  "price": 12000,
+  "id": "1adb4f08-b354-5eef-a5e9-b4404063bab0",
+  "order": 216
+ },
+ {
+  "category": "Karet Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Fazzio",
+  "price_label": "Rp 12.000",
+  "price": 12000,
+  "id": "f3d39ad3-388f-5f0e-9abb-52a9a118497b",
+  "order": 217
+ },
+ {
+  "category": "Karet Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Lexi",
+  "price_label": "Rp 15.000",
+  "price": 15000,
+  "id": "165ff2df-e42e-5a0d-a6dd-69171115e72b",
+  "order": 218
+ },
+ {
+  "category": "Karet Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Aerox",
+  "price_label": "Rp 15.000",
+  "price": 15000,
+  "id": "828cfa7e-12e2-561b-867e-1f1eac7fdf71",
+  "order": 219
+ },
+ {
+  "category": "Karet Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "NMAX",
+  "price_label": "Rp 18.000",
+  "price": 18000,
+  "id": "6fef97cf-b7ae-55f1-acf9-d9f5ad123f40",
+  "order": 220
+ },
+ {
+  "category": "Karet Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "R15",
+  "price_label": "Rp 20.000",
+  "price": 20000,
+  "id": "1fe86d2d-53b1-5b7a-b456-730ba1a948c3",
+  "order": 221
+ },
+ {
+  "category": "Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Mio M3",
+  "price_label": "Rp 55.000",
+  "price": 55000,
+  "id": "1de3b85d-a2fe-5e17-ba28-8a72da9817e1",
+  "order": 222
+ },
+ {
+  "category": "Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Gear 125",
+  "price_label": "Rp 60.000",
+  "price": 60000,
+  "id": "e488d1aa-8e3f-5cd9-b1ee-b6c44b39d5d0",
+  "order": 223
+ },
+ {
+  "category": "Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Fazzio",
+  "price_label": "Rp 65.000",
+  "price": 65000,
+  "id": "a37c5041-75b2-5167-8b3b-3977b61dd0d5",
+  "order": 224
+ },
+ {
+  "category": "Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Lexi",
+  "price_label": "Rp 75.000",
+  "price": 75000,
+  "id": "3e4e78ab-d530-546d-b545-bc28a8dc2567",
+  "order": 225
+ },
+ {
+  "category": "Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "Aerox",
+  "price_label": "Rp 85.000",
+  "price": 85000,
+  "id": "94ecd848-0576-5501-954f-0a90b5770a5a",
+  "order": 226
+ },
+ {
+  "category": "Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "NMAX",
+  "price_label": "Rp 95.000",
+  "price": 95000,
+  "id": "dd00024e-0880-59c3-826a-92b164ccab6b",
+  "order": 227
+ },
+ {
+  "category": "Standar Samping",
+  "group": "Body & Aksesori",
+  "motor": "R15",
+  "price_label": "Rp 120.000",
+  "price": 120000,
+  "id": "cb6c6818-1117-5511-937e-2768292a0552",
+  "order": 228
+ },
+ {
+  "category": "Standar Tengah",
+  "group": "Body & Aksesori",
+  "motor": "Mio M3",
+  "price_label": "Rp 95.000",
+  "price": 95000,
+  "id": "6ed0c778-510b-5fdb-adcd-827d02da6af5",
+  "order": 229
+ },
+ {
+  "category": "Standar Tengah",
+  "group": "Body & Aksesori",
+  "motor": "Gear 125",
+  "price_label": "Rp 100.000",
+  "price": 100000,
+  "id": "953286a2-6830-5b23-b5f5-b5b3ed9f3d12",
+  "order": 230
+ },
+ {
+  "category": "Standar Tengah",
+  "group": "Body & Aksesori",
+  "motor": "Fazzio",
+  "price_label": "Rp 110.000",
+  "price": 110000,
+  "id": "e1b93f37-10f2-5f4e-abf7-582f54359424",
+  "order": 231
+ },
+ {
+  "category": "Standar Tengah",
+  "group": "Body & Aksesori",
+  "motor": "Lexi",
+  "price_label": "Rp 120.000",
+  "price": 120000,
+  "id": "9621e2af-97a2-5058-9574-5ae8cc11787a",
+  "order": 232
+ },
+ {
+  "category": "Standar Tengah",
+  "group": "Body & Aksesori",
+  "motor": "Aerox",
+  "price_label": "Rp 140.000",
+  "price": 140000,
+  "id": "64946f96-350e-58f2-a6f4-8b78c7b617c8",
+  "order": 233
+ },
+ {
+  "category": "Standar Tengah",
+  "group": "Body & Aksesori",
+  "motor": "NMAX",
+  "price_label": "Rp 160.000",
+  "price": 160000,
+  "id": "b5822b1c-6ea8-5259-8c81-0a374a547366",
+  "order": 234
+ },
+ {
+  "category": "Standar Tengah",
+  "group": "Body & Aksesori",
+  "motor": "R15",
+  "price_label": "Rp 220.000",
+  "price": 220000,
+  "id": "12d6b7a3-ed3b-5207-8a80-bc945b710bc9",
+  "order": 235
+ },
+ {
+  "category": "Ban Depan",
+  "group": "Ban",
+  "motor": "Mio M3, Gear 125",
+  "price_label": "Rp 180.000",
+  "price": 180000,
+  "description": "Lebar ban 80 mm, tinggi ban 80% dari lebar ban, menggunakan velg 14 inci. Karakter ringan, stabil, dan cocok untuk mobilitas harian.",
+  "size": "80/80-14",
+  "price_prefix": "Mulai dari",
+  "id": "21632272-7d3e-5812-9794-055ade3b179c",
+  "order": 236
+ },
+ {
+  "category": "Ban Depan",
+  "group": "Ban",
+  "motor": "Fazzio, FreeGo",
+  "price_label": "Rp 250.000",
+  "price": 250000,
+  "description": "Lebar ban 110 mm, tinggi ban 70% dari lebar ban, menggunakan velg 12 inci. Cocok untuk penggunaan harian dengan handling yang nyaman.",
+  "size": "110/70-12",
+  "price_prefix": "Mulai dari",
+  "id": "3348dd60-db2e-51d4-8c8d-4cfd2ce26164",
+  "order": 237
+ },
+ {
+  "category": "Ban Depan",
+  "group": "Ban",
+  "motor": "Lexi",
+  "price_label": "Rp 240.000",
+  "price": 240000,
+  "description": "Lebar ban 90 mm, tinggi ban 90% dari lebar ban, menggunakan velg 14 inci. Nyaman digunakan untuk perjalanan harian maupun jarak menengah.",
+  "size": "90/90-14",
+  "price_prefix": "Mulai dari",
+  "id": "303c6ce4-d191-5856-84e0-227fa50b9286",
+  "order": 238
+ },
+ {
+  "category": "Ban Depan",
+  "group": "Ban",
+  "motor": "Aerox",
+  "price_label": "Rp 350.000",
+  "price": 350000,
+  "description": "Lebar ban 110 mm, tinggi ban 80% dari lebar ban, menggunakan velg 14 inci. Karakter sporty dengan grip tinggi dan handling yang lebih agresif.",
+  "size": "110/80-14",
+  "price_prefix": "Mulai dari",
+  "id": "63eb76bc-1e0d-58b0-aa50-81e06a889453",
+  "order": 239
+ },
+ {
+  "category": "Ban Depan",
+  "group": "Ban",
+  "motor": "NMAX",
+  "price_label": "Rp 320.000",
+  "price": 320000,
+  "description": "Lebar ban 110 mm, tinggi ban 70% dari lebar ban, menggunakan velg 13 inci. Menawarkan keseimbangan antara kenyamanan dan stabilitas untuk touring maupun penggunaan harian.",
+  "size": "110/70-13",
+  "price_prefix": "Mulai dari",
+  "id": "4064c6e0-64b4-5745-bf82-c312f8d6052e",
+  "order": 240
+ },
+ {
+  "category": "Ban Depan",
+  "group": "Ban",
+  "motor": "XMAX 250",
+  "price_label": "Rp 700.000",
+  "price": 700000,
+  "description": "Lebar ban 120 mm, tinggi ban 70% dari lebar ban, menggunakan velg 15 inci. Grip lebih maksimal, stabil pada kecepatan tinggi dan perjalanan jauh.",
+  "size": "120/70-15",
+  "price_prefix": "Mulai dari",
+  "id": "dcb8f263-80f1-5121-ba4e-798bcb67e5b3",
+  "order": 241
+ },
+ {
+  "category": "Ban Belakang",
+  "group": "Ban",
+  "motor": "Mio M3 125",
+  "price_label": "Rp 220.000",
+  "price": 220000,
+  "description": "Lebar ban 100 mm, tinggi ban 70% dari lebar ban, menggunakan velg 14 inci. Memberikan keseimbangan antara kenyamanan, efisiensi bahan bakar, dan stabilitas saat berkendara harian.",
+  "size": "100/70-14",
+  "price_prefix": "Mulai dari",
+  "id": "6fc34719-d837-588a-8434-216a3913d402",
+  "order": 242
+ },
+ {
+  "category": "Ban Belakang",
+  "group": "Ban",
+  "motor": "Gear 125",
+  "price_label": "Rp 220.000",
+  "price": 220000,
+  "description": "Lebar ban 100 mm, tinggi ban 70%, velg 14 inci. Cocok untuk penggunaan harian dengan daya cengkeram yang baik di jalan perkotaan.",
+  "size": "100/70-14",
+  "price_prefix": "Mulai dari",
+  "id": "e7371081-fc59-503d-8da2-bcf37387c7d8",
+  "order": 243
+ },
+ {
+  "category": "Ban Belakang",
+  "group": "Ban",
+  "motor": "Fazzio Hybrid",
+  "price_label": "Rp 280.000",
+  "price": 280000,
+  "description": "Lebar ban 110 mm, tinggi ban 70%, velg 12 inci. Ban lebar yang memberikan kestabilan dan kenyamanan lebih baik saat bermanuver.",
+  "size": "110/70-12",
+  "price_prefix": "Mulai dari",
+  "id": "744feb91-1ebd-5371-bc23-f77dc2a2eb6d",
+  "order": 244
+ },
+ {
+  "category": "Ban Belakang",
+  "group": "Ban",
+  "motor": "FreeGo 125",
+  "price_label": "Rp 280.000",
+  "price": 280000,
+  "description": "Lebar ban 110 mm, tinggi ban 70%, velg 12 inci. Mendukung kenyamanan berkendara dengan handling yang ringan.",
+  "size": "110/70-12",
+  "price_prefix": "Mulai dari",
+  "id": "e7b9ce28-eb10-5bb3-a562-372ddf42022a",
+  "order": 245
+ },
+ {
+  "category": "Ban Belakang",
+  "group": "Ban",
+  "motor": "Lexi 125",
+  "price_label": "Rp 270.000",
+  "price": 270000,
+  "description": "Lebar ban 100 mm, tinggi ban 90%, velg 14 inci. Nyaman digunakan untuk perjalanan harian maupun jarak menengah dengan kemampuan meredam getaran yang baik.",
+  "size": "100/90-14",
+  "price_prefix": "Mulai dari",
+  "id": "87c53d9e-a68a-505f-b874-9198888a4578",
+  "order": 246
+ },
+ {
+  "category": "Ban Belakang",
+  "group": "Ban",
+  "motor": "Aerox 155",
+  "price_label": "Rp 500.000",
+  "price": 500000,
+  "description": "Lebar ban 140 mm, tinggi ban 70%, velg 14 inci. Ban sporty dengan tapak lebar yang memberikan grip maksimal dan stabilitas tinggi saat kecepatan tinggi.",
+  "size": "140/70-14",
+  "price_prefix": "Mulai dari",
+  "id": "aa96a85c-98b6-5a0a-aa94-d0e289a0a30a",
+  "order": 247
+ },
+ {
+  "category": "Ban Belakang",
+  "group": "Ban",
+  "motor": "NMAX 155",
+  "price_label": "Rp 420.000",
+  "price": 420000,
+  "description": "Lebar ban 130 mm, tinggi ban 70%, velg 13 inci. Cocok untuk touring dan penggunaan harian dengan stabilitas serta kenyamanan yang baik.",
+  "size": "130/70-13",
+  "price_prefix": "Mulai dari",
+  "id": "88fd6b70-1048-5f7e-b1bf-aff8c53f10dd",
+  "order": 248
+ },
+ {
+  "category": "Ban Belakang",
+  "group": "Ban",
+  "motor": "XMAX 250",
+  "price_label": "Rp 750.000",
+  "price": 750000,
+  "description": "Lebar ban 140 mm, tinggi ban 70%, velg 14 inci. Memberikan daya cengkeram optimal dan kestabilan tinggi untuk perjalanan jauh dan kecepatan tinggi.",
+  "size": "140/70-14",
+  "price_prefix": "Mulai dari",
+  "id": "ad6052a0-9f0e-56fb-92b1-fb2fe4159d8c",
+  "order": 249
+ },
+ {
+  "category": "Spion",
+  "group": "Body & Aksesori",
+  "motor": "Mio M3, Gear 125",
+  "price_label": "Rp 130.000",
+  "price": 130000,
+  "description": "Sepasang Rp 130.000 · Satuan (kiri/kanan) Rp 65.000",
+  "id": "b115a2d3-007d-5f15-8974-833441654613",
+  "order": 250
+ },
+ {
+  "category": "Spion",
+  "group": "Body & Aksesori",
+  "motor": "Lexi",
+  "price_label": "Rp 170.000",
+  "price": 170000,
+  "description": "Sepasang Rp 170.000 · Satuan (kiri/kanan) Rp 77.000",
+  "id": "b69f6ee0-e592-5594-9302-2b5d4330795f",
+  "order": 251
+ },
+ {
+  "category": "Spion",
+  "group": "Body & Aksesori",
+  "motor": "Aerox 155",
+  "price_label": "Rp 229.000",
+  "price": 229000,
+  "description": "Sepasang Rp 229.000 · Satuan (kiri/kanan) Rp 90.000",
+  "id": "6f03ddfd-1589-5eea-be35-db54f7bbf6ed",
+  "order": 252
+ },
+ {
+  "category": "Spion",
+  "group": "Body & Aksesori",
+  "motor": "NMAX 155",
+  "price_label": "Rp 279.000",
+  "price": 279000,
+  "description": "Sepasang Rp 279.000 · Satuan (kiri/kanan) Rp 85.000",
+  "id": "abb18f35-1a67-59c7-85b7-93a2e23b606c",
+  "order": 253
+ },
+ {
+  "category": "Spion",
+  "group": "Body & Aksesori",
+  "motor": "R15",
+  "price_label": "Rp 399.000",
+  "price": 399000,
+  "description": "Sepasang Rp 399.000 · Satuan (kiri/kanan) Rp 108.000",
+  "id": "15f8d11c-28c8-5203-bd9f-88ae90e6b111",
+  "order": 254
+ },
+ {
+  "category": "Spion",
+  "group": "Body & Aksesori",
+  "motor": "Fazzio, Fino",
+  "price_label": "Rp 215.000",
+  "price": 215000,
+  "description": "Sepasang Rp 215.000 · Satuan (kiri/kanan) Rp 100.000",
+  "id": "45e03490-8c51-592e-8f73-2485f3f2b7ac",
+  "order": 255
+ },
+ {
+  "category": "Busi NGK",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Mio Sporty, Mio Soul Lama, Jupiter Z Lama, Vega R",
+  "price_label": "Rp 18.000 – Rp 25.000",
+  "price": 18000,
+  "variant": "NGK CR6HSA",
+  "id": "d84f7a3f-2215-55e9-b93f-9af497aaff9d",
+  "order": 256
+ },
+ {
+  "category": "Busi NGK",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Vixion Lama, Scorpio Z, Byson",
+  "price_label": "Rp 35.000 – Rp 50.000",
+  "price": 35000,
+  "variant": "NGK CPR6EA-9",
+  "id": "224be57c-e164-5fc9-864d-15079b37992f",
+  "order": 257
+ },
+ {
+  "category": "Busi NGK",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "New Vixion, R15 V2, Xabre",
+  "price_label": "Rp 40.000 – Rp 55.000",
+  "price": 40000,
+  "variant": "NGK CPR8EA-9",
+  "id": "6f8e7f73-82e8-58cf-baad-adf3b418986d",
+  "order": 258
+ },
+ {
+  "category": "Busi NGK",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "NMAX 155, Aerox 155, Lexi 155, XMAX 250",
+  "price_label": "Rp 45.000 – Rp 65.000",
+  "price": 45000,
+  "variant": "NGK LMAR8A-9",
+  "id": "9dadd3a2-d1bc-52ad-b716-2baa6b0ad69a",
+  "order": 259
+ },
+ {
+  "category": "Busi NGK",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Jupiter MX 135, MX King 150",
+  "price_label": "Rp 35.000 – Rp 55.000",
+  "price": 35000,
+  "variant": "NGK CPR8E",
+  "id": "0d813d2c-2fb1-5f2e-b15e-07436f85f758",
+  "order": 260
+ },
+ {
+  "category": "Busi NGK",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "Jupiter MX 135, RX King Modifikasi",
+  "price_label": "Rp 35.000 – Rp 50.000",
+  "price": 35000,
+  "variant": "NGK CR7E",
+  "id": "e8779365-6ffc-5b45-bc2c-c61308c84827",
+  "order": 261
+ },
+ {
+  "category": "Busi NGK",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "R15 V3, MT-15, XSR 155",
+  "price_label": "Rp 50.000 – Rp 75.000",
+  "price": 50000,
+  "variant": "NGK MR8E-9",
+  "id": "4c0d4e91-f413-50f8-b249-fd8b36aa0b0d",
+  "order": 262
+ },
+ {
+  "category": "Busi NGK",
+  "group": "Mesin & Bahan Bakar",
+  "motor": "R25, MT-25",
+  "price_label": "Rp 45.000 – Rp 70.000",
+  "price": 45000,
+  "variant": "NGK CPR9EA-9",
+  "id": "599382f7-d07c-5359-aa76-adb0dfc26329",
+  "order": 263
+ },
+ {
+  "category": "Aki GS Astra",
+  "group": "Kelistrikan",
+  "motor": "Mio M3, Mio Z, Mio J, Soul GT, X-Ride, Fino, Xeon",
+  "price_label": "Rp 250.000 – Rp 330.000",
+  "price": 250000,
+  "variant": "GS Astra GTZ5S",
+  "capacity": "12V 3,5Ah",
+  "id": "5fab991c-b9a0-528f-bee5-6e414e8757ca",
+  "order": 264
+ },
+ {
+  "category": "Aki GS Astra",
+  "group": "Kelistrikan",
+  "motor": "Aerox 155, NMAX Old, Lexi, FreeGo, Fazzio, Vixion, MX King",
+  "price_label": "Rp 290.000 – Rp 430.000",
+  "price": 290000,
+  "variant": "GS Astra GTZ6V",
+  "capacity": "12V 5Ah",
+  "id": "9d3dbe08-4064-5e64-9290-ed4b9496435e",
+  "order": 265
+ },
+ {
+  "category": "Aki GS Astra",
+  "group": "Kelistrikan",
+  "motor": "NMAX New, Aerox New, Lexi, WR155R, MT-25",
+  "price_label": "Rp 315.000 – Rp 465.000",
+  "price": 315000,
+  "variant": "GS Astra GTZ7S",
+  "capacity": "12V 6Ah",
+  "id": "6e288312-092a-5624-a711-2c32a5c2c4e0",
+  "order": 266
+ },
+ {
+  "category": "Aki GS Astra",
+  "group": "Kelistrikan",
+  "motor": "XMAX 250, R25, MT-25, TMAX, Vespa Sprint",
+  "price_label": "Rp 500.000 – Rp 815.000",
+  "price": 500000,
+  "variant": "GS Astra GTZ8V",
+  "capacity": "12V 7Ah",
+  "id": "f5c4911a-8547-5db3-91c7-a8f311fa4309",
+  "order": 267
+ }
+]
