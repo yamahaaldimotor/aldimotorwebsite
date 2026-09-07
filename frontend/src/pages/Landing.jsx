@@ -142,9 +142,14 @@ export default function Landing() {
               Pilih jenis servis <br />sesuai kebutuhan.
             </h2>
           </div>
-          <p className="max-w-md text-slate-600">
-            4 tipe servis dengan estimasi durasi yang jelas. Mekanik dialokasikan otomatis oleh sistem.
-          </p>
+          <div className="max-w-md">
+            <p className="text-slate-600">
+              4 tipe servis dengan estimasi durasi yang jelas. Mekanik dialokasikan otomatis oleh sistem.
+            </p>
+            <Link to="/biaya-servis" data-testid="layanan-biaya-link" className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 underline-offset-4 hover:underline">
+              Lihat biaya servis per tipe motor <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">

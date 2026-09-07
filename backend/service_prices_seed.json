@@ -1,0 +1,312 @@
+[
+ {
+  "id": "9f767508-96ec-5197-9948-99d470cca791",
+  "category": "Moped",
+  "category_order": 0,
+  "motor": "Vega Force",
+  "ringan": 75000,
+  "berat": 98000,
+  "overhaul": 275000,
+  "order": 0
+ },
+ {
+  "id": "8e07a351-f636-518c-8d9f-f8ba7849bc42",
+  "category": "Moped",
+  "category_order": 0,
+  "motor": "Jupiter Z1",
+  "ringan": 75000,
+  "berat": 98000,
+  "overhaul": 275000,
+  "order": 1
+ },
+ {
+  "id": "07016bbb-fd7e-56b8-aa77-1621c4bace5b",
+  "category": "Moped",
+  "category_order": 0,
+  "motor": "Jupiter MX 135",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 275000,
+  "order": 2
+ },
+ {
+  "id": "de873cf9-f7a5-53af-bc90-79e425045476",
+  "category": "Moped",
+  "category_order": 0,
+  "motor": "MX King 150",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 275000,
+  "order": 3
+ },
+ {
+  "id": "5d8d7576-fa3a-5559-9bd3-b81e45537e9a",
+  "category": "Matic",
+  "category_order": 1,
+  "motor": "Mio Series",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 4
+ },
+ {
+  "id": "1da0c24f-8136-5d97-8823-99e47a6808c9",
+  "category": "Matic",
+  "category_order": 1,
+  "motor": "Mio M3",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 5
+ },
+ {
+  "id": "ad184750-e8bb-5b21-addc-3e524926c883",
+  "category": "Matic",
+  "category_order": 1,
+  "motor": "Mio S",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 6
+ },
+ {
+  "id": "4700616c-80f9-5535-98d5-2e1657f42165",
+  "category": "Matic",
+  "category_order": 1,
+  "motor": "Aerox 125",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 7
+ },
+ {
+  "id": "0c436a3d-d21d-5b1b-bf67-a9f968791fea",
+  "category": "Matic",
+  "category_order": 1,
+  "motor": "Gear 125",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 8
+ },
+ {
+  "id": "00844e04-2df4-5017-aa7c-14504c909672",
+  "category": "Matic",
+  "category_order": 1,
+  "motor": "Fino 125",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 9
+ },
+ {
+  "id": "2229d723-0dce-55dc-8f2d-e4a4f9c21467",
+  "category": "Matic",
+  "category_order": 1,
+  "motor": "X-Ride 125",
+  "ringan": 75000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 10
+ },
+ {
+  "id": "c9c9e8e4-1226-5dc6-9f6f-9421a33a604d",
+  "category": "Matic Classy",
+  "category_order": 2,
+  "motor": "FreeGo",
+  "ringan": 80000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 11
+ },
+ {
+  "id": "4f2b6c6b-927c-5a94-bf6f-60f111eea36a",
+  "category": "Matic Classy",
+  "category_order": 2,
+  "motor": "Fazzio",
+  "ringan": 80000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 12
+ },
+ {
+  "id": "ca1067da-a9cf-596b-a43e-21dbb9c29a1c",
+  "category": "Matic Classy",
+  "category_order": 2,
+  "motor": "Grand Filano",
+  "ringan": 80000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 13
+ },
+ {
+  "id": "5f898610-afc3-596f-a951-d4e7a9810410",
+  "category": "Matic Premium",
+  "category_order": 3,
+  "motor": "Lexi 125",
+  "ringan": 100000,
+  "berat": 130000,
+  "overhaul": 300000,
+  "order": 14
+ },
+ {
+  "id": "3160a9f9-45bc-54a7-8046-88e9263dc6d0",
+  "category": "Matic Premium",
+  "category_order": 3,
+  "motor": "Lexi LX 155",
+  "ringan": 100000,
+  "berat": 130000,
+  "overhaul": 300000,
+  "order": 15
+ },
+ {
+  "id": "1637663b-f522-5142-bde3-dee5c71ead34",
+  "category": "Matic Premium",
+  "category_order": 3,
+  "motor": "Aerox 155",
+  "ringan": 100000,
+  "berat": 130000,
+  "overhaul": 300000,
+  "order": 16
+ },
+ {
+  "id": "3d8656a8-721c-5434-abc9-0eac9c63f22c",
+  "category": "Matic Premium",
+  "category_order": 3,
+  "motor": "NMAX",
+  "ringan": 100000,
+  "berat": 130000,
+  "overhaul": 375000,
+  "order": 17
+ },
+ {
+  "id": "20862154-d405-5692-bbd5-5ebf77e755a5",
+  "category": "Matic Premium",
+  "category_order": 3,
+  "motor": "NMAX Neo",
+  "ringan": 100000,
+  "berat": 130000,
+  "overhaul": 375000,
+  "order": 18
+ },
+ {
+  "id": "acf2c4ec-65fb-56e0-8737-df6bc4362494",
+  "category": "Sport",
+  "category_order": 4,
+  "motor": "Vixion",
+  "ringan": 100000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 19
+ },
+ {
+  "id": "1dda1004-9f15-5136-bfe5-52d00a54bf1e",
+  "category": "Sport",
+  "category_order": 4,
+  "motor": "Xabre",
+  "ringan": 100000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 20
+ },
+ {
+  "id": "8d208c07-ab5b-527f-bfde-a4e8203601b9",
+  "category": "Sport",
+  "category_order": 4,
+  "motor": "R15",
+  "ringan": 100000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 21
+ },
+ {
+  "id": "3e4d988d-6573-567c-bb4b-4703756cc340",
+  "category": "Sport",
+  "category_order": 4,
+  "motor": "MT-15",
+  "ringan": 100000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 22
+ },
+ {
+  "id": "ad643d5b-d9cd-521e-8547-3e2956ba520c",
+  "category": "Sport",
+  "category_order": 4,
+  "motor": "XSR 155",
+  "ringan": 100000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 23
+ },
+ {
+  "id": "0f4e5db5-9532-5752-9ab7-cbe1f4abb78c",
+  "category": "Sport",
+  "category_order": 4,
+  "motor": "WR 155",
+  "ringan": 100000,
+  "berat": 115000,
+  "overhaul": 300000,
+  "order": 24
+ },
+ {
+  "id": "a5f8f829-231d-54a6-9c5e-2e141e9beed4",
+  "category": "Matic Premium 1",
+  "category_order": 5,
+  "motor": "Aerox 155 Turbo",
+  "ringan": 110000,
+  "berat": 130000,
+  "overhaul": 350000,
+  "order": 25
+ },
+ {
+  "id": "8abd4555-14a5-505c-bc4e-8a8a317744f2",
+  "category": "Matic Premium 1",
+  "category_order": 5,
+  "motor": "NMAX Turbo",
+  "ringan": 110000,
+  "berat": 130000,
+  "overhaul": 350000,
+  "order": 26
+ },
+ {
+  "id": "72fed112-75ec-5c03-9942-4fffe0862e17",
+  "category": "Matic Premium 2",
+  "category_order": 6,
+  "motor": "XMAX",
+  "ringan": 130000,
+  "berat": 170000,
+  "overhaul": 375000,
+  "order": 27
+ },
+ {
+  "id": "b795b08d-d03f-5bb7-911e-2e0ab62b58d7",
+  "category": "Matic Premium 2",
+  "category_order": 6,
+  "motor": "T-MAX",
+  "ringan": 150000,
+  "berat": 400000,
+  "overhaul": 900000,
+  "order": 28
+ },
+ {
+  "id": "555586da-ebc8-57bb-b495-1c5550e2ae62",
+  "category": "Sport Premium",
+  "category_order": 7,
+  "motor": "R25",
+  "ringan": 120000,
+  "berat": 185000,
+  "overhaul": 375000,
+  "order": 29
+ },
+ {
+  "id": "f091402d-3f6d-510d-9fc5-a5be5354290d",
+  "category": "Sport Premium",
+  "category_order": 7,
+  "motor": "MT-25",
+  "ringan": 120000,
+  "berat": 185000,
+  "overhaul": 375000,
+  "order": 30
+ }
+]

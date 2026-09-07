@@ -8,6 +8,7 @@ const navItems = [
   { label: "Beranda", href: "/#beranda" },
   { label: "Layanan", href: "/#layanan" },
   { label: "Tim Mekanik", href: "/#mekanik" },
+  { label: "Biaya Servis", href: "/biaya-servis", route: true },
   { label: "Sparepart", href: "/sparepart", route: true },
   { label: "Cara Reservasi", href: "/#cara-reservasi" },
   { label: "Kontak", href: "/#kontak" },

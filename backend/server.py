@@ -262,6 +262,17 @@ async def seed_data():
                 await db.spareparts.insert_many(parts)
                 logger.info("Seeded %d spareparts", len(parts))
 
+    # Biaya jasa servis per tipe motor (sheet "Data Service Ringan dan Berat")
+    if await db.service_prices.count_documents({}) == 0:
+        seed_file = ROOT_DIR / "service_prices_seed.json"
+        if seed_file.exists():
+            import json
+            with open(seed_file, encoding="utf-8") as f:
+                rows = json.load(f)
+            if rows:
+                await db.service_prices.insert_many(rows)
+                logger.info("Seeded %d service prices", len(rows))
+
     # Business hours (Senin-Sabtu 08:30-16:30, Jumat istirahat 11:00-14:00)
     default_breaks = [{"weekday": 4, "start": "11:00", "end": "14:00", "label": "Istirahat Sholat Jumat"}]
     bh_doc = await db.settings.find_one({"key": "business_hours"})
@@ -360,6 +371,59 @@ async def list_holidays():
     docs = await db.holidays.find({}, {"_id": 0}).to_list(500)
     docs.sort(key=lambda d: d.get("date", ""))
     return docs
+
+
+# ----------------- Public: biaya servis -----------------
+SERVICE_PRICE_TYPES = [
+    {"code": "ringan", "key": "ringan", "name": "Servis Ringan"},
+    {"code": "berat", "key": "berat", "name": "Servis Berat"},
+    {"code": "overhaul", "key": "overhaul", "name": "Overhaul"},
+]
+
+
+@api.get("/service-prices")
+async def list_service_prices(q: Optional[str] = None, category: Optional[str] = None):
+    """Biaya jasa servis (ringan/berat/overhaul) per tipe motor, dikelompokkan per kategori motor."""
+    query = {}
+    if category:
+        query["category"] = category
+    docs = await db.service_prices.find(query, {"_id": 0}).to_list(1000)
+    if q:
+        ql = q.lower().strip()
+        docs = [d for d in docs if ql in d.get("motor", "").lower() or ql in d.get("category", "").lower()]
+    docs.sort(key=lambda d: (d.get("category_order", 0), d.get("order", 0)))
+
+    services = await db.services.find({"status": "active"}, {"_id": 0, "code": 1, "name": 1, "duration_hours": 1, "description": 1}).to_list(50)
+    svc_by_code = {s_["code"]: s_ for s_ in services}
+    types = []
+    for t in SERVICE_PRICE_TYPES:
+        svc = svc_by_code.get(t["code"], {})
+        types.append({**t, "duration_hours": svc.get("duration_hours"), "description": svc.get("description")})
+
+    categories = []
+    index = {}
+    for d in docs:
+        c = d["category"]
+        if c not in index:
+            index[c] = {"category": c, "items": []}
+            categories.append(index[c])
+        index[c]["items"].append({
+            "id": d["id"], "motor": d["motor"],
+            "prices": {k: d.get(k) for k in ("ringan", "berat", "overhaul")},
+        })
+    all_docs = docs if not (q or category) else await db.service_prices.find({}, {"_id": 0}).to_list(1000)
+    summary = {}
+    for k in ("ringan", "berat", "overhaul"):
+        vals = [d[k] for d in all_docs if d.get(k) is not None]
+        summary[k] = {"min": min(vals) if vals else None, "max": max(vals) if vals else None}
+    return {
+        "total_motors": len(docs),
+        "types": types,
+        "categories": categories,
+        "summary": summary,
+        "all_categories": sorted({d["category"] for d in all_docs}, key=lambda c: next((d["category_order"] for d in all_docs if d["category"] == c), 99)),
+        "note": "Harga di atas adalah biaya jasa servis, belum termasuk sparepart dan oli. Harga dapat berubah sewaktu-waktu.",
+    }
 
 
 # ----------------- Public: spareparts -----------------

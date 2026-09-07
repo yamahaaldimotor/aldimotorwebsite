@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-ALDI MOTOR Backend Test Suite - Mechanic Photo Upload Feature
-Tests the new mechanic photo upload/delete functionality
+ALDI MOTOR Backend Test Suite - Service Prices Feature
+Tests the new /api/service-prices endpoint
 """
 import os
 import sys
@@ -11,7 +11,7 @@ from PIL import Image
 import time
 
 # Backend URL from frontend/.env
-BACKEND_URL = "https://bf4f7221-ce61-49f2-a3c1-cc17b0180a7b.preview.emergentagent.com"
+BACKEND_URL = "https://repo-sync-122.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test credentials
@@ -940,6 +940,351 @@ def test_regression_services_no_price():
     return True
 
 
+def test_service_prices_basic():
+    """Test SP1: GET /api/service-prices - basic structure"""
+    print("\n=== TEST SP1: GET /api/service-prices (basic) ===")
+    
+    resp = requests.get(f"{API_BASE}/service-prices", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("SP1", "FAIL", f"GET /api/service-prices returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    # Check total_motors == 31
+    if data.get("total_motors") != 31:
+        log_test("SP1", "FAIL", f"Expected total_motors=31, got {data.get('total_motors')}")
+        return False
+    
+    # Check categories length == 8
+    categories = data.get("categories", [])
+    if len(categories) != 8:
+        log_test("SP1", "FAIL", f"Expected 8 categories, got {len(categories)}")
+        return False
+    
+    # Check category order
+    expected_order = ["Moped", "Matic", "Matic Classy", "Matic Premium", "Sport", "Matic Premium 1", "Matic Premium 2", "Sport Premium"]
+    actual_order = [c.get("category") for c in categories]
+    
+    if actual_order != expected_order:
+        log_test("SP1", "FAIL", f"Category order mismatch. Expected: {expected_order}, Got: {actual_order}")
+        return False
+    
+    # Check types length == 3
+    types = data.get("types", [])
+    if len(types) != 3:
+        log_test("SP1", "FAIL", f"Expected 3 types, got {len(types)}")
+        return False
+    
+    # Check types have correct keys and duration_hours
+    expected_types = [
+        {"key": "ringan", "duration_hours": 1.0},
+        {"key": "berat", "duration_hours": 2.0},
+        {"key": "overhaul", "duration_hours": 4.0}
+    ]
+    
+    for i, expected in enumerate(expected_types):
+        if i >= len(types):
+            log_test("SP1", "FAIL", f"Missing type at index {i}")
+            return False
+        
+        actual = types[i]
+        if actual.get("key") != expected["key"]:
+            log_test("SP1", "FAIL", f"Type {i} key: expected '{expected['key']}', got '{actual.get('key')}'")
+            return False
+        
+        if actual.get("duration_hours") != expected["duration_hours"]:
+            log_test("SP1", "FAIL", f"Type {i} duration_hours: expected {expected['duration_hours']}, got {actual.get('duration_hours')}")
+            return False
+    
+    # Check summary
+    summary = data.get("summary", {})
+    
+    # Check ringan summary
+    ringan_summary = summary.get("ringan", {})
+    if ringan_summary.get("min") != 75000:
+        log_test("SP1", "FAIL", f"Summary ringan min: expected 75000, got {ringan_summary.get('min')}")
+        return False
+    if ringan_summary.get("max") != 150000:
+        log_test("SP1", "FAIL", f"Summary ringan max: expected 150000, got {ringan_summary.get('max')}")
+        return False
+    
+    # Check berat summary
+    berat_summary = summary.get("berat", {})
+    if berat_summary.get("min") != 98000:
+        log_test("SP1", "FAIL", f"Summary berat min: expected 98000, got {berat_summary.get('min')}")
+        return False
+    if berat_summary.get("max") != 400000:
+        log_test("SP1", "FAIL", f"Summary berat max: expected 400000, got {berat_summary.get('max')}")
+        return False
+    
+    # Check overhaul summary
+    overhaul_summary = summary.get("overhaul", {})
+    if overhaul_summary.get("min") != 275000:
+        log_test("SP1", "FAIL", f"Summary overhaul min: expected 275000, got {overhaul_summary.get('min')}")
+        return False
+    if overhaul_summary.get("max") != 900000:
+        log_test("SP1", "FAIL", f"Summary overhaul max: expected 900000, got {overhaul_summary.get('max')}")
+        return False
+    
+    # Check specific items: NMAX, T-MAX, Vega Force
+    nmax_found = False
+    tmax_found = False
+    vega_force_found = False
+    
+    for category in categories:
+        for item in category.get("items", []):
+            motor = item.get("motor", "")
+            prices = item.get("prices", {})
+            
+            if motor == "NMAX":
+                nmax_found = True
+                if prices.get("ringan") != 100000:
+                    log_test("SP1", "FAIL", f"NMAX ringan: expected 100000, got {prices.get('ringan')}")
+                    return False
+                if prices.get("berat") != 130000:
+                    log_test("SP1", "FAIL", f"NMAX berat: expected 130000, got {prices.get('berat')}")
+                    return False
+                if prices.get("overhaul") != 375000:
+                    log_test("SP1", "FAIL", f"NMAX overhaul: expected 375000, got {prices.get('overhaul')}")
+                    return False
+            
+            if motor == "T-MAX":
+                tmax_found = True
+                if prices.get("overhaul") != 900000:
+                    log_test("SP1", "FAIL", f"T-MAX overhaul: expected 900000, got {prices.get('overhaul')}")
+                    return False
+            
+            if motor == "Vega Force":
+                vega_force_found = True
+                if prices.get("berat") != 98000:
+                    log_test("SP1", "FAIL", f"Vega Force berat: expected 98000, got {prices.get('berat')}")
+                    return False
+    
+    if not nmax_found:
+        log_test("SP1", "FAIL", "NMAX not found in items")
+        return False
+    if not tmax_found:
+        log_test("SP1", "FAIL", "T-MAX not found in items")
+        return False
+    if not vega_force_found:
+        log_test("SP1", "FAIL", "Vega Force not found in items")
+        return False
+    
+    # Check all_categories length == 8
+    all_categories = data.get("all_categories", [])
+    if len(all_categories) != 8:
+        log_test("SP1", "FAIL", f"Expected all_categories length 8, got {len(all_categories)}")
+        return False
+    
+    # Check note is present
+    if not data.get("note"):
+        log_test("SP1", "FAIL", "Note field is missing or empty")
+        return False
+    
+    log_test("SP1", "PASS", f"GET /api/service-prices: 31 motors, 8 categories in correct order, 3 types with correct durations, summary correct, specific items verified, all_categories=8, note present")
+    return True
+
+
+def test_service_prices_search_nmax_lowercase():
+    """Test SP2: GET /api/service-prices?q=nmax"""
+    print("\n=== TEST SP2: GET /api/service-prices?q=nmax ===")
+    
+    resp = requests.get(f"{API_BASE}/service-prices", params={"q": "nmax"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("SP2", "FAIL", f"GET /api/service-prices?q=nmax returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    # Check total_motors == 3
+    total_motors = data.get("total_motors", 0)
+    if total_motors != 3:
+        log_test("SP2", "FAIL", f"Expected total_motors=3 for 'nmax', got {total_motors}")
+        return False
+    
+    # Check categories length == 2
+    categories = data.get("categories", [])
+    if len(categories) != 2:
+        log_test("SP2", "FAIL", f"Expected 2 categories for 'nmax', got {len(categories)}")
+        return False
+    
+    # Verify motors are NMAX, NMAX Neo, NMAX Turbo
+    found_motors = []
+    for category in categories:
+        for item in category.get("items", []):
+            found_motors.append(item.get("motor"))
+    
+    expected_motors = ["NMAX", "NMAX Neo", "NMAX Turbo"]
+    if sorted(found_motors) != sorted(expected_motors):
+        log_test("SP2", "FAIL", f"Expected motors {expected_motors}, got {found_motors}")
+        return False
+    
+    # Check summary is still global (ringan min 75000)
+    summary = data.get("summary", {})
+    ringan_summary = summary.get("ringan", {})
+    if ringan_summary.get("min") != 75000:
+        log_test("SP2", "FAIL", f"Summary should be global, ringan min expected 75000, got {ringan_summary.get('min')}")
+        return False
+    
+    # Check all_categories still == 8
+    all_categories = data.get("all_categories", [])
+    if len(all_categories) != 8:
+        log_test("SP2", "FAIL", f"Expected all_categories=8 (global), got {len(all_categories)}")
+        return False
+    
+    log_test("SP2", "PASS", f"Search 'nmax': 3 motors (NMAX, NMAX Neo, NMAX Turbo), 2 categories, summary still global (ringan min 75000), all_categories=8")
+    return True
+
+
+def test_service_prices_search_nmax_uppercase():
+    """Test SP3: GET /api/service-prices?q=NMAX (uppercase) - should return same count"""
+    print("\n=== TEST SP3: GET /api/service-prices?q=NMAX (uppercase) ===")
+    
+    resp = requests.get(f"{API_BASE}/service-prices", params={"q": "NMAX"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("SP3", "FAIL", f"GET /api/service-prices?q=NMAX returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    uppercase_count = data.get("total_motors", 0)
+    
+    # Get lowercase count
+    resp_lower = requests.get(f"{API_BASE}/service-prices", params={"q": "nmax"}, timeout=10)
+    lowercase_count = resp_lower.json().get("total_motors", 0)
+    
+    if uppercase_count != lowercase_count:
+        log_test("SP3", "FAIL", f"Uppercase 'NMAX' returned {uppercase_count} motors, lowercase 'nmax' returned {lowercase_count}")
+        return False
+    
+    if uppercase_count != 3:
+        log_test("SP3", "FAIL", f"Expected 3 motors for 'NMAX', got {uppercase_count}")
+        return False
+    
+    log_test("SP3", "PASS", f"Search 'NMAX' (uppercase) returned same count as lowercase: {uppercase_count} motors")
+    return True
+
+
+def test_service_prices_filter_category_sport():
+    """Test SP4: GET /api/service-prices?category=Sport"""
+    print("\n=== TEST SP4: GET /api/service-prices?category=Sport ===")
+    
+    resp = requests.get(f"{API_BASE}/service-prices", params={"category": "Sport"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("SP4", "FAIL", f"GET /api/service-prices?category=Sport returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    # Check total_motors == 6
+    total_motors = data.get("total_motors", 0)
+    if total_motors != 6:
+        log_test("SP4", "FAIL", f"Expected total_motors=6 for category 'Sport', got {total_motors}")
+        return False
+    
+    # Check categories length == 1
+    categories = data.get("categories", [])
+    if len(categories) != 1:
+        log_test("SP4", "FAIL", f"Expected 1 category, got {len(categories)}")
+        return False
+    
+    # Check category is "Sport"
+    if categories[0].get("category") != "Sport":
+        log_test("SP4", "FAIL", f"Expected category 'Sport', got '{categories[0].get('category')}'")
+        return False
+    
+    log_test("SP4", "PASS", f"Filter category=Sport: 6 motors, 1 category 'Sport'")
+    return True
+
+
+def test_service_prices_search_empty():
+    """Test SP5: GET /api/service-prices?q=zzz (no results)"""
+    print("\n=== TEST SP5: GET /api/service-prices?q=zzz (empty) ===")
+    
+    resp = requests.get(f"{API_BASE}/service-prices", params={"q": "zzz"}, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("SP5", "FAIL", f"GET /api/service-prices?q=zzz returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    if data.get("total_motors") != 0:
+        log_test("SP5", "FAIL", f"Expected total_motors=0, got {data.get('total_motors')}")
+        return False
+    
+    if len(data.get("categories", [])) != 0:
+        log_test("SP5", "FAIL", f"Expected empty categories array, got {len(data.get('categories', []))} categories")
+        return False
+    
+    log_test("SP5", "PASS", "Search 'zzz' returned 0 motors, empty categories")
+    return True
+
+
+def test_regression_spareparts_total():
+    """Test SP6a: Regression - GET /api/spareparts total_items 268"""
+    print("\n=== TEST SP6a: Regression - GET /api/spareparts ===")
+    
+    resp = requests.get(f"{API_BASE}/spareparts", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("SP6a", "FAIL", f"GET /api/spareparts returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    if data.get("total_items") != 268:
+        log_test("SP6a", "FAIL", f"Expected total_items=268, got {data.get('total_items')}")
+        return False
+    
+    log_test("SP6a", "PASS", f"GET /api/spareparts: total_items=268")
+    return True
+
+
+def test_regression_business_hours():
+    """Test SP6b: Regression - GET /api/business-hours opening_time 08:30"""
+    print("\n=== TEST SP6b: Regression - GET /api/business-hours ===")
+    
+    resp = requests.get(f"{API_BASE}/business-hours", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("SP6b", "FAIL", f"GET /api/business-hours returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    
+    if data.get("opening_time") != "08:30":
+        log_test("SP6b", "FAIL", f"Expected opening_time='08:30', got '{data.get('opening_time')}'")
+        return False
+    
+    log_test("SP6b", "PASS", f"GET /api/business-hours: opening_time='08:30'")
+    return True
+
+
+def test_regression_mechanics_count():
+    """Test SP6c: Regression - GET /api/mechanics count 5"""
+    print("\n=== TEST SP6c: Regression - GET /api/mechanics ===")
+    
+    resp = requests.get(f"{API_BASE}/mechanics", timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("SP6c", "FAIL", f"GET /api/mechanics returned {resp.status_code}")
+        return False
+    
+    mechanics = resp.json()
+    
+    if len(mechanics) != 5:
+        log_test("SP6c", "FAIL", f"Expected 5 mechanics, got {len(mechanics)}")
+        return False
+    
+    log_test("SP6c", "PASS", f"GET /api/mechanics: 5 mechanics")
+    return True
+
+
 def print_summary():
     """Print test summary"""
     print("\n" + "="*60)
@@ -973,31 +1318,25 @@ def main():
     print("="*60)
     
     try:
-        # Login
-        login()
-        
-        # NEW SPAREPARTS TESTS (Priority)
+        # SERVICE PRICES TESTS (Priority)
         print("\n" + "="*60)
-        print("SPAREPARTS API TESTS")
+        print("SERVICE PRICES API TESTS")
         print("="*60)
         
-        test_spareparts_basic()
-        test_spareparts_search_nmax_lowercase()
-        test_spareparts_search_nmax_uppercase()
-        test_spareparts_filter_group_ban()
-        test_spareparts_filter_category_busi()
-        test_spareparts_filter_category_aki()
-        test_spareparts_search_empty()
-        test_spareparts_meta()
-        test_spareparts_combined_filter()
+        test_service_prices_basic()
+        test_service_prices_search_nmax_lowercase()
+        test_service_prices_search_nmax_uppercase()
+        test_service_prices_filter_category_sport()
+        test_service_prices_search_empty()
         
         # REGRESSION TESTS
         print("\n" + "="*60)
         print("REGRESSION TESTS")
         print("="*60)
         
-        test_regression_mechanics_with_photo()
-        test_regression_services_no_price()
+        test_regression_spareparts_total()
+        test_regression_business_hours()
+        test_regression_mechanics_count()
         
         # Print summary
         success = print_summary()

@@ -56,6 +56,12 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
 - Jadwal: settings.business_hours {opening_time 08:30, closing_time 16:30, closed_days [6], breaks:[{weekday,start,end,label}], schedule_version 2}. Helper day_windows/slot_starts/fits_windows di server.py: slot per jam dari awal tiap sesi; slot yang melewati akhir sesi status "closed". Jumat (ringan): 08:30, 09:30, 14:00, 15:00. Kalender admin harian punya kolom "Istirahat". Admin Pengaturan: editor jam istirahat (hari, mulai, selesai, keterangan). Beranda & Reservasi menampilkan jadwal baru.
 - Sparepart admin: tab "Sparepart" di dashboard (frontend/src/pages/admin/SparepartsPanel.jsx) — cari/filter, tambah (dialog dengan detail opsional), edit harga inline (blur/Enter), edit lengkap, hapus, tambah varian per jenis. API /api/admin/spareparts (GET/POST), /api/admin/spareparts/{id} (PATCH/DELETE).
 
+## Update 2026-09-07 (v1.6) - Halaman Biaya Servis
+- Data sheet "Data Service Ringan dan Berat" dirapikan -> backend/service_prices_seed.json (31 tipe motor, 8 kategori: Moped, Matic, Matic Classy, Matic Premium, Sport, Matic Premium 1, Matic Premium 2, Sport Premium; kolom ringan/berat/overhaul). Asumsi karena data kosong di sheet: Lexi LX 155 & NMAX Neo servis ringan = Rp100.000 (sama kategori). Seed ke koleksi `service_prices` jika kosong.
+- API publik GET /api/service-prices?q=&category= (+ summary min/max, types dari koleksi services untuk durasi).
+- Frontend: halaman /biaya-servis (hero dengan ringkasan 3 jenis servis, search tipe motor, chip kategori, tabel per kategori 3 kolom harga, catatan "biaya jasa belum termasuk sparepart/oli", CTA). Link "Biaya Servis" di header; link "Lihat biaya servis per tipe motor" di section Layanan beranda.
+- Catatan: harga jasa servis hanya informasi; alur reservasi tetap tanpa harga/payment.
+
 ## Backlog (P1/P2)
 - P1: Kalender view mingguan/bulanan untuk admin
 - P1: Notifikasi Twilio WhatsApp API (kirim otomatis, bukan wa.me link)
