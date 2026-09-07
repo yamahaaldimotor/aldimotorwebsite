@@ -238,7 +238,7 @@ function Bookings() {
                     <Badge className={statusColor[b.status]}>{b.status}</Badge>
                   </div>
                   <div className="mt-2 text-sm text-slate-700">
-                    <span className="font-semibold">{b.customer_name}</span> · {b.plate_number} · WA {b.whatsapp}
+                    <span className="font-semibold">{b.customer_name}</span> · {b.motor_type ? `${b.motor_type} · ` : ""}{b.plate_number} · WA {b.whatsapp}
                   </div>
                   <div className="mt-1 text-sm text-slate-500">
                     {b.service_name} · {b.booking_date} · {b.start_time}–{b.end_time} · {b.mechanic_name}
@@ -863,6 +863,7 @@ function CalendarView() {
           {selectedBooking && (
             <div className="space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-slate-500">Customer</span><span className="font-medium">{selectedBooking.customer_name}</span></div>
+              {selectedBooking.motor_type && <div className="flex justify-between"><span className="text-slate-500">Motor</span><span className="font-medium">{selectedBooking.motor_type}</span></div>}
               <div className="flex justify-between"><span className="text-slate-500">Plat</span><span className="font-medium">{selectedBooking.plate_number}</span></div>
               <div className="flex justify-between"><span className="text-slate-500">Servis</span><span className="font-medium">{selectedBooking.service_name}</span></div>
               <div className="flex justify-between"><span className="text-slate-500">Jam</span><span className="font-medium">{selectedBooking.start_time}–{selectedBooking.end_time}</span></div>
@@ -1004,6 +1005,7 @@ function Reports() {
                       <th className="py-2 pr-3">No Reservasi</th>
                       <th className="py-2 pr-3">Tanggal</th>
                       <th className="py-2 pr-3">Customer</th>
+                      <th className="py-2 pr-3">Motor</th>
                       <th className="py-2 pr-3">Servis</th>
                       <th className="py-2 pr-3">Status</th>
                       <th className="py-2 pr-3">Mekanik</th>
@@ -1015,6 +1017,7 @@ function Reports() {
                         <td className="py-2 pr-3 font-medium text-blue-600">{b.booking_number}</td>
                         <td className="py-2 pr-3">{b.booking_date} · {b.start_time}</td>
                         <td className="py-2 pr-3">{b.customer_name}</td>
+                        <td className="py-2 pr-3">{b.motor_type || "—"}<div className="text-[11px] text-slate-400">{b.plate_number}</div></td>
                         <td className="py-2 pr-3">{b.service_name}</td>
                         <td className="py-2 pr-3"><Badge className={statusColor[b.status]}>{b.status}</Badge></td>
                         <td className="py-2 pr-3">{b.mechanic_name}</td>

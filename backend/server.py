@@ -177,6 +177,7 @@ class BookingCreate(BaseModel):
     customer_name: str = Field(min_length=3)
     whatsapp: str
     plate_number: str
+    motor_type: str = Field(min_length=2, max_length=80)  # jenis/tipe motor customer, mis. "NMAX 155"
     complaint: str
     service_id: str
     booking_date: str  # YYYY-MM-DD
@@ -674,6 +675,7 @@ async def customer_history(plate: str = Query(..., min_length=3)):
             "start_time": b["start_time"],
             "service_name": b["service_name"],
             "mechanic_name": b["mechanic_name"],
+            "motor_type": b.get("motor_type"),
             "complaint": b["complaint"],
             "status": b["status"],
         })
@@ -885,7 +887,7 @@ async def create_booking(body: BookingCreate):
     customer_id = str(uuid.uuid4())
     await db.customers.insert_one({
         "id": customer_id, "name": body.customer_name.strip(),
-        "whatsapp": wa, "plate_number": plate,
+        "whatsapp": wa, "plate_number": plate, "motor_type": body.motor_type.strip(),
         "created_at": datetime.now(timezone.utc).isoformat(),
     })
 
@@ -897,6 +899,7 @@ async def create_booking(body: BookingCreate):
         "customer_name": body.customer_name.strip(),
         "whatsapp": wa,
         "plate_number": plate,
+        "motor_type": body.motor_type.strip(),
         "complaint": body.complaint.strip(),
         "service_id": service["id"],
         "service_name": service["name"],
@@ -923,6 +926,7 @@ async def create_booking(body: BookingCreate):
         f"Jenis Servis: {booking['service_name']}%0A"
         f"Tanggal: {booking['booking_date']}%0A"
         f"Jam: {booking['start_time']}%0A"
+        f"Jenis Motor: {booking['motor_type']}%0A"
         f"Nomor Polisi: {booking['plate_number']}%0A"
         f"Keluhan: {booking['complaint']}%0A%0A"
         f"Mohon konfirmasi reservasi saya. Terima kasih."
@@ -932,6 +936,7 @@ async def create_booking(body: BookingCreate):
         f"Nomor: {booking['booking_number']}%0A"
         f"Customer: {booking['customer_name']}%0A"
         f"WhatsApp: {booking['whatsapp']}%0A"
+        f"Jenis Motor: {booking['motor_type']}%0A"
         f"Nomor Polisi: {booking['plate_number']}%0A"
         f"Jenis Servis: {booking['service_name']}%0A"
         f"Tanggal: {booking['booking_date']}%0A"
@@ -1440,18 +1445,19 @@ async def monthly_report_pdf(
     if not data["bookings"]:
         elems.append(Paragraph("Tidak ada reservasi pada periode ini.", small_st))
     else:
-        det = [["No Reservasi", "Tanggal", "Jam", "Customer", "Servis", "Mekanik", "Status"]]
+        det = [["No Reservasi", "Tanggal", "Jam", "Customer", "Motor", "Servis", "Mekanik", "Status"]]
         for b in data["bookings"]:
             det.append([
                 b["booking_number"],
                 b["booking_date"],
                 f"{b['start_time']}-{b['end_time']}",
                 Paragraph(b["customer_name"], cell_st),
+                Paragraph(f"{b.get('motor_type') or '-'}<br/><font size=7 color='#64748B'>{b['plate_number']}</font>", cell_st),
                 b["service_name"],
                 b["mechanic_name"],
                 b["status"],
             ])
-        dt = Table(det, colWidths=[3*cm, 2.3*cm, 2.2*cm, 3.6*cm, 2.8*cm, 2.3*cm, 2.8*cm], repeatRows=1)
+        dt = Table(det, colWidths=[2.8*cm, 2.1*cm, 2.1*cm, 3*cm, 2.6*cm, 2.4*cm, 2.1*cm, 2.4*cm], repeatRows=1)
         dt.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), dark),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),

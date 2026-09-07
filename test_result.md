@@ -228,6 +228,21 @@ backend:
         agent: "testing"
         comment: "✅ ALL 7 TESTS PASSED (100% success rate). Verified: (1) GET /api/admin/service-prices with auth returns 31 items (401 without auth), (2) POST {category:'Sport', motor:'MotorUjiXYZ', ringan:90000, berat:120000, overhaul:310000} returns 200 with category_order=4 (same as other Sport items) and order=31, (3) GET /api/service-prices?q=motorujixyz (public) returns total_motors=1 in Sport category with correct prices {ringan:90000, berat:120000, overhaul:310000}, (4) POST duplicate motor 'motorujixyz' (lowercase) correctly returns 400, (5) POST {category:'Kategori Baru', motor:'MotorBaruQQ'} returns 200 with category_order=8 and prices null; public search shows null prices, (6) PATCH {ringan:95000} updates ringan to 95000 while berat stays 120000; PATCH {ringan:-1} returns 400; PATCH {} returns 400; PATCH non-existent id returns 404, (7) DELETE both test items returns {ok:true}; DELETE again returns 404; GET /api/service-prices shows total_motors=31 and all_categories length=8. Admin service prices CRUD feature fully working."
 
+  - task: "Field motor_type (jenis motor) pada booking: wajib (2-80 char), tersimpan di booking & customer, ikut di pesan WA, customer/history, PDF laporan"
+    implemented: true
+    working: true
+    file: "backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "BookingCreate.motor_type: str Field(min_length=2, max_length=80). Booking doc & response mengandung motor_type; wa_customer_link mengandung 'Jenis Motor:'; GET /api/customer/history?plate= mengembalikan motor_type per item; PDF laporan kolom Motor."
+      - working: true
+        agent: "testing"
+        comment: "✅ ALL 13 TESTS PASSED (100% success rate). Verified: (1) GET /api/business-hours returns min_date/max_date, found valid non-Sunday date 2026-09-08, (2) GET /api/services returns ringan service, GET /api/availability returns available slot 08:30, (3) POST /api/bookings without motor_type → 422 (correctly rejected), (4) POST /api/bookings with motor_type='X' (1 char) → 422 (correctly rejected, min_length=2), (5) POST /api/bookings with motor_type='Yamaha NMAX 155' → 200, response.booking.motor_type='Yamaha NMAX 155', wa_customer_link contains 'Jenis', wa_admin_link contains 'Jenis', (6) GET /api/admin/bookings (auth) returns test booking with motor_type='Yamaha NMAX 155', (7) GET /api/customer/history?plate=DD%202%20TM returns recent[0].motor_type='Yamaha NMAX 155', (8) GET /api/admin/reports/monthly.pdf?year=2026&month=9&token=<jwt> → 200 application/pdf, 3499 bytes, starts with %PDF, (9) PATCH /api/admin/bookings/{id} status='Dibatalkan' → 200 (cleanup successful). Motor type feature fully working."
+
 frontend:
   - task: "Hapus tampilan harga/pendapatan di Admin (bookings list, pengaturan servis, laporan bulanan) dan update nomor kontak di Landing"
     implemented: true
@@ -243,12 +258,13 @@ frontend:
 
 metadata:
   created_by: "main_agent"
-  version: "1.6"
-  test_sequence: 6
+  version: "1.7"
+  test_sequence: 7
   run_ui: false
 
 test_plan:
   current_focus:
+    - "Field motor_type (jenis motor) pada booking: wajib (2-80 char), tersimpan di booking & customer, ikut di pesan WA, customer/history, PDF laporan"
     - "Admin CRUD biaya servis: GET/POST /api/admin/service-prices, PATCH/DELETE /api/admin/service-prices/{id}"
     - "Biaya servis publik: seed 31 tipe motor (8 kategori) + GET /api/service-prices (q/category)"
     - "Jam operasional baru 08:30-16:30 + istirahat per hari (breaks), slot berbasis sesi, kalender admin kolom istirahat"
@@ -286,3 +302,7 @@ agent_communication:
     message: "Fitur baru: admin CRUD biaya servis. Uji: GET /api/admin/service-prices (auth) -> 31 item, tanpa auth 401. POST {category:'Sport', motor:'MotorUjiXYZ', ringan:90000, berat:120000, overhaul:310000} -> 200, category_order == category_order item Sport lain (4), order == 31. GET /api/service-prices?q=motorujixyz (publik) -> total_motors 1 dalam kategori Sport dengan prices sesuai. POST duplikat sama (motor 'motorujixyz' lowercase) -> 400. POST {category:'Kategori Baru', motor:'MotorBaruQQ'} (tanpa harga) -> 200 category_order 8, prices null; publik: rupiah null tampil sebagai null. PATCH {ringan: 95000} -> ringan 95000, field lain tetap. PATCH {ringan:-1} -> 400. PATCH {} -> 400. PATCH id acak -> 404. DELETE kedua item uji -> {ok:true}; DELETE lagi -> 404; total kembali 31 dan all_categories kembali 8. Regression: GET /api/service-prices tanpa filter total_motors 31."
   - agent: "testing"
     message: "✅ ADMIN SERVICE PRICES CRUD TESTING COMPLETE (2026-09-06): All 7 tests passed (100% success rate). Feature fully verified: (1) GET /api/admin/service-prices with auth returns 31 items, without auth returns 401, (2) POST new Sport motor creates item with category_order=4 (matching other Sport items) and order=31, (3) Public search finds new motor with correct prices, (4) Duplicate motor (case-insensitive) correctly rejected with 400, (5) POST new category without prices creates item with category_order=8 and null prices visible in public endpoint, (6) PATCH operations work correctly: partial update preserves other fields, negative values rejected (400), empty body rejected (400), non-existent id rejected (404), (7) DELETE operations work correctly: both test items deleted successfully, re-delete returns 404, totals restored to 31 motors and 8 categories. All backend features now fully tested and working. Backend is production-ready."
+  - agent: "main"
+    message: "Fitur baru: field motor_type di POST /api/bookings. Uji: POST tanpa motor_type -> 422; motor_type 'X' (1 char) -> 422; POST valid dengan motor_type 'Yamaha NMAX 155' pada tanggal kerja valid (H+1..H+7 non-Minggu, jam 08:30) -> 200, response.booking.motor_type == 'Yamaha NMAX 155', wa_customer_link mengandung 'Jenis%20Motor' atau 'Jenis Motor' (URL-encoded, cek substring 'Jenis'), GET /api/admin/bookings (auth) item tsb punya motor_type, GET /api/customer/history?plate=<plate> recent[0].motor_type sesuai, GET /api/admin/reports/monthly.pdf?year=&month=&token= -> 200 PDF. Setelahnya PATCH booking status Dibatalkan."
+  - agent: "testing"
+    message: "✅ MOTOR TYPE FEATURE TESTING COMPLETE (2026-09-08): All 13 tests passed (100% success rate). Feature fully verified: (1) GET /api/business-hours returns min_date/max_date, found valid non-Sunday date 2026-09-08, (2) GET /api/services returns ringan service, GET /api/availability returns available slot 08:30, (3) POST /api/bookings without motor_type → 422 (correctly rejected), (4) POST /api/bookings with motor_type='X' (1 char) → 422 (correctly rejected, min_length=2 validation working), (5) POST /api/bookings with motor_type='Yamaha NMAX 155' → 200, response.booking.motor_type='Yamaha NMAX 155', wa_customer_link contains 'Jenis', wa_admin_link contains 'Jenis', (6) GET /api/admin/bookings (auth) returns test booking with motor_type='Yamaha NMAX 155', (7) GET /api/customer/history?plate=DD%202%20TM returns recent[0].motor_type='Yamaha NMAX 155', (8) GET /api/admin/reports/monthly.pdf?year=2026&month=9&token=<jwt> → 200 application/pdf, 3499 bytes, starts with %PDF, (9) PATCH /api/admin/bookings/{id} status='Dibatalkan' → 200 (cleanup successful). Motor type field is fully working across all endpoints (booking creation, admin view, customer history, PDF reports, WhatsApp messages). Backend is fully functional and production-ready."

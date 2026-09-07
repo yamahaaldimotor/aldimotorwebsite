@@ -75,7 +75,7 @@ export default function Reservasi() {
   const [time, setTime] = useState(null);
   const [dateRange, setDateRange] = useState(null); // { today, min, max } from server
   const [customer, setCustomer] = useState({
-    customer_name: "", whatsapp: "", plate_number: "", complaint: "",
+    customer_name: "", whatsapp: "", plate_number: "", motor_type: "", complaint: "",
   });
   const [errors, setErrors] = useState({});
   const [confirm, setConfirm] = useState(false);
@@ -126,6 +126,7 @@ export default function Reservasi() {
     if (!(digits.startsWith("08") || digits.startsWith("628") || digits.startsWith("8")) || digits.length < 9)
       e.whatsapp = "Nomor WA tidak valid";
     if (!customer.plate_number.trim()) e.plate_number = "Nomor polisi wajib diisi";
+    if (customer.motor_type.trim().length < 2) e.motor_type = "Jenis motor wajib diisi";
     if (!customer.complaint.trim()) e.complaint = "Keluhan wajib diisi";
     setErrors(e);
     return Object.keys(e).length === 0;
@@ -151,6 +152,7 @@ export default function Reservasi() {
       const r = await api.post("/bookings", {
         ...customer,
         plate_number: customer.plate_number.toUpperCase(),
+        motor_type: customer.motor_type.trim(),
         service_id: chosenService.id,
         booking_date: format(date, "yyyy-MM-dd"),
         start_time: time,
@@ -369,6 +371,17 @@ export default function Reservasi() {
                   />
                   {errors.plate_number && <p className="mt-1 text-xs text-red-600">{errors.plate_number}</p>}
                 </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="motor-type">Jenis Motor</Label>
+                  <Input
+                    id="motor-type" data-testid="input-motor-type"
+                    value={customer.motor_type}
+                    onChange={(e) => setCustomer({ ...customer, motor_type: e.target.value })}
+                    className="mt-2" placeholder="mis. Yamaha NMAX 155, Mio M3, Vixion" maxLength={80}
+                  />
+                  <p className="mt-1 text-xs text-slate-500">Tuliskan merek dan tipe motor Anda agar mekanik dapat menyiapkan penanganan yang sesuai.</p>
+                  {errors.motor_type && <p className="mt-1 text-xs text-red-600">{errors.motor_type}</p>}
+                </div>
               </div>
               <div className="mt-5">
                 <Label htmlFor="complaint">Keluhan / Permintaan</Label>
@@ -446,6 +459,7 @@ export default function Reservasi() {
                 <div className="my-3 border-t border-slate-200" />
                 <Row k="Nama" v={customer.customer_name} />
                 <Row k="WhatsApp" v={customer.whatsapp} />
+                <Row k="Jenis Motor" v={customer.motor_type} />
                 <Row k="Nomor Polisi" v={customer.plate_number.toUpperCase()} />
                 <Row k="Keluhan" v={customer.complaint} />
               </div>
@@ -524,6 +538,7 @@ function ReceiptCard({ result }) {
 
         <div className="mt-5 space-y-2 text-sm">
           <Row k="Nama" v={b.customer_name} />
+          {b.motor_type && <Row k="Jenis Motor" v={b.motor_type} />}
           <Row k="Nomor Polisi" v={b.plate_number} />
           <Row k="Jenis Servis" v={b.service_name} />
           <Row k="Estimasi Durasi" v={`${b.duration_hours} jam`} />

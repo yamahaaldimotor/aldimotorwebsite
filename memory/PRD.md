@@ -66,6 +66,9 @@ Website reservasi/booking servis motor untuk bengkel ALDI MOTOR. Customer bisa m
 - API /api/admin/service-prices (GET/POST) & /api/admin/service-prices/{id} (PATCH/DELETE); validasi duplikat motor per kategori (case-insensitive), harga negatif ditolak; kategori baru otomatis dapat category_order berikutnya.
 - Admin tab "Biaya Servis" (frontend/src/pages/admin/ServicePricesPanel.jsx): cari tipe motor, edit harga inline per kolom (Enter/blur, Escape batal, highlight kuning saat berubah), tambah tipe motor (dialog), edit lengkap, hapus, tambah tipe per kategori.
 
+## Update 2026-09-07 (v1.8) - Kolom Jenis Motor di Reservasi
+- Field `motor_type` (wajib, 2-80 karakter, teks bebas) di step Data Customer form reservasi; tidak terhubung ke harga. Tersimpan di booking & customer; tampil di ringkasan konfirmasi, bukti reservasi, pesan WA, daftar reservasi admin, detail kalender, tabel & PDF laporan, dan riwayat plat.
+
 ## Backlog (P1/P2)
 - P1: Kalender view mingguan/bulanan untuk admin
 - P1: Notifikasi Twilio WhatsApp API (kirim otomatis, bukan wa.me link)

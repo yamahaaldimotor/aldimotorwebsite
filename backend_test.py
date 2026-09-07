@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """
-ALDI MOTOR Backend Test Suite - Service Prices Feature
-Tests the new /api/service-prices endpoint
+ALDI MOTOR Backend Test Suite - Motor Type Feature
+Tests the new motor_type field on POST /api/bookings
 """
 import os
 import sys
 import requests
-from io import BytesIO
-from PIL import Image
+from datetime import datetime, timedelta
 import time
 
 # Backend URL from frontend/.env
@@ -20,7 +19,7 @@ ADMIN_PASSWORD = "aldimotorjaya"
 
 # Test state
 token = None
-test_mechanic_id = None
+test_booking_id = None
 test_results = []
 
 
@@ -54,1234 +53,333 @@ def login():
     return token
 
 
-def test_get_mechanics():
-    """Test 1: GET /api/mechanics - verify 5 mechanics with real names and photo fields"""
-    print("\n=== TEST 1: GET /api/mechanics ===")
-    resp = requests.get(f"{API_BASE}/mechanics", timeout=10)
+def get_valid_booking_date():
+    """Get a valid booking date (non-Sunday, within business hours range)"""
+    print("\n=== STEP 1: Get valid booking date ===")
     
+    # Get business hours
+    resp = requests.get(f"{API_BASE}/business-hours", timeout=10)
     if resp.status_code != 200:
-        log_test("1", "FAIL", f"GET /api/mechanics returned {resp.status_code}")
-        return False
+        log_test("1a", "FAIL", f"GET /api/business-hours returned {resp.status_code}")
+        return None, None
     
-    mechanics = resp.json()
+    bh = resp.json()
+    min_date = bh.get("min_date")
+    max_date = bh.get("max_date")
     
-    # Check we have 5 mechanics
-    if len(mechanics) < 5:
-        log_test("1", "FAIL", f"Expected at least 5 mechanics, got {len(mechanics)}")
-        return False
+    if not min_date or not max_date:
+        log_test("1a", "FAIL", f"Business hours missing min_date or max_date")
+        return None, None
     
-    # Expected real names
-    expected_names = ["Andi Muh Wahidin", "Ahmad Balla", "Kasim", "Ansar", "Muh Risal"]
-    found_names = [m.get("name") for m in mechanics]
+    log_test("1a", "PASS", f"Business hours: min_date={min_date}, max_date={max_date}")
     
-    # Check all expected names are present
-    missing_names = [name for name in expected_names if name not in found_names]
-    if missing_names:
-        log_test("1", "FAIL", f"Missing mechanics: {missing_names}. Found: {found_names}")
-        return False
-    
-    # Check each mechanic has a photo field
-    mechanics_without_photo = [m.get("name") for m in mechanics if "photo" not in m or not m["photo"]]
-    if mechanics_without_photo:
-        log_test("1", "FAIL", f"Mechanics without photo field: {mechanics_without_photo}")
-        return False
-    
-    # Verify photo field format (should be like "/mechanics/<slug>.jpg")
-    for m in mechanics:
-        photo = m.get("photo", "")
-        if not photo.startswith("/mechanics/") and not photo.startswith("/api/uploads/mechanics/"):
-            log_test("1", "FAIL", f"Mechanic {m.get('name')} has invalid photo format: {photo}")
-            return False
-    
-    log_test("1", "PASS", f"Found {len(mechanics)} mechanics with real names and photo fields")
-    return True
-
-
-def test_create_mechanic():
-    """Test 2: POST /api/admin/mechanics - create test mechanic"""
-    global test_mechanic_id
-    print("\n=== TEST 2: POST /api/admin/mechanics ===")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    resp = requests.post(
-        f"{API_BASE}/admin/mechanics",
-        json={"name": "Test Mekanik Foto"},
-        headers=headers,
-        timeout=10
-    )
-    
+    # Get holidays
+    resp = requests.get(f"{API_BASE}/holidays", timeout=10)
     if resp.status_code != 200:
-        log_test("2", "FAIL", f"POST /api/admin/mechanics returned {resp.status_code}: {resp.text}")
-        return False
+        log_test("1b", "FAIL", f"GET /api/holidays returned {resp.status_code}")
+        return None, None
     
-    mechanic = resp.json()
-    test_mechanic_id = mechanic.get("id")
+    holidays = resp.json()
+    holiday_dates = [h.get("date") for h in holidays]
+    log_test("1b", "PASS", f"Got {len(holiday_dates)} holidays")
     
-    if not test_mechanic_id:
-        log_test("2", "FAIL", "No id in response")
-        return False
+    # Find a valid date (non-Sunday, not holiday)
+    current_date = datetime.strptime(min_date, "%Y-%m-%d")
+    max_date_obj = datetime.strptime(max_date, "%Y-%m-%d")
     
-    if mechanic.get("name") != "Test Mekanik Foto":
-        log_test("2", "FAIL", f"Name mismatch: expected 'Test Mekanik Foto', got '{mechanic.get('name')}'")
-        return False
+    valid_date = None
+    while current_date <= max_date_obj:
+        date_str = current_date.strftime("%Y-%m-%d")
+        # Check if Sunday (weekday 6)
+        if current_date.weekday() != 6 and date_str not in holiday_dates:
+            valid_date = date_str
+            break
+        current_date += timedelta(days=1)
     
-    log_test("2", "PASS", f"Created test mechanic with id: {test_mechanic_id}")
-    return True
+    if not valid_date:
+        log_test("1c", "FAIL", "No valid booking date found in range")
+        return None, None
+    
+    log_test("1c", "PASS", f"Found valid booking date: {valid_date}")
+    return valid_date, bh
 
 
-def create_test_image(width, height, format="PNG"):
-    """Create a test image using PIL"""
-    img = Image.new("RGB", (width, height), color=(73, 109, 137))
-    # Add some pattern to make it recognizable
-    from PIL import ImageDraw
-    draw = ImageDraw.Draw(img)
-    draw.rectangle([width//4, height//4, 3*width//4, 3*height//4], fill=(255, 200, 100))
-    draw.text((width//2 - 20, height//2), "TEST", fill=(0, 0, 0))
-    
-    buf = BytesIO()
-    img.save(buf, format=format, quality=95)
-    buf.seek(0)
-    return buf
-
-
-def test_upload_photo_png():
-    """Test 3a: POST /api/admin/mechanics/{id}/photo with PNG"""
-    print("\n=== TEST 3a: Upload PNG photo ===")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # Create 800x600 PNG
-    img_buf = create_test_image(800, 600, "PNG")
-    
-    files = {"file": ("test.png", img_buf, "image/png")}
-    resp = requests.post(
-        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
-        files=files,
-        headers=headers,
-        timeout=15
-    )
-    
-    if resp.status_code != 200:
-        log_test("3a", "FAIL", f"Upload PNG returned {resp.status_code}: {resp.text}")
-        return False
-    
-    mechanic = resp.json()
-    photo_url = mechanic.get("photo")
-    
-    if not photo_url:
-        log_test("3a", "FAIL", "No photo field in response")
-        return False
-    
-    if not photo_url.startswith(f"/api/uploads/mechanics/{test_mechanic_id}.jpg"):
-        log_test("3a", "FAIL", f"Photo URL format incorrect: {photo_url}")
-        return False
-    
-    if "?v=" not in photo_url:
-        log_test("3a", "FAIL", f"Photo URL missing version parameter: {photo_url}")
-        return False
-    
-    log_test("3a", "PASS", f"PNG uploaded successfully, photo URL: {photo_url}")
-    return photo_url
-
-
-def test_upload_photo_jpeg():
-    """Test 3b: POST /api/admin/mechanics/{id}/photo with JPEG"""
-    print("\n=== TEST 3b: Upload JPEG photo ===")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # Create 800x600 JPEG
-    img_buf = create_test_image(800, 600, "JPEG")
-    
-    files = {"file": ("test.jpg", img_buf, "image/jpeg")}
-    resp = requests.post(
-        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
-        files=files,
-        headers=headers,
-        timeout=15
-    )
-    
-    if resp.status_code != 200:
-        log_test("3b", "FAIL", f"Upload JPEG returned {resp.status_code}: {resp.text}")
-        return False
-    
-    mechanic = resp.json()
-    photo_url = mechanic.get("photo")
-    
-    if not photo_url:
-        log_test("3b", "FAIL", "No photo field in response")
-        return False
-    
-    log_test("3b", "PASS", f"JPEG uploaded successfully, photo URL: {photo_url}")
-    return photo_url
-
-
-def test_get_uploaded_photo(photo_url):
-    """Test 4: GET uploaded photo and verify it's 480x480 JPEG"""
-    print("\n=== TEST 4: GET uploaded photo ===")
-    
-    # Extract path without query params
-    photo_path = photo_url.split("?")[0]
-    full_url = f"{BACKEND_URL}{photo_path}"
-    
-    resp = requests.get(full_url, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("4", "FAIL", f"GET {photo_path} returned {resp.status_code}")
-        return False
-    
-    content_type = resp.headers.get("content-type", "")
-    if "image/jpeg" not in content_type:
-        log_test("4", "FAIL", f"Content-Type is {content_type}, expected image/jpeg")
-        return False
-    
-    # Verify image dimensions with PIL
-    try:
-        img = Image.open(BytesIO(resp.content))
-        width, height = img.size
-        
-        if width != 480 or height != 480:
-            log_test("4", "FAIL", f"Image dimensions are {width}x{height}, expected 480x480")
-            return False
-        
-        log_test("4", "PASS", f"Photo retrieved successfully: 480x480 JPEG, {len(resp.content)} bytes")
-        return True
-    except Exception as e:
-        log_test("4", "FAIL", f"Failed to verify image: {e}")
-        return False
-
-
-def test_upload_txt_file():
-    """Test 5a: Upload .txt file - should return 400"""
-    print("\n=== TEST 5a: Upload .txt file (negative test) ===")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    txt_content = BytesIO(b"This is a text file, not an image")
-    files = {"file": ("test.txt", txt_content, "text/plain")}
-    
-    resp = requests.post(
-        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
-        files=files,
-        headers=headers,
-        timeout=10
-    )
-    
-    if resp.status_code != 400:
-        log_test("5a", "FAIL", f"Expected 400 for .txt file, got {resp.status_code}")
-        return False
-    
-    log_test("5a", "PASS", "Correctly rejected .txt file with 400")
-    return True
-
-
-def test_upload_large_file():
-    """Test 5b: Upload file > 5MB - should return 400"""
-    print("\n=== TEST 5b: Upload file > 5MB (negative test) ===")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # Create a large PNG (3000x3000 with random noise should be > 5MB)
-    img = Image.new("RGB", (3000, 3000))
-    import random
-    pixels = img.load()
-    for i in range(3000):
-        for j in range(3000):
-            pixels[i, j] = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-    
-    buf = BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
-    size_mb = len(buf.getvalue()) / (1024 * 1024)
-    
-    if size_mb <= 5:
-        log_test("5b", "FAIL", f"Test image is only {size_mb:.2f}MB, need > 5MB")
-        return False
-    
-    files = {"file": ("large.png", buf, "image/png")}
-    
-    resp = requests.post(
-        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
-        files=files,
-        headers=headers,
-        timeout=15
-    )
-    
-    if resp.status_code != 400:
-        log_test("5b", "FAIL", f"Expected 400 for {size_mb:.2f}MB file, got {resp.status_code}")
-        return False
-    
-    log_test("5b", "PASS", f"Correctly rejected {size_mb:.2f}MB file with 400")
-    return True
-
-
-def test_upload_without_auth():
-    """Test 5c: Upload without authentication - should return 401"""
-    print("\n=== TEST 5c: Upload without auth (negative test) ===")
-    
-    img_buf = create_test_image(100, 100, "JPEG")
-    files = {"file": ("test.jpg", img_buf, "image/jpeg")}
-    
-    resp = requests.post(
-        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
-        files=files,
-        timeout=10
-    )
-    
-    if resp.status_code != 401:
-        log_test("5c", "FAIL", f"Expected 401 without auth, got {resp.status_code}")
-        return False
-    
-    log_test("5c", "PASS", "Correctly rejected upload without auth with 401")
-    return True
-
-
-def test_upload_nonexistent_mechanic():
-    """Test 5d: Upload to non-existent mechanic - should return 404"""
-    print("\n=== TEST 5d: Upload to non-existent mechanic (negative test) ===")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    img_buf = create_test_image(100, 100, "JPEG")
-    files = {"file": ("test.jpg", img_buf, "image/jpeg")}
-    
-    fake_id = "00000000-0000-0000-0000-000000000000"
-    resp = requests.post(
-        f"{API_BASE}/admin/mechanics/{fake_id}/photo",
-        files=files,
-        headers=headers,
-        timeout=10
-    )
-    
-    if resp.status_code != 404:
-        log_test("5d", "FAIL", f"Expected 404 for non-existent mechanic, got {resp.status_code}")
-        return False
-    
-    log_test("5d", "PASS", "Correctly returned 404 for non-existent mechanic")
-    return True
-
-
-def test_delete_photo():
-    """Test 6: DELETE /api/admin/mechanics/{id}/photo"""
-    print("\n=== TEST 6: DELETE photo ===")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    resp = requests.delete(
-        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
-        headers=headers,
-        timeout=10
-    )
-    
-    if resp.status_code != 200:
-        log_test("6", "FAIL", f"DELETE photo returned {resp.status_code}: {resp.text}")
-        return False
-    
-    mechanic = resp.json()
-    
-    if "photo" in mechanic and mechanic["photo"]:
-        log_test("6", "FAIL", f"Photo field still present after delete: {mechanic.get('photo')}")
-        return False
-    
-    log_test("6", "PASS", "Photo deleted successfully, no photo field in response")
-    return True
-
-
-def test_photo_file_deleted():
-    """Test 6b: Verify photo file returns 404 after deletion"""
-    print("\n=== TEST 6b: Verify photo file deleted ===")
-    
-    photo_path = f"/api/uploads/mechanics/{test_mechanic_id}.jpg"
-    full_url = f"{BACKEND_URL}{photo_path}"
-    
-    resp = requests.get(full_url, timeout=10)
-    
-    if resp.status_code != 404:
-        log_test("6b", "FAIL", f"Expected 404 for deleted photo, got {resp.status_code}")
-        return False
-    
-    log_test("6b", "PASS", "Photo file correctly returns 404 after deletion")
-    return True
-
-
-def test_reupload_and_delete_mechanic():
-    """Test 7: Re-upload photo, then delete mechanic, verify file deleted"""
-    print("\n=== TEST 7: Re-upload and delete mechanic ===")
-    
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    # Re-upload photo
-    img_buf = create_test_image(500, 500, "JPEG")
-    files = {"file": ("test.jpg", img_buf, "image/jpeg")}
-    
-    resp = requests.post(
-        f"{API_BASE}/admin/mechanics/{test_mechanic_id}/photo",
-        files=files,
-        headers=headers,
-        timeout=15
-    )
-    
-    if resp.status_code != 200:
-        log_test("7", "FAIL", f"Re-upload failed: {resp.status_code}")
-        return False
-    
-    # Delete mechanic
-    resp = requests.delete(
-        f"{API_BASE}/admin/mechanics/{test_mechanic_id}",
-        headers=headers,
-        timeout=10
-    )
-    
-    if resp.status_code != 200:
-        log_test("7", "FAIL", f"Delete mechanic returned {resp.status_code}: {resp.text}")
-        return False
-    
-    # Verify photo file is deleted
-    photo_path = f"/api/uploads/mechanics/{test_mechanic_id}.jpg"
-    full_url = f"{BACKEND_URL}{photo_path}"
-    
-    resp = requests.get(full_url, timeout=10)
-    
-    if resp.status_code != 404:
-        log_test("7", "FAIL", f"Photo file still accessible after mechanic deletion: {resp.status_code}")
-        return False
-    
-    log_test("7", "PASS", "Mechanic deleted, photo file correctly removed (404)")
-    return True
-
-
-def test_regression_services():
-    """Test 8a: Regression - GET /api/services (no price)"""
-    print("\n=== TEST 8a: Regression - GET /api/services ===")
-    
+def get_service_and_availability(booking_date):
+    """Get service ID and available slot"""
+    print("\n=== STEP 1 (continued): Get service and availability ===")
+    
+    # Get services
     resp = requests.get(f"{API_BASE}/services", timeout=10)
-    
     if resp.status_code != 200:
-        log_test("8a", "FAIL", f"GET /api/services returned {resp.status_code}")
-        return False
+        log_test("1d", "FAIL", f"GET /api/services returned {resp.status_code}")
+        return None, None
     
     services = resp.json()
+    ringan_service = None
+    for svc in services:
+        if svc.get("code") == "ringan":
+            ringan_service = svc
+            break
     
-    # Check no service has price field
-    services_with_price = [s.get("name") for s in services if "price" in s]
-    if services_with_price:
-        log_test("8a", "FAIL", f"Services with price field: {services_with_price}")
+    if not ringan_service:
+        log_test("1d", "FAIL", "Ringan service not found")
+        return None, None
+    
+    service_id = ringan_service.get("id")
+    log_test("1d", "PASS", f"Found ringan service: id={service_id}")
+    
+    # Get availability
+    resp = requests.get(
+        f"{API_BASE}/availability",
+        params={"date": booking_date, "service_id": service_id},
+        timeout=10
+    )
+    if resp.status_code != 200:
+        log_test("1e", "FAIL", f"GET /api/availability returned {resp.status_code}")
+        return None, None
+    
+    availability = resp.json()
+    slots = availability.get("slots", [])
+    
+    # Find an available slot (not closed, not full)
+    available_slot = None
+    for slot in slots:
+        if slot.get("status") not in ["closed", "full"]:
+            available_slot = slot.get("time")
+            break
+    
+    if not available_slot:
+        log_test("1e", "FAIL", "No available slot found")
+        return None, None
+    
+    log_test("1e", "PASS", f"Found available slot: {available_slot}")
+    return service_id, available_slot
+
+
+def test_booking_without_motor_type(booking_date, service_id, start_time):
+    """Test 2: POST /api/bookings without motor_type - should return 422"""
+    print("\n=== TEST 2: POST /api/bookings without motor_type ===")
+    
+    booking_data = {
+        "customer_name": "Tester Motor",
+        "whatsapp": "081200002222",
+        "plate_number": "DD 2 TM",
+        # motor_type is missing
+        "complaint": "tes motor type",
+        "service_id": service_id,
+        "booking_date": booking_date,
+        "start_time": start_time
+    }
+    
+    resp = requests.post(f"{API_BASE}/bookings", json=booking_data, timeout=10)
+    
+    if resp.status_code != 422:
+        log_test("2", "FAIL", f"Expected 422 without motor_type, got {resp.status_code}: {resp.text}")
         return False
     
-    log_test("8a", "PASS", f"GET /api/services returned {len(services)} services without price field")
+    log_test("2", "PASS", "Correctly rejected booking without motor_type with 422")
     return True
 
 
-def test_regression_stats():
-    """Test 8b: Regression - GET /api/admin/stats"""
-    print("\n=== TEST 8b: Regression - GET /api/admin/stats ===")
+def test_booking_with_short_motor_type(booking_date, service_id, start_time):
+    """Test 3: POST /api/bookings with motor_type 'X' (1 char) - should return 422"""
+    print("\n=== TEST 3: POST /api/bookings with motor_type 'X' (1 char) ===")
     
-    headers = {"Authorization": f"Bearer {token}"}
+    booking_data = {
+        "customer_name": "Tester Motor",
+        "whatsapp": "081200002222",
+        "plate_number": "DD 2 TM",
+        "motor_type": "X",  # Too short (min_length=2)
+        "complaint": "tes motor type",
+        "service_id": service_id,
+        "booking_date": booking_date,
+        "start_time": start_time
+    }
     
-    resp = requests.get(f"{API_BASE}/admin/stats", headers=headers, timeout=10)
+    resp = requests.post(f"{API_BASE}/bookings", json=booking_data, timeout=10)
+    
+    if resp.status_code != 422:
+        log_test("3", "FAIL", f"Expected 422 with motor_type 'X', got {resp.status_code}: {resp.text}")
+        return False
+    
+    log_test("3", "PASS", "Correctly rejected booking with motor_type 'X' (1 char) with 422")
+    return True
+
+
+def test_booking_with_valid_motor_type(booking_date, service_id, start_time):
+    """Test 4: POST /api/bookings with valid motor_type 'Yamaha NMAX 155' - should return 200"""
+    global test_booking_id
+    print("\n=== TEST 4: POST /api/bookings with valid motor_type ===")
+    
+    booking_data = {
+        "customer_name": "Tester Motor",
+        "whatsapp": "081200002222",
+        "plate_number": "DD 2 TM",
+        "motor_type": "Yamaha NMAX 155",
+        "complaint": "tes motor type",
+        "service_id": service_id,
+        "booking_date": booking_date,
+        "start_time": start_time
+    }
+    
+    resp = requests.post(f"{API_BASE}/bookings", json=booking_data, timeout=10)
     
     if resp.status_code != 200:
-        log_test("8b", "FAIL", f"GET /api/admin/stats returned {resp.status_code}")
+        log_test("4", "FAIL", f"POST /api/bookings returned {resp.status_code}: {resp.text}")
         return False
     
-    stats = resp.json()
+    data = resp.json()
+    booking = data.get("booking")
     
-    # Just verify it returns data
-    if "total" not in stats:
-        log_test("8b", "FAIL", "Stats response missing 'total' field")
+    if not booking:
+        log_test("4", "FAIL", "No booking in response")
         return False
     
-    log_test("8b", "PASS", f"GET /api/admin/stats returned successfully")
+    test_booking_id = booking.get("id")
+    
+    # Check motor_type in response
+    if booking.get("motor_type") != "Yamaha NMAX 155":
+        log_test("4", "FAIL", f"motor_type mismatch: expected 'Yamaha NMAX 155', got '{booking.get('motor_type')}'")
+        return False
+    
+    # Check wa_customer_link contains "Jenis"
+    wa_customer_link = data.get("wa_customer_link", "")
+    if "Jenis" not in wa_customer_link:
+        log_test("4", "FAIL", f"wa_customer_link doesn't contain 'Jenis': {wa_customer_link}")
+        return False
+    
+    # Check wa_admin_link contains "Jenis"
+    wa_admin_link = data.get("wa_admin_link", "")
+    if "Jenis" not in wa_admin_link:
+        log_test("4", "FAIL", f"wa_admin_link doesn't contain 'Jenis': {wa_admin_link}")
+        return False
+    
+    log_test("4", "PASS", f"Booking created successfully with motor_type='Yamaha NMAX 155', id={test_booking_id}, WA links contain 'Jenis'")
     return True
 
 
-def test_regression_monthly_report():
-    """Test 8c: Regression - GET /api/admin/reports/monthly"""
-    print("\n=== TEST 8c: Regression - GET /api/admin/reports/monthly ===")
+def test_admin_bookings_has_motor_type():
+    """Test 5: GET /api/admin/bookings - verify booking has motor_type"""
+    print("\n=== TEST 5: GET /api/admin/bookings ===")
     
     headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.get(f"{API_BASE}/admin/bookings", headers=headers, timeout=10)
+    
+    if resp.status_code != 200:
+        log_test("5", "FAIL", f"GET /api/admin/bookings returned {resp.status_code}")
+        return False
+    
+    bookings = resp.json()
+    
+    # Find our test booking
+    test_booking = None
+    for b in bookings:
+        if b.get("id") == test_booking_id:
+            test_booking = b
+            break
+    
+    if not test_booking:
+        log_test("5", "FAIL", f"Test booking {test_booking_id} not found in admin bookings")
+        return False
+    
+    if test_booking.get("motor_type") != "Yamaha NMAX 155":
+        log_test("5", "FAIL", f"motor_type mismatch: expected 'Yamaha NMAX 155', got '{test_booking.get('motor_type')}'")
+        return False
+    
+    log_test("5", "PASS", f"Admin bookings contains test booking with motor_type='Yamaha NMAX 155'")
+    return True
+
+
+def test_customer_history_has_motor_type():
+    """Test 6: GET /api/customer/history?plate=DD%202%20TM - verify motor_type"""
+    print("\n=== TEST 6: GET /api/customer/history ===")
     
     resp = requests.get(
-        f"{API_BASE}/admin/reports/monthly",
-        params={"year": 2026, "month": 9},
+        f"{API_BASE}/customer/history",
+        params={"plate": "DD 2 TM"},
+        timeout=10
+    )
+    
+    if resp.status_code != 200:
+        log_test("6", "FAIL", f"GET /api/customer/history returned {resp.status_code}")
+        return False
+    
+    data = resp.json()
+    recent_list = data.get("recent", [])
+    
+    if not recent_list or len(recent_list) == 0:
+        log_test("6", "FAIL", "No recent bookings found for plate 'DD 2 TM'")
+        return False
+    
+    # Check the most recent booking (should be our test booking)
+    recent = recent_list[0]
+    
+    if recent.get("motor_type") != "Yamaha NMAX 155":
+        log_test("6", "FAIL", f"motor_type mismatch: expected 'Yamaha NMAX 155', got '{recent.get('motor_type')}'")
+        return False
+    
+    log_test("6", "PASS", f"Customer history contains booking with motor_type='Yamaha NMAX 155'")
+    return True
+
+
+def test_monthly_pdf_report(booking_date):
+    """Test 7: GET /api/admin/reports/monthly.pdf - verify PDF generation"""
+    print("\n=== TEST 7: GET /api/admin/reports/monthly.pdf ===")
+    
+    # Extract year and month from booking_date
+    date_obj = datetime.strptime(booking_date, "%Y-%m-%d")
+    year = date_obj.year
+    month = date_obj.month
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.get(
+        f"{API_BASE}/admin/reports/monthly.pdf",
+        params={"year": year, "month": month, "token": token},
+        headers=headers,
+        timeout=15
+    )
+    
+    if resp.status_code != 200:
+        log_test("7", "FAIL", f"GET /api/admin/reports/monthly.pdf returned {resp.status_code}: {resp.text}")
+        return False
+    
+    # Check content type
+    content_type = resp.headers.get("content-type", "")
+    if "application/pdf" not in content_type:
+        log_test("7", "FAIL", f"Content-Type is {content_type}, expected application/pdf")
+        return False
+    
+    # Check PDF signature
+    if not resp.content.startswith(b"%PDF"):
+        log_test("7", "FAIL", "Response doesn't start with %PDF")
+        return False
+    
+    pdf_size = len(resp.content)
+    log_test("7", "PASS", f"Monthly PDF generated successfully: {pdf_size} bytes, content-type=application/pdf, starts with %PDF")
+    return True
+
+
+def cleanup_test_booking():
+    """Test 8: Cleanup - PATCH /api/admin/bookings/{id} status to 'Dibatalkan'"""
+    print("\n=== TEST 8: Cleanup - Cancel test booking ===")
+    
+    if not test_booking_id:
+        log_test("8", "SKIP", "No test booking to cleanup")
+        return True
+    
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.patch(
+        f"{API_BASE}/admin/bookings/{test_booking_id}",
+        json={"status": "Dibatalkan"},
         headers=headers,
         timeout=10
     )
     
     if resp.status_code != 200:
-        log_test("8c", "FAIL", f"GET /api/admin/reports/monthly returned {resp.status_code}")
+        log_test("8", "FAIL", f"PATCH /api/admin/bookings/{test_booking_id} returned {resp.status_code}: {resp.text}")
         return False
     
-    report = resp.json()
-    
-    # Verify has active_total and completed_total, no revenue fields
-    if "active_total" not in report:
-        log_test("8c", "FAIL", "Report missing 'active_total' field")
-        return False
-    
-    if "completed_total" not in report:
-        log_test("8c", "FAIL", "Report missing 'completed_total' field")
-        return False
-    
-    if "revenue_total" in report or "revenue_completed" in report:
-        log_test("8c", "FAIL", "Report contains revenue fields (should be removed)")
-        return False
-    
-    log_test("8c", "PASS", "Monthly report has active_total/completed_total, no revenue fields")
-    return True
-
-
-def test_spareparts_basic():
-    """Test 9: GET /api/spareparts - basic structure"""
-    print("\n=== TEST 9: GET /api/spareparts (basic) ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("9", "FAIL", f"GET /api/spareparts returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    # Check total_items == 268
-    if data.get("total_items") != 268:
-        log_test("9", "FAIL", f"Expected total_items=268, got {data.get('total_items')}")
-        return False
-    
-    # Check total_categories == 36
-    if data.get("total_categories") != 36:
-        log_test("9", "FAIL", f"Expected total_categories=36, got {data.get('total_categories')}")
-        return False
-    
-    # Check groups has exactly 6 entries
-    groups = data.get("groups", [])
-    if len(groups) != 6:
-        log_test("9", "FAIL", f"Expected 6 groups, got {len(groups)}")
-        return False
-    
-    # Check group order
-    expected_order = ["CVT & Transmisi", "Mesin & Bahan Bakar", "Kelistrikan", "Ban", "Rem, Kemudi & Suspensi", "Body & Aksesori"]
-    actual_order = [g.get("group") for g in groups]
-    
-    if actual_order != expected_order:
-        log_test("9", "FAIL", f"Group order mismatch. Expected: {expected_order}, Got: {actual_order}")
-        return False
-    
-    # Verify every item has required keys
-    for group in groups:
-        for category in group.get("categories", []):
-            for item in category.get("items", []):
-                required_keys = ["id", "category", "group", "motor", "price_label", "price", "order"]
-                missing_keys = [k for k in required_keys if k not in item]
-                if missing_keys:
-                    log_test("9", "FAIL", f"Item missing keys: {missing_keys}. Item: {item.get('id')}")
-                    return False
-                
-                # Check price_label starts with "Rp "
-                if not item.get("price_label", "").startswith("Rp "):
-                    log_test("9", "FAIL", f"price_label doesn't start with 'Rp ': {item.get('price_label')}")
-                    return False
-    
-    log_test("9", "PASS", f"GET /api/spareparts: 268 items, 36 categories, 6 groups in correct order")
-    return True
-
-
-def test_spareparts_search_nmax_lowercase():
-    """Test 10: GET /api/spareparts?q=nmax (lowercase)"""
-    print("\n=== TEST 10: GET /api/spareparts?q=nmax ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", params={"q": "nmax"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("10", "FAIL", f"GET /api/spareparts?q=nmax returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    total_items = data.get("total_items", 0)
-    
-    if total_items == 0:
-        log_test("10", "FAIL", "Expected total_items > 0 for query 'nmax'")
-        return False
-    
-    # Verify every returned item contains "nmax" (case-insensitive)
-    for group in data.get("groups", []):
-        for category in group.get("categories", []):
-            for item in category.get("items", []):
-                searchable = f"{item.get('category', '')} {item.get('motor', '')} {item.get('variant', '')} {item.get('group', '')} {item.get('description', '')}".lower()
-                if "nmax" not in searchable:
-                    log_test("10", "FAIL", f"Item doesn't contain 'nmax': {item.get('motor')} - {item.get('category')}")
-                    return False
-    
-    log_test("10", "PASS", f"Search 'nmax' returned {total_items} items, all contain 'nmax'")
-    return total_items
-
-
-def test_spareparts_search_nmax_uppercase():
-    """Test 11: GET /api/spareparts?q=NMAX (uppercase) - should return same count"""
-    print("\n=== TEST 11: GET /api/spareparts?q=NMAX (uppercase) ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", params={"q": "NMAX"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("11", "FAIL", f"GET /api/spareparts?q=NMAX returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    uppercase_count = data.get("total_items", 0)
-    
-    # Get lowercase count from previous test
-    resp_lower = requests.get(f"{API_BASE}/spareparts", params={"q": "nmax"}, timeout=10)
-    lowercase_count = resp_lower.json().get("total_items", 0)
-    
-    if uppercase_count != lowercase_count:
-        log_test("11", "FAIL", f"Uppercase 'NMAX' returned {uppercase_count} items, lowercase 'nmax' returned {lowercase_count}")
-        return False
-    
-    log_test("11", "PASS", f"Search 'NMAX' (uppercase) returned same count as lowercase: {uppercase_count} items")
-    return True
-
-
-def test_spareparts_filter_group_ban():
-    """Test 12: GET /api/spareparts?group=Ban"""
-    print("\n=== TEST 12: GET /api/spareparts?group=Ban ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", params={"group": "Ban"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("12", "FAIL", f"GET /api/spareparts?group=Ban returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    groups = data.get("groups", [])
-    
-    # Should have only 1 group
-    if len(groups) != 1:
-        log_test("12", "FAIL", f"Expected 1 group, got {len(groups)}")
-        return False
-    
-    # Group should be "Ban"
-    if groups[0].get("group") != "Ban":
-        log_test("12", "FAIL", f"Expected group 'Ban', got '{groups[0].get('group')}'")
-        return False
-    
-    # Check categories
-    categories = groups[0].get("categories", [])
-    category_names = [c.get("category") for c in categories]
-    
-    expected_categories = ["Ban Depan", "Ban Belakang"]
-    if not all(cat in category_names for cat in expected_categories):
-        log_test("12", "FAIL", f"Expected categories {expected_categories}, got {category_names}")
-        return False
-    
-    # Verify items have size, description, price_prefix
-    for category in categories:
-        for item in category.get("items", []):
-            if "size" not in item:
-                log_test("12", "FAIL", f"Item missing 'size': {item.get('motor')}")
-                return False
-            if "description" not in item:
-                log_test("12", "FAIL", f"Item missing 'description': {item.get('motor')}")
-                return False
-            if item.get("price_prefix") != "Mulai dari":
-                log_test("12", "FAIL", f"Expected price_prefix='Mulai dari', got '{item.get('price_prefix')}'")
-                return False
-    
-    log_test("12", "PASS", f"Filter group=Ban: 1 group with Ban Depan & Ban Belakang, items have size/description/price_prefix")
-    return True
-
-
-def test_spareparts_filter_category_busi():
-    """Test 13: GET /api/spareparts?category=Busi NGK"""
-    print("\n=== TEST 13: GET /api/spareparts?category=Busi NGK ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", params={"category": "Busi NGK"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("13", "FAIL", f"GET /api/spareparts?category=Busi NGK returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    total_items = data.get("total_items", 0)
-    
-    # Should have 8 items
-    if total_items != 8:
-        log_test("13", "FAIL", f"Expected 8 items for 'Busi NGK', got {total_items}")
-        return False
-    
-    # Verify each item has variant starting with "NGK "
-    for group in data.get("groups", []):
-        for category in group.get("categories", []):
-            for item in category.get("items", []):
-                variant = item.get("variant", "")
-                if not variant.startswith("NGK "):
-                    log_test("13", "FAIL", f"Variant doesn't start with 'NGK ': {variant}")
-                    return False
-    
-    log_test("13", "PASS", f"Filter category='Busi NGK': 8 items, all variants start with 'NGK '")
-    return True
-
-
-def test_spareparts_filter_category_aki():
-    """Test 14: GET /api/spareparts?category=Aki GS Astra"""
-    print("\n=== TEST 14: GET /api/spareparts?category=Aki GS Astra ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", params={"category": "Aki GS Astra"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("14", "FAIL", f"GET /api/spareparts?category=Aki GS Astra returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    total_items = data.get("total_items", 0)
-    
-    # Should have 4 items
-    if total_items != 4:
-        log_test("14", "FAIL", f"Expected 4 items for 'Aki GS Astra', got {total_items}")
-        return False
-    
-    # Verify each item has variant and capacity
-    gtz8v_item = None
-    for group in data.get("groups", []):
-        for category in group.get("categories", []):
-            for item in category.get("items", []):
-                if "variant" not in item:
-                    log_test("14", "FAIL", f"Item missing 'variant': {item.get('motor')}")
-                    return False
-                if "capacity" not in item:
-                    log_test("14", "FAIL", f"Item missing 'capacity': {item.get('motor')}")
-                    return False
-                
-                # Find GTZ8V item
-                if "GTZ8V" in item.get("variant", ""):
-                    gtz8v_item = item
-    
-    # Check GTZ8V price_label
-    if not gtz8v_item:
-        log_test("14", "FAIL", "GTZ8V item not found")
-        return False
-    
-    expected_price_label = "Rp 500.000 – Rp 815.000"
-    if gtz8v_item.get("price_label") != expected_price_label:
-        log_test("14", "FAIL", f"GTZ8V price_label: expected '{expected_price_label}', got '{gtz8v_item.get('price_label')}'")
-        return False
-    
-    log_test("14", "PASS", f"Filter category='Aki GS Astra': 4 items with variant/capacity, GTZ8V price correct")
-    return True
-
-
-def test_spareparts_search_empty():
-    """Test 15: GET /api/spareparts?q=zzzz (no results)"""
-    print("\n=== TEST 15: GET /api/spareparts?q=zzzz (empty) ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", params={"q": "zzzz"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("15", "FAIL", f"GET /api/spareparts?q=zzzz returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    if data.get("total_items") != 0:
-        log_test("15", "FAIL", f"Expected total_items=0, got {data.get('total_items')}")
-        return False
-    
-    if data.get("total_categories") != 0:
-        log_test("15", "FAIL", f"Expected total_categories=0, got {data.get('total_categories')}")
-        return False
-    
-    if len(data.get("groups", [])) != 0:
-        log_test("15", "FAIL", f"Expected empty groups array, got {len(data.get('groups', []))} groups")
-        return False
-    
-    log_test("15", "PASS", "Search 'zzzz' returned 0 items, 0 categories, empty groups")
-    return True
-
-
-def test_spareparts_meta():
-    """Test 16: GET /api/spareparts/meta"""
-    print("\n=== TEST 16: GET /api/spareparts/meta ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts/meta", timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("16", "FAIL", f"GET /api/spareparts/meta returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    # Check total_items == 268
-    if data.get("total_items") != 268:
-        log_test("16", "FAIL", f"Expected total_items=268, got {data.get('total_items')}")
-        return False
-    
-    # Check 6 groups
-    groups = data.get("groups", [])
-    if len(groups) != 6:
-        log_test("16", "FAIL", f"Expected 6 groups, got {len(groups)}")
-        return False
-    
-    # Verify each group has group, categories (list of str), count
-    total_count = 0
-    for group in groups:
-        if "group" not in group:
-            log_test("16", "FAIL", f"Group missing 'group' field")
-            return False
-        
-        if "categories" not in group or not isinstance(group["categories"], list):
-            log_test("16", "FAIL", f"Group '{group.get('group')}' missing or invalid 'categories' field")
-            return False
-        
-        # Check categories are strings
-        if not all(isinstance(cat, str) for cat in group["categories"]):
-            log_test("16", "FAIL", f"Group '{group.get('group')}' has non-string categories")
-            return False
-        
-        if "count" not in group:
-            log_test("16", "FAIL", f"Group '{group.get('group')}' missing 'count' field")
-            return False
-        
-        total_count += group["count"]
-    
-    # Sum of counts should equal 268
-    if total_count != 268:
-        log_test("16", "FAIL", f"Sum of group counts is {total_count}, expected 268")
-        return False
-    
-    log_test("16", "PASS", f"GET /api/spareparts/meta: 268 items, 6 groups with categories/count, sum=268")
-    return True
-
-
-def test_spareparts_combined_filter():
-    """Test 17: GET /api/spareparts?group=Kelistrikan&q=aerox"""
-    print("\n=== TEST 17: GET /api/spareparts?group=Kelistrikan&q=aerox ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", params={"group": "Kelistrikan", "q": "aerox"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("17", "FAIL", f"GET /api/spareparts?group=Kelistrikan&q=aerox returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    # Verify all items are in Kelistrikan group and match aerox
-    for group in data.get("groups", []):
-        if group.get("group") != "Kelistrikan":
-            log_test("17", "FAIL", f"Found group '{group.get('group')}', expected only 'Kelistrikan'")
-            return False
-        
-        for category in group.get("categories", []):
-            for item in category.get("items", []):
-                # Check group
-                if item.get("group") != "Kelistrikan":
-                    log_test("17", "FAIL", f"Item has group '{item.get('group')}', expected 'Kelistrikan'")
-                    return False
-                
-                # Check contains aerox
-                searchable = f"{item.get('category', '')} {item.get('motor', '')} {item.get('variant', '')} {item.get('group', '')} {item.get('description', '')}".lower()
-                if "aerox" not in searchable:
-                    log_test("17", "FAIL", f"Item doesn't contain 'aerox': {item.get('motor')} - {item.get('category')}")
-                    return False
-    
-    total_items = data.get("total_items", 0)
-    log_test("17", "PASS", f"Combined filter group=Kelistrikan&q=aerox: {total_items} items, all match both filters")
-    return True
-
-
-def test_regression_mechanics_with_photo():
-    """Test 18: Regression - GET /api/mechanics (5 with photo)"""
-    print("\n=== TEST 18: Regression - GET /api/mechanics ===")
-    
-    resp = requests.get(f"{API_BASE}/mechanics", timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("18", "FAIL", f"GET /api/mechanics returned {resp.status_code}")
-        return False
-    
-    mechanics = resp.json()
-    
-    # Should have at least 5 mechanics
-    if len(mechanics) < 5:
-        log_test("18", "FAIL", f"Expected at least 5 mechanics, got {len(mechanics)}")
-        return False
-    
-    # Check each has photo
-    mechanics_without_photo = [m.get("name") for m in mechanics if "photo" not in m or not m["photo"]]
-    if mechanics_without_photo:
-        log_test("18", "FAIL", f"Mechanics without photo: {mechanics_without_photo}")
-        return False
-    
-    log_test("18", "PASS", f"GET /api/mechanics: {len(mechanics)} mechanics, all have photo field")
-    return True
-
-
-def test_regression_services_no_price():
-    """Test 19: Regression - GET /api/services (4, no price)"""
-    print("\n=== TEST 19: Regression - GET /api/services ===")
-    
-    resp = requests.get(f"{API_BASE}/services", timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("19", "FAIL", f"GET /api/services returned {resp.status_code}")
-        return False
-    
-    services = resp.json()
-    
-    # Should have 4 services
-    if len(services) != 4:
-        log_test("19", "FAIL", f"Expected 4 services, got {len(services)}")
-        return False
-    
-    # Check no service has price
-    services_with_price = [s.get("name") for s in services if "price" in s]
-    if services_with_price:
-        log_test("19", "FAIL", f"Services with price field: {services_with_price}")
-        return False
-    
-    log_test("19", "PASS", f"GET /api/services: 4 services, none have price field")
-    return True
-
-
-def test_service_prices_basic():
-    """Test SP1: GET /api/service-prices - basic structure"""
-    print("\n=== TEST SP1: GET /api/service-prices (basic) ===")
-    
-    resp = requests.get(f"{API_BASE}/service-prices", timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("SP1", "FAIL", f"GET /api/service-prices returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    # Check total_motors == 31
-    if data.get("total_motors") != 31:
-        log_test("SP1", "FAIL", f"Expected total_motors=31, got {data.get('total_motors')}")
-        return False
-    
-    # Check categories length == 8
-    categories = data.get("categories", [])
-    if len(categories) != 8:
-        log_test("SP1", "FAIL", f"Expected 8 categories, got {len(categories)}")
-        return False
-    
-    # Check category order
-    expected_order = ["Moped", "Matic", "Matic Classy", "Matic Premium", "Sport", "Matic Premium 1", "Matic Premium 2", "Sport Premium"]
-    actual_order = [c.get("category") for c in categories]
-    
-    if actual_order != expected_order:
-        log_test("SP1", "FAIL", f"Category order mismatch. Expected: {expected_order}, Got: {actual_order}")
-        return False
-    
-    # Check types length == 3
-    types = data.get("types", [])
-    if len(types) != 3:
-        log_test("SP1", "FAIL", f"Expected 3 types, got {len(types)}")
-        return False
-    
-    # Check types have correct keys and duration_hours
-    expected_types = [
-        {"key": "ringan", "duration_hours": 1.0},
-        {"key": "berat", "duration_hours": 2.0},
-        {"key": "overhaul", "duration_hours": 4.0}
-    ]
-    
-    for i, expected in enumerate(expected_types):
-        if i >= len(types):
-            log_test("SP1", "FAIL", f"Missing type at index {i}")
-            return False
-        
-        actual = types[i]
-        if actual.get("key") != expected["key"]:
-            log_test("SP1", "FAIL", f"Type {i} key: expected '{expected['key']}', got '{actual.get('key')}'")
-            return False
-        
-        if actual.get("duration_hours") != expected["duration_hours"]:
-            log_test("SP1", "FAIL", f"Type {i} duration_hours: expected {expected['duration_hours']}, got {actual.get('duration_hours')}")
-            return False
-    
-    # Check summary
-    summary = data.get("summary", {})
-    
-    # Check ringan summary
-    ringan_summary = summary.get("ringan", {})
-    if ringan_summary.get("min") != 75000:
-        log_test("SP1", "FAIL", f"Summary ringan min: expected 75000, got {ringan_summary.get('min')}")
-        return False
-    if ringan_summary.get("max") != 150000:
-        log_test("SP1", "FAIL", f"Summary ringan max: expected 150000, got {ringan_summary.get('max')}")
-        return False
-    
-    # Check berat summary
-    berat_summary = summary.get("berat", {})
-    if berat_summary.get("min") != 98000:
-        log_test("SP1", "FAIL", f"Summary berat min: expected 98000, got {berat_summary.get('min')}")
-        return False
-    if berat_summary.get("max") != 400000:
-        log_test("SP1", "FAIL", f"Summary berat max: expected 400000, got {berat_summary.get('max')}")
-        return False
-    
-    # Check overhaul summary
-    overhaul_summary = summary.get("overhaul", {})
-    if overhaul_summary.get("min") != 275000:
-        log_test("SP1", "FAIL", f"Summary overhaul min: expected 275000, got {overhaul_summary.get('min')}")
-        return False
-    if overhaul_summary.get("max") != 900000:
-        log_test("SP1", "FAIL", f"Summary overhaul max: expected 900000, got {overhaul_summary.get('max')}")
-        return False
-    
-    # Check specific items: NMAX, T-MAX, Vega Force
-    nmax_found = False
-    tmax_found = False
-    vega_force_found = False
-    
-    for category in categories:
-        for item in category.get("items", []):
-            motor = item.get("motor", "")
-            prices = item.get("prices", {})
-            
-            if motor == "NMAX":
-                nmax_found = True
-                if prices.get("ringan") != 100000:
-                    log_test("SP1", "FAIL", f"NMAX ringan: expected 100000, got {prices.get('ringan')}")
-                    return False
-                if prices.get("berat") != 130000:
-                    log_test("SP1", "FAIL", f"NMAX berat: expected 130000, got {prices.get('berat')}")
-                    return False
-                if prices.get("overhaul") != 375000:
-                    log_test("SP1", "FAIL", f"NMAX overhaul: expected 375000, got {prices.get('overhaul')}")
-                    return False
-            
-            if motor == "T-MAX":
-                tmax_found = True
-                if prices.get("overhaul") != 900000:
-                    log_test("SP1", "FAIL", f"T-MAX overhaul: expected 900000, got {prices.get('overhaul')}")
-                    return False
-            
-            if motor == "Vega Force":
-                vega_force_found = True
-                if prices.get("berat") != 98000:
-                    log_test("SP1", "FAIL", f"Vega Force berat: expected 98000, got {prices.get('berat')}")
-                    return False
-    
-    if not nmax_found:
-        log_test("SP1", "FAIL", "NMAX not found in items")
-        return False
-    if not tmax_found:
-        log_test("SP1", "FAIL", "T-MAX not found in items")
-        return False
-    if not vega_force_found:
-        log_test("SP1", "FAIL", "Vega Force not found in items")
-        return False
-    
-    # Check all_categories length == 8
-    all_categories = data.get("all_categories", [])
-    if len(all_categories) != 8:
-        log_test("SP1", "FAIL", f"Expected all_categories length 8, got {len(all_categories)}")
-        return False
-    
-    # Check note is present
-    if not data.get("note"):
-        log_test("SP1", "FAIL", "Note field is missing or empty")
-        return False
-    
-    log_test("SP1", "PASS", f"GET /api/service-prices: 31 motors, 8 categories in correct order, 3 types with correct durations, summary correct, specific items verified, all_categories=8, note present")
-    return True
-
-
-def test_service_prices_search_nmax_lowercase():
-    """Test SP2: GET /api/service-prices?q=nmax"""
-    print("\n=== TEST SP2: GET /api/service-prices?q=nmax ===")
-    
-    resp = requests.get(f"{API_BASE}/service-prices", params={"q": "nmax"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("SP2", "FAIL", f"GET /api/service-prices?q=nmax returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    # Check total_motors == 3
-    total_motors = data.get("total_motors", 0)
-    if total_motors != 3:
-        log_test("SP2", "FAIL", f"Expected total_motors=3 for 'nmax', got {total_motors}")
-        return False
-    
-    # Check categories length == 2
-    categories = data.get("categories", [])
-    if len(categories) != 2:
-        log_test("SP2", "FAIL", f"Expected 2 categories for 'nmax', got {len(categories)}")
-        return False
-    
-    # Verify motors are NMAX, NMAX Neo, NMAX Turbo
-    found_motors = []
-    for category in categories:
-        for item in category.get("items", []):
-            found_motors.append(item.get("motor"))
-    
-    expected_motors = ["NMAX", "NMAX Neo", "NMAX Turbo"]
-    if sorted(found_motors) != sorted(expected_motors):
-        log_test("SP2", "FAIL", f"Expected motors {expected_motors}, got {found_motors}")
-        return False
-    
-    # Check summary is still global (ringan min 75000)
-    summary = data.get("summary", {})
-    ringan_summary = summary.get("ringan", {})
-    if ringan_summary.get("min") != 75000:
-        log_test("SP2", "FAIL", f"Summary should be global, ringan min expected 75000, got {ringan_summary.get('min')}")
-        return False
-    
-    # Check all_categories still == 8
-    all_categories = data.get("all_categories", [])
-    if len(all_categories) != 8:
-        log_test("SP2", "FAIL", f"Expected all_categories=8 (global), got {len(all_categories)}")
-        return False
-    
-    log_test("SP2", "PASS", f"Search 'nmax': 3 motors (NMAX, NMAX Neo, NMAX Turbo), 2 categories, summary still global (ringan min 75000), all_categories=8")
-    return True
-
-
-def test_service_prices_search_nmax_uppercase():
-    """Test SP3: GET /api/service-prices?q=NMAX (uppercase) - should return same count"""
-    print("\n=== TEST SP3: GET /api/service-prices?q=NMAX (uppercase) ===")
-    
-    resp = requests.get(f"{API_BASE}/service-prices", params={"q": "NMAX"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("SP3", "FAIL", f"GET /api/service-prices?q=NMAX returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    uppercase_count = data.get("total_motors", 0)
-    
-    # Get lowercase count
-    resp_lower = requests.get(f"{API_BASE}/service-prices", params={"q": "nmax"}, timeout=10)
-    lowercase_count = resp_lower.json().get("total_motors", 0)
-    
-    if uppercase_count != lowercase_count:
-        log_test("SP3", "FAIL", f"Uppercase 'NMAX' returned {uppercase_count} motors, lowercase 'nmax' returned {lowercase_count}")
-        return False
-    
-    if uppercase_count != 3:
-        log_test("SP3", "FAIL", f"Expected 3 motors for 'NMAX', got {uppercase_count}")
-        return False
-    
-    log_test("SP3", "PASS", f"Search 'NMAX' (uppercase) returned same count as lowercase: {uppercase_count} motors")
-    return True
-
-
-def test_service_prices_filter_category_sport():
-    """Test SP4: GET /api/service-prices?category=Sport"""
-    print("\n=== TEST SP4: GET /api/service-prices?category=Sport ===")
-    
-    resp = requests.get(f"{API_BASE}/service-prices", params={"category": "Sport"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("SP4", "FAIL", f"GET /api/service-prices?category=Sport returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    # Check total_motors == 6
-    total_motors = data.get("total_motors", 0)
-    if total_motors != 6:
-        log_test("SP4", "FAIL", f"Expected total_motors=6 for category 'Sport', got {total_motors}")
-        return False
-    
-    # Check categories length == 1
-    categories = data.get("categories", [])
-    if len(categories) != 1:
-        log_test("SP4", "FAIL", f"Expected 1 category, got {len(categories)}")
-        return False
-    
-    # Check category is "Sport"
-    if categories[0].get("category") != "Sport":
-        log_test("SP4", "FAIL", f"Expected category 'Sport', got '{categories[0].get('category')}'")
-        return False
-    
-    log_test("SP4", "PASS", f"Filter category=Sport: 6 motors, 1 category 'Sport'")
-    return True
-
-
-def test_service_prices_search_empty():
-    """Test SP5: GET /api/service-prices?q=zzz (no results)"""
-    print("\n=== TEST SP5: GET /api/service-prices?q=zzz (empty) ===")
-    
-    resp = requests.get(f"{API_BASE}/service-prices", params={"q": "zzz"}, timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("SP5", "FAIL", f"GET /api/service-prices?q=zzz returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    if data.get("total_motors") != 0:
-        log_test("SP5", "FAIL", f"Expected total_motors=0, got {data.get('total_motors')}")
-        return False
-    
-    if len(data.get("categories", [])) != 0:
-        log_test("SP5", "FAIL", f"Expected empty categories array, got {len(data.get('categories', []))} categories")
-        return False
-    
-    log_test("SP5", "PASS", "Search 'zzz' returned 0 motors, empty categories")
-    return True
-
-
-def test_regression_spareparts_total():
-    """Test SP6a: Regression - GET /api/spareparts total_items 268"""
-    print("\n=== TEST SP6a: Regression - GET /api/spareparts ===")
-    
-    resp = requests.get(f"{API_BASE}/spareparts", timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("SP6a", "FAIL", f"GET /api/spareparts returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    if data.get("total_items") != 268:
-        log_test("SP6a", "FAIL", f"Expected total_items=268, got {data.get('total_items')}")
-        return False
-    
-    log_test("SP6a", "PASS", f"GET /api/spareparts: total_items=268")
-    return True
-
-
-def test_regression_business_hours():
-    """Test SP6b: Regression - GET /api/business-hours opening_time 08:30"""
-    print("\n=== TEST SP6b: Regression - GET /api/business-hours ===")
-    
-    resp = requests.get(f"{API_BASE}/business-hours", timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("SP6b", "FAIL", f"GET /api/business-hours returned {resp.status_code}")
-        return False
-    
-    data = resp.json()
-    
-    if data.get("opening_time") != "08:30":
-        log_test("SP6b", "FAIL", f"Expected opening_time='08:30', got '{data.get('opening_time')}'")
-        return False
-    
-    log_test("SP6b", "PASS", f"GET /api/business-hours: opening_time='08:30'")
-    return True
-
-
-def test_regression_mechanics_count():
-    """Test SP6c: Regression - GET /api/mechanics count 5"""
-    print("\n=== TEST SP6c: Regression - GET /api/mechanics ===")
-    
-    resp = requests.get(f"{API_BASE}/mechanics", timeout=10)
-    
-    if resp.status_code != 200:
-        log_test("SP6c", "FAIL", f"GET /api/mechanics returned {resp.status_code}")
-        return False
-    
-    mechanics = resp.json()
-    
-    if len(mechanics) != 5:
-        log_test("SP6c", "FAIL", f"Expected 5 mechanics, got {len(mechanics)}")
-        return False
-    
-    log_test("SP6c", "PASS", f"GET /api/mechanics: 5 mechanics")
+    log_test("8", "PASS", f"Test booking {test_booking_id} cancelled successfully")
     return True
 
 
@@ -1293,11 +391,14 @@ def print_summary():
     
     passed = sum(1 for r in test_results if r["status"] == "PASS")
     failed = sum(1 for r in test_results if r["status"] == "FAIL")
+    skipped = sum(1 for r in test_results if r["status"] == "SKIP")
     total = len(test_results)
     
     print(f"\nTotal Tests: {total}")
     print(f"Passed: {passed} ✅")
     print(f"Failed: {failed} ❌")
+    if skipped > 0:
+        print(f"Skipped: {skipped} ⏭️")
     print(f"Success Rate: {(passed/total*100):.1f}%")
     
     if failed > 0:
@@ -1314,29 +415,46 @@ def print_summary():
 def main():
     """Run all tests"""
     print("="*60)
-    print("ALDI MOTOR - Backend API Test Suite")
+    print("ALDI MOTOR - Motor Type Feature Test Suite")
     print("="*60)
     
     try:
-        # SERVICE PRICES TESTS (Priority)
-        print("\n" + "="*60)
-        print("SERVICE PRICES API TESTS")
-        print("="*60)
+        # Login
+        login()
         
-        test_service_prices_basic()
-        test_service_prices_search_nmax_lowercase()
-        test_service_prices_search_nmax_uppercase()
-        test_service_prices_filter_category_sport()
-        test_service_prices_search_empty()
+        # Step 1: Get valid booking date and service
+        booking_date, bh = get_valid_booking_date()
+        if not booking_date:
+            print("\n❌ FATAL ERROR: Could not get valid booking date")
+            return False
         
-        # REGRESSION TESTS
-        print("\n" + "="*60)
-        print("REGRESSION TESTS")
-        print("="*60)
+        service_id, start_time = get_service_and_availability(booking_date)
+        if not service_id or not start_time:
+            print("\n❌ FATAL ERROR: Could not get service or available slot")
+            return False
         
-        test_regression_spareparts_total()
-        test_regression_business_hours()
-        test_regression_mechanics_count()
+        # Step 2: Test booking without motor_type
+        test_booking_without_motor_type(booking_date, service_id, start_time)
+        
+        # Step 3: Test booking with short motor_type
+        test_booking_with_short_motor_type(booking_date, service_id, start_time)
+        
+        # Step 4: Test booking with valid motor_type
+        if not test_booking_with_valid_motor_type(booking_date, service_id, start_time):
+            print("\n❌ FATAL ERROR: Could not create test booking")
+            return False
+        
+        # Step 5: Test admin bookings
+        test_admin_bookings_has_motor_type()
+        
+        # Step 6: Test customer history
+        test_customer_history_has_motor_type()
+        
+        # Step 7: Test monthly PDF report
+        test_monthly_pdf_report(booking_date)
+        
+        # Step 8: Cleanup
+        cleanup_test_booking()
         
         # Print summary
         success = print_summary()
