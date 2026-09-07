@@ -147,6 +147,20 @@ class SparepartIn(BaseModel):
     variant: Optional[str] = None
     capacity: Optional[str] = None
 
+class ServicePriceIn(BaseModel):
+    category: str = Field(min_length=2)
+    motor: str = Field(min_length=1)
+    ringan: Optional[float] = None
+    berat: Optional[float] = None
+    overhaul: Optional[float] = None
+
+class ServicePriceUpdate(BaseModel):
+    category: Optional[str] = None
+    motor: Optional[str] = None
+    ringan: Optional[float] = None
+    berat: Optional[float] = None
+    overhaul: Optional[float] = None
+
 class SparepartUpdate(BaseModel):
     category: Optional[str] = None
     group: Optional[str] = None
@@ -424,6 +438,81 @@ async def list_service_prices(q: Optional[str] = None, category: Optional[str] =
         "all_categories": sorted({d["category"] for d in all_docs}, key=lambda c: next((d["category_order"] for d in all_docs if d["category"] == c), 99)),
         "note": "Harga di atas adalah biaya jasa servis, belum termasuk sparepart dan oli. Harga dapat berubah sewaktu-waktu.",
     }
+
+
+# ----------------- Admin: biaya servis -----------------
+def _validate_prices(payload: dict):
+    for k in ("ringan", "berat", "overhaul"):
+        v = payload.get(k)
+        if v is not None and v < 0:
+            raise HTTPException(400, f"Harga {k} tidak boleh negatif")
+
+
+async def _category_order_for(category: str) -> int:
+    existing = await db.service_prices.find_one({"category": category}, {"_id": 0, "category_order": 1})
+    if existing:
+        return existing.get("category_order", 0)
+    last = await db.service_prices.find({}, {"_id": 0, "category_order": 1}).sort("category_order", -1).to_list(1)
+    return (last[0].get("category_order", 0) + 1) if last else 0
+
+
+@api.get("/admin/service-prices")
+async def admin_list_service_prices(user: dict = Depends(get_current_user)):
+    docs = await db.service_prices.find({}, {"_id": 0}).to_list(1000)
+    docs.sort(key=lambda d: (d.get("category_order", 0), d.get("order", 0)))
+    return docs
+
+
+@api.post("/admin/service-prices")
+async def admin_create_service_price(body: ServicePriceIn, user: dict = Depends(get_current_user)):
+    payload = body.model_dump()
+    _validate_prices(payload)
+    category = payload["category"].strip()
+    motor = payload["motor"].strip()
+    if await db.service_prices.find_one({"category": category, "motor": {"$regex": f"^{motor}$", "$options": "i"}}):
+        raise HTTPException(400, "Tipe motor tersebut sudah ada di kategori ini")
+    last = await db.service_prices.find({}, {"_id": 0, "order": 1}).sort("order", -1).to_list(1)
+    doc = {
+        "id": str(uuid.uuid4()),
+        "category": category,
+        "category_order": await _category_order_for(category),
+        "motor": motor,
+        "ringan": payload.get("ringan"),
+        "berat": payload.get("berat"),
+        "overhaul": payload.get("overhaul"),
+        "order": (last[0].get("order", 0) + 1) if last else 0,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.service_prices.insert_one(doc.copy())
+    doc.pop("_id", None)
+    return doc
+
+
+@api.patch("/admin/service-prices/{pid}")
+async def admin_update_service_price(pid: str, body: ServicePriceUpdate, user: dict = Depends(get_current_user)):
+    existing = await db.service_prices.find_one({"id": pid}, {"_id": 0})
+    if not existing:
+        raise HTTPException(404, "Data biaya servis tidak ditemukan")
+    payload = {k: v for k, v in body.model_dump().items() if v is not None}
+    if not payload:
+        raise HTTPException(400, "Tidak ada perubahan")
+    _validate_prices(payload)
+    if "category" in payload:
+        payload["category"] = payload["category"].strip()
+        payload["category_order"] = await _category_order_for(payload["category"])
+    if "motor" in payload:
+        payload["motor"] = payload["motor"].strip()
+    payload["updated_at"] = datetime.now(timezone.utc).isoformat()
+    await db.service_prices.update_one({"id": pid}, {"$set": payload})
+    return await db.service_prices.find_one({"id": pid}, {"_id": 0})
+
+
+@api.delete("/admin/service-prices/{pid}")
+async def admin_delete_service_price(pid: str, user: dict = Depends(get_current_user)):
+    r = await db.service_prices.delete_one({"id": pid})
+    if r.deleted_count == 0:
+        raise HTTPException(404, "Data biaya servis tidak ditemukan")
+    return {"ok": True}
 
 
 # ----------------- Public: spareparts -----------------

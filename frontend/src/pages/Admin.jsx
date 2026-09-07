@@ -12,9 +12,10 @@ import {
   Wrench, LayoutDashboard, CalendarDays, Users2, Settings, LogOut,
   Loader2, Plus, Trash2, MessageCircle, CheckCircle2, PlayCircle, XCircle, Clock,
   FileText, Download, CalendarRange, History, ChevronLeft, ChevronRight, X,
-  Camera, ImageOff, Package,
+  Camera, ImageOff, Package, Receipt,
 } from "lucide-react";
 import SparepartsPanel from "@/pages/admin/SparepartsPanel";
+import ServicePricesPanel from "@/pages/admin/ServicePricesPanel";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format, addDays, startOfWeek } from "date-fns";
@@ -61,6 +62,7 @@ export default function Admin() {
               { id: "calendar", icon: CalendarRange, label: "Kalender" },
               { id: "mechanics", icon: Users2, label: "Mekanik" },
               { id: "spareparts", icon: Package, label: "Sparepart" },
+              { id: "service-prices", icon: Receipt, label: "Biaya Servis" },
               { id: "reports", icon: FileText, label: "Laporan" },
               { id: "settings", icon: Settings, label: "Pengaturan" },
             ].map((it) => (
@@ -93,12 +95,13 @@ export default function Admin() {
           {/* Mobile tab bar */}
           <div className="md:hidden border-b border-slate-200 bg-white px-4 py-2">
             <Tabs value={tab} onValueChange={setTab}>
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="overview">Home</TabsTrigger>
                 <TabsTrigger value="bookings">Reservasi</TabsTrigger>
                 <TabsTrigger value="calendar">Kalender</TabsTrigger>
                 <TabsTrigger value="mechanics">Mekanik</TabsTrigger>
                 <TabsTrigger value="spareparts">Part</TabsTrigger>
+                <TabsTrigger value="service-prices">Biaya</TabsTrigger>
                 <TabsTrigger value="reports">Laporan</TabsTrigger>
                 <TabsTrigger value="settings">Setting</TabsTrigger>
               </TabsList>
@@ -111,6 +114,7 @@ export default function Admin() {
             {tab === "calendar" && <CalendarView />}
             {tab === "mechanics" && <Mechanics />}
             {tab === "spareparts" && <SparepartsPanel />}
+            {tab === "service-prices" && <ServicePricesPanel />}
             {tab === "reports" && <Reports />}
             {tab === "settings" && <SettingsPanel />}
           </div>
